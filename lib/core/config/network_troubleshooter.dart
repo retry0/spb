@@ -7,7 +7,13 @@ import '../utils/logger.dart';
 
 /// Network troubleshooting utilities for diagnosing connection issues
 class NetworkTroubleshooter {
-  static final Dio _dio = Dio();
+  static final Dio _dio = Dio(
+    BaseOptions(
+      connectTimeout: const Duration(seconds: 5),
+      receiveTimeout: const Duration(seconds: 5),
+      sendTimeout: const Duration(seconds: 5),
+    ),
+  );
 
   /// Perform comprehensive network diagnostics
   static Future<NetworkDiagnostics> diagnoseNetwork() async {
@@ -70,14 +76,7 @@ class NetworkTroubleshooter {
   /// Check if we can reach the internet
   static Future<InternetAccessStatus> _checkInternetAccess() async {
     try {
-      final response = await _dio.get(
-        'https://www.google.com',
-        options: Options(
-          connectTimeout: const Duration(seconds: 5),
-          receiveTimeout: const Duration(seconds: 5),
-          sendTimeout: const Duration(seconds: 5),
-        ),
-      );
+      final response = await _dio.get('https://www.google.com');
 
       return InternetAccessStatus(
         hasAccess: response.statusCode == 200,
@@ -99,15 +98,17 @@ class NetworkTroubleshooter {
       final baseUrl = EnvironmentConfig.baseUrl;
       final healthEndpoint = '$baseUrl/health';
 
-      // Try to reach the health endpoint
-      final response = await _dio.get(
-        healthEndpoint,
-        options: Options(
+      // Create a separate Dio instance with longer timeout for backend checks
+      final backendDio = Dio(
+        BaseOptions(
           connectTimeout: const Duration(seconds: 10),
           receiveTimeout: const Duration(seconds: 10),
           sendTimeout: const Duration(seconds: 10),
         ),
       );
+
+      // Try to reach the health endpoint
+      final response = await backendDio.get(healthEndpoint);
 
       return BackendAccessStatus(
         isAccessible: response.statusCode! >= 200 && response.statusCode! < 300,
@@ -186,14 +187,15 @@ class NetworkTroubleshooter {
   /// Test if a specific URL is accessible
   static Future<bool> _testUrl(String url) async {
     try {
-      final response = await _dio.get(
-        url,
-        options: Options(
+      final testDio = Dio(
+        BaseOptions(
           connectTimeout: const Duration(seconds: 3),
           receiveTimeout: const Duration(seconds: 3),
           sendTimeout: const Duration(seconds: 3),
         ),
       );
+
+      final response = await testDio.get(url);
       return response.statusCode! >= 200 && response.statusCode! < 500;
     } catch (e) {
       return false;

@@ -2,11 +2,7 @@ import 'dart:io';
 import 'android_emulator_config.dart';
 
 /// Environment types supported by the application
-enum Environment {
-  development,
-  staging,
-  production,
-}
+enum Environment { development, staging, production }
 
 /// Environment configuration class that manages endpoint URLs and settings
 /// based on environment variables with security best practices
@@ -24,19 +20,20 @@ class EnvironmentConfig {
 
     try {
       // Determine environment from ENV variable
-      final envString = Platform.environment['FLUTTER_ENV'] ?? 
-                       Platform.environment['ENV'] ?? 
-                       'development';
-      
+      final envString =
+          Platform.environment['FLUTTER_ENV'] ??
+          Platform.environment['ENV'] ??
+          'development';
+
       _currentEnvironment = _parseEnvironment(envString);
-      
+
       // Load configuration based on environment
       await _loadConfiguration();
-      
+
       _initialized = true;
     } catch (e) {
       throw EnvironmentConfigException(
-        'Failed to initialize environment configuration: $e'
+        'Failed to initialize environment configuration: $e',
       );
     }
   }
@@ -56,7 +53,7 @@ class EnvironmentConfig {
       default:
         throw EnvironmentConfigException(
           'Invalid environment: $envString. '
-          'Valid values: development, staging, production'
+          'Valid values: development, staging, production',
         );
     }
   }
@@ -64,25 +61,34 @@ class EnvironmentConfig {
   /// Load configuration based on current environment
   static Future<void> _loadConfiguration() async {
     final env = Platform.environment;
-    
+
     switch (_currentEnvironment!) {
       case Environment.development:
-        _baseUrl = _getRequiredEnvVar(env, 'DEV_API_BASE_URL', 
-                                     'http://localhost:8000/api');
+        _baseUrl = _getRequiredEnvVar(
+          env,
+          'DEV_API_BASE_URL',
+          'http://10.0.2.2:8000/api',
+        );
         _enableLogging = _getBoolEnvVar(env, 'DEV_ENABLE_LOGGING', true);
-        _timeout = Duration(seconds: _getIntEnvVar(env, 'DEV_TIMEOUT_SECONDS', 30));
+        _timeout = Duration(
+          seconds: _getIntEnvVar(env, 'DEV_TIMEOUT_SECONDS', 30),
+        );
         break;
-        
+
       case Environment.staging:
         _baseUrl = _getRequiredEnvVar(env, 'STAGING_API_BASE_URL');
         _enableLogging = _getBoolEnvVar(env, 'STAGING_ENABLE_LOGGING', false);
-        _timeout = Duration(seconds: _getIntEnvVar(env, 'STAGING_TIMEOUT_SECONDS', 60));
+        _timeout = Duration(
+          seconds: _getIntEnvVar(env, 'STAGING_TIMEOUT_SECONDS', 60),
+        );
         break;
-        
+
       case Environment.production:
         _baseUrl = _getRequiredEnvVar(env, 'PROD_API_BASE_URL');
         _enableLogging = _getBoolEnvVar(env, 'PROD_ENABLE_LOGGING', false);
-        _timeout = Duration(seconds: _getIntEnvVar(env, 'PROD_TIMEOUT_SECONDS', 120));
+        _timeout = Duration(
+          seconds: _getIntEnvVar(env, 'PROD_TIMEOUT_SECONDS', 120),
+        );
         break;
     }
 
@@ -92,14 +98,14 @@ class EnvironmentConfig {
 
   /// Get required environment variable with optional default
   static String _getRequiredEnvVar(
-    Map<String, String> env, 
-    String key, 
-    [String? defaultValue]
-  ) {
+    Map<String, String> env,
+    String key, [
+    String? defaultValue,
+  ]) {
     final value = env[key] ?? defaultValue;
     if (value == null || value.isEmpty) {
       throw EnvironmentConfigException(
-        'Required environment variable $key is not set'
+        'Required environment variable $key is not set',
       );
     }
     return value;
@@ -107,13 +113,13 @@ class EnvironmentConfig {
 
   /// Get boolean environment variable with default
   static bool _getBoolEnvVar(
-    Map<String, String> env, 
-    String key, 
-    bool defaultValue
+    Map<String, String> env,
+    String key,
+    bool defaultValue,
   ) {
     final value = env[key];
     if (value == null) return defaultValue;
-    
+
     switch (value.toLowerCase()) {
       case 'true':
       case '1':
@@ -126,24 +132,24 @@ class EnvironmentConfig {
       default:
         throw EnvironmentConfigException(
           'Invalid boolean value for $key: $value. '
-          'Valid values: true, false, 1, 0, yes, no'
+          'Valid values: true, false, 1, 0, yes, no',
         );
     }
   }
 
   /// Get integer environment variable with default
   static int _getIntEnvVar(
-    Map<String, String> env, 
-    String key, 
-    int defaultValue
+    Map<String, String> env,
+    String key,
+    int defaultValue,
   ) {
     final value = env[key];
     if (value == null) return defaultValue;
-    
+
     final parsed = int.tryParse(value);
     if (parsed == null) {
       throw EnvironmentConfigException(
-        'Invalid integer value for $key: $value'
+        'Invalid integer value for $key: $value',
       );
     }
     return parsed;
@@ -157,11 +163,12 @@ class EnvironmentConfig {
     }
 
     // Ensure HTTPS in production (but allow 10.0.2.2 for Android emulator in dev)
-    if (_currentEnvironment == Environment.production && uri.scheme != 'https') {
+    if (_currentEnvironment == Environment.production &&
+        uri.scheme != 'https') {
       // Allow 10.0.2.2 for Android emulator testing in production builds
       if (!(uri.host == '10.0.2.2' && Platform.isAndroid)) {
         throw EnvironmentConfigException(
-          'Production environment requires HTTPS URLs. Got: ${uri.scheme}'
+          'Production environment requires HTTPS URLs. Got: ${uri.scheme}',
         );
       }
     }
@@ -169,7 +176,7 @@ class EnvironmentConfig {
     // Validate scheme
     if (!['http', 'https'].contains(uri.scheme)) {
       throw EnvironmentConfigException(
-        'Invalid URL scheme: ${uri.scheme}. Only HTTP and HTTPS are allowed'
+        'Invalid URL scheme: ${uri.scheme}. Only HTTP and HTTPS are allowed',
       );
     }
 
@@ -188,12 +195,12 @@ class EnvironmentConfig {
   /// Get base API URL (automatically converted for Android emulator)
   static String get baseUrl {
     _ensureInitialized();
-    
+
     // Convert localhost URLs for Android emulator
     if (Platform.isAndroid && AndroidEmulatorConfig.isAndroidEmulator) {
       return AndroidEmulatorConfig.convertUrlForEmulator(_baseUrl!);
     }
-    
+
     return _baseUrl!;
   }
 
@@ -216,7 +223,8 @@ class EnvironmentConfig {
   }
 
   /// Check if running in development mode
-  static bool get isDevelopment => currentEnvironment == Environment.development;
+  static bool get isDevelopment =>
+      currentEnvironment == Environment.development;
 
   /// Check if running in staging mode
   static bool get isStaging => currentEnvironment == Environment.staging;
@@ -240,7 +248,7 @@ class EnvironmentConfig {
   static void _ensureInitialized() {
     if (!_initialized) {
       throw EnvironmentConfigException(
-        'EnvironmentConfig not initialized. Call EnvironmentConfig.initialize() first.'
+        'EnvironmentConfig not initialized. Call EnvironmentConfig.initialize() first.',
       );
     }
   }
@@ -264,7 +272,8 @@ class EnvironmentConfig {
       'loggingEnabled': isLoggingEnabled,
       'timeout': '${timeout.inSeconds}s',
       'isProduction': isProduction,
-      'isAndroidEmulator': Platform.isAndroid ? AndroidEmulatorConfig.isAndroidEmulator : false,
+      'isAndroidEmulator':
+          Platform.isAndroid ? AndroidEmulatorConfig.isAndroidEmulator : false,
       'platform': Platform.operatingSystem,
     };
   }
@@ -273,9 +282,9 @@ class EnvironmentConfig {
 /// Exception thrown when environment configuration fails
 class EnvironmentConfigException implements Exception {
   final String message;
-  
+
   const EnvironmentConfigException(this.message);
-  
+
   @override
   String toString() => 'EnvironmentConfigException: $message';
 }
