@@ -97,7 +97,7 @@ Future<void> configureDependencies() async {
   getIt.registerLazySingleton(() => LoginUseCase(getIt<AuthRepository>()));
   getIt.registerLazySingleton(() => LogoutUseCase(getIt<AuthRepository>()));
   getIt.registerLazySingleton(() => RefreshTokenUseCase(getIt<AuthRepository>()));
-  getIt.registerLazySingleton(() => CheckUsernameAvailabilityUseCase(getIt<AuthRepository>()));
+  getIt.registerLazySingleton(() => CheckUserNameAvailabilityUseCase(getIt<AuthRepository>()));
   
   // BLoCs
   getIt.registerFactory(
@@ -105,7 +105,7 @@ Future<void> configureDependencies() async {
       loginUseCase: getIt<LoginUseCase>(),
       logoutUseCase: getIt<LogoutUseCase>(),
       refreshTokenUseCase: getIt<RefreshTokenUseCase>(),
-      checkUsernameAvailabilityUseCase: getIt<CheckUsernameAvailabilityUseCase>(),
+      checkUserNameAvailabilityUseCase: getIt<CheckUserNameAvailabilityUseCase>(),
     ),
   );
   

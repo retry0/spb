@@ -37,23 +37,23 @@ class AuthError extends AuthState {
   List<Object> get props => [message];
 }
 
-class AuthUsernameCheckResult extends AuthState {
-  final String username;
+class AuthUserNameCheckResult extends AuthState {
+  final String userName;
   final bool isAvailable;
 
-  const AuthUsernameCheckResult({
-    required this.username,
+  const AuthUserNameCheckResult({
+    required this.userName,
     required this.isAvailable,
   });
 
   @override
-  List<Object> get props => [username, isAvailable];
+  List<Object> get props => [userName, isAvailable];
 }
 
-class AuthUsernameCheckError extends AuthState {
+class AuthUserNameCheckError extends AuthState {
   final String message;
 
-  const AuthUsernameCheckError(this.message);
+  const AuthUserNameCheckError(this.message);
 
   @override
   List<Object> get props => [message];

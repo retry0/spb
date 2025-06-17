@@ -4,12 +4,12 @@ import '../models/user_model.dart';
 import '../models/auth_tokens_model.dart';
 
 abstract class AuthRemoteDataSource {
-  Future<AuthTokensModel> loginWithUsername(Map<String, dynamic> credentials);
+  Future<AuthTokensModel> loginWithUserName(Map<String, dynamic> credentials);
   Future<void> logout();
   Future<AuthTokensModel> refreshToken(Map<String, dynamic> refreshData);
   Future<UserModel> getCurrentUser();
   Future<void> changePassword(Map<String, dynamic> data);
-  Future<Map<String, dynamic>> checkUsernameAvailability(String username);
+  Future<Map<String, dynamic>> checkUserNameAvailability(String userName);
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -18,7 +18,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   AuthRemoteDataSourceImpl(this._dio);
 
   @override
-  Future<AuthTokensModel> loginWithUsername(
+  Future<AuthTokensModel> loginWithUserName(
     Map<String, dynamic> credentials,
   ) async {
     final response = await _dio.post(ApiEndpoints.login, data: credentials);
@@ -48,12 +48,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<Map<String, dynamic>> checkUsernameAvailability(
-    String username,
+  Future<Map<String, dynamic>> checkUserNameAvailability(
+    String userName,
   ) async {
     final endpoint = ApiEndpoints.withQuery(
-      ApiEndpoints.usernameCheck,
-      {'username': username},
+      ApiEndpoints.userNameCheck,
+      {'userName': userName},
     );
     final response = await _dio.get(endpoint);
     return response.data;
