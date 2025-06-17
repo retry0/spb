@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/splash_page.dart';
-import '../../features/auth/presentation/pages/password_reset_page.dart';
 import '../../features/main/presentation/pages/main_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/data/presentation/pages/data_page.dart';
@@ -21,16 +20,14 @@ class AppRouter {
       // If user is not logged in and trying to access protected routes
       if (!isLoggedIn && 
           state.matchedLocation != '/login' && 
-          state.matchedLocation != '/splash' &&
-          !state.matchedLocation.startsWith('/password-reset')) {
+          state.matchedLocation != '/splash') {
         return '/login';
       }
       
       // If user is logged in and trying to access auth routes
       if (isLoggedIn && 
           (state.matchedLocation == '/login' || 
-           state.matchedLocation == '/splash' ||
-           state.matchedLocation.startsWith('/password-reset'))) {
+           state.matchedLocation == '/splash')) {
         return '/home';
       }
       
@@ -46,14 +43,6 @@ class AppRouter {
         path: '/login',
         name: 'login',
         builder: (context, state) => const LoginPage(),
-      ),
-      GoRoute(
-        path: '/password-reset',
-        name: 'password-reset',
-        builder: (context, state) {
-          final token = state.uri.queryParameters['token'];
-          return PasswordResetPage(token: token);
-        },
       ),
       ShellRoute(
         builder: (context, state, child) => MainPage(child: child),

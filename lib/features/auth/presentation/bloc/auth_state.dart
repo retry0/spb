@@ -58,24 +58,3 @@ class AuthUsernameCheckError extends AuthState {
   @override
   List<Object> get props => [message];
 }
-
-class AuthPasswordResetLoading extends AuthState {
-  const AuthPasswordResetLoading();
-}
-
-class AuthPasswordResetEmailSent extends AuthState {
-  const AuthPasswordResetEmailSent();
-}
-
-class AuthPasswordResetSuccess extends AuthState {
-  const AuthPasswordResetSuccess();
-}
-
-class AuthPasswordResetError extends AuthState {
-  final String message;
-
-  const AuthPasswordResetError(this.message);
-
-  @override
-  List<Object> get props => [message];
-}
