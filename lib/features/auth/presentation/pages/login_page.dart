@@ -31,11 +31,11 @@ class LoginPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Icon(
-                  Icons.security,
-                  size: 80,
-                  color: Colors.blue,
-                ),
+                // const Icon(
+                //   Icons.security,
+                //   size: 80,
+                //   color: Colors.blue,
+                // ),
                 const SizedBox(height: 32),
                 Text(
                   'Welcome Back',
@@ -45,13 +45,13 @@ class LoginPage extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  'Sign in to your account',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.grey[600],
-                  ),
-                  textAlign: TextAlign.center,
-                ),
+                // Text(
+                //   'Sign in to your account',
+                //   style: Theme.of(
+                //     context,
+                //   ).textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
+                //   textAlign: TextAlign.center,
+                // ),
                 const SizedBox(height: 48),
                 const LoginForm(),
               ],

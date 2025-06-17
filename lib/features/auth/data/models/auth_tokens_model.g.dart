@@ -8,14 +8,14 @@ part of 'auth_tokens_model.dart';
 
 AuthTokensModel _$AuthTokensModelFromJson(Map<String, dynamic> json) =>
     AuthTokensModel(
-      accessToken: json['access_token'] as String,
-      refreshToken: json['refresh_token'] as String,
-      expiresAt: DateTime.parse(json['expires_at'] as String),
+      accessToken: json['accessToken'] as String,
+      refreshToken: json['refreshToken'] as String,
+      expiresAt: DateTime.parse(json['expiresAt'] as String),
     );
 
 Map<String, dynamic> _$AuthTokensModelToJson(AuthTokensModel instance) =>
     <String, dynamic>{
-      'access_token': instance.accessToken,
-      'refresh_token': instance.refreshToken,
-      'expires_at': instance.expiresAt.toIso8601String(),
+      'accessToken': instance.accessToken,
+      'refreshToken': instance.refreshToken,
+      'expiresAt': instance.expiresAt.toIso8601String(),
     };
