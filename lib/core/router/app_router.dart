@@ -18,30 +18,16 @@ class AppRouter {
       final isLoggedIn = authState is AuthAuthenticated;
 
       // If user is not logged in and trying to access protected routes
-<<<<<<< HEAD
       if (!isLoggedIn &&
           state.matchedLocation != '/login' &&
-          state.matchedLocation != '/splash' &&
-          !state.matchedLocation.startsWith('/password-reset')) {
-=======
-      if (!isLoggedIn && 
-          state.matchedLocation != '/login' && 
           state.matchedLocation != '/splash') {
->>>>>>> 51ee234352a17f5d388bc3b671fd5e5a8578b12a
         return '/login';
       }
 
       // If user is logged in and trying to access auth routes
-<<<<<<< HEAD
       if (isLoggedIn &&
           (state.matchedLocation == '/login' ||
-              state.matchedLocation == '/splash' ||
-              state.matchedLocation.startsWith('/password-reset'))) {
-=======
-      if (isLoggedIn && 
-          (state.matchedLocation == '/login' || 
-           state.matchedLocation == '/splash')) {
->>>>>>> 51ee234352a17f5d388bc3b671fd5e5a8578b12a
+              state.matchedLocation == '/splash')) {
         return '/home';
       }
 
@@ -58,17 +44,6 @@ class AppRouter {
         name: 'login',
         builder: (context, state) => const LoginPage(),
       ),
-<<<<<<< HEAD
-      // GoRoute(
-      //   path: '/password-reset',
-      //   name: 'password-reset',
-      //   builder: (context, state) {
-      //     final token = state.uri.queryParameters['token'];
-      //     return PasswordResetPage(token: token);
-      //   },
-      // ),
-=======
->>>>>>> 51ee234352a17f5d388bc3b671fd5e5a8578b12a
       ShellRoute(
         builder: (context, state, child) => MainPage(child: child),
         routes: [
