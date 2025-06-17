@@ -14,13 +14,11 @@ class LoginUseCase {
     // Validate username format
     final usernameError = UsernameValidator.validateFormat(username);
     if (usernameError != null) {
-      await repository.logAuthAttempt(username, 'login', false, errorMessage: usernameError);
       return Left(ValidationFailure(usernameError));
     }
 
     // Validate password
     if (password.isEmpty) {
-      await repository.logAuthAttempt(username, 'login', false, errorMessage: 'Password is required');
       return Left(ValidationFailure('Password is required'));
     }
 
@@ -28,14 +26,6 @@ class LoginUseCase {
     final normalizedUsername = UsernameValidator.normalize(username);
 
     // Attempt login
-    final result = await repository.loginWithUsername(normalizedUsername, password);
-    
-    // Log the attempt
-    result.fold(
-      (failure) => repository.logAuthAttempt(normalizedUsername, 'login', false, errorMessage: failure.message),
-      (_) => repository.logAuthAttempt(normalizedUsername, 'login', true),
-    );
-
-    return result;
+    return await repository.loginWithUsername(normalizedUsername, password);
   }
 }

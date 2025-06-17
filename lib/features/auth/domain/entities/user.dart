@@ -6,9 +6,6 @@ class User extends Equatable {
   final String email;
   final String name;
   final String? avatar;
-  final DateTime? lastLogin;
-  final int failedLoginAttempts;
-  final DateTime? lockedUntil;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -18,17 +15,9 @@ class User extends Equatable {
     required this.email,
     required this.name,
     this.avatar,
-    this.lastLogin,
-    this.failedLoginAttempts = 0,
-    this.lockedUntil,
     required this.createdAt,
     required this.updatedAt,
   });
-
-  bool get isLocked {
-    if (lockedUntil == null) return false;
-    return DateTime.now().isBefore(lockedUntil!);
-  }
 
   User copyWith({
     String? id,
@@ -36,9 +25,6 @@ class User extends Equatable {
     String? email,
     String? name,
     String? avatar,
-    DateTime? lastLogin,
-    int? failedLoginAttempts,
-    DateTime? lockedUntil,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -48,9 +34,6 @@ class User extends Equatable {
       email: email ?? this.email,
       name: name ?? this.name,
       avatar: avatar ?? this.avatar,
-      lastLogin: lastLogin ?? this.lastLogin,
-      failedLoginAttempts: failedLoginAttempts ?? this.failedLoginAttempts,
-      lockedUntil: lockedUntil ?? this.lockedUntil,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -58,7 +41,6 @@ class User extends Equatable {
 
   @override
   List<Object?> get props => [
-    id, username, email, name, avatar, lastLogin, 
-    failedLoginAttempts, lockedUntil, createdAt, updatedAt
+    id, username, email, name, avatar, createdAt, updatedAt
   ];
 }

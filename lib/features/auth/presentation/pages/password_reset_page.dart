@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/security/password_security.dart';
 import '../bloc/auth_bloc.dart';
 
 class PasswordResetPage extends StatefulWidget {
@@ -20,19 +19,12 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
   final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
-  PasswordStrength _passwordStrength = PasswordStrength.weak;
 
   @override
   void dispose() {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
-  }
-
-  void _onPasswordChanged(String password) {
-    setState(() {
-      _passwordStrength = PasswordSecurity.validatePasswordStrength(password);
-    });
   }
 
   void _onSubmit() {
@@ -96,7 +88,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Enter a strong password for your account',
+                    'Enter a new password for your account',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: Colors.grey[600],
                     ),
@@ -107,7 +99,6 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
                     controller: _passwordController,
                     obscureText: _obscurePassword,
                     textInputAction: TextInputAction.next,
-                    onChanged: _onPasswordChanged,
                     decoration: InputDecoration(
                       labelText: 'New Password',
                       prefixIcon: const Icon(Icons.lock_outlined),
@@ -129,14 +120,9 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
                       if (value.length < 8) {
                         return 'Password must be at least 8 characters';
                       }
-                      if (_passwordStrength == PasswordStrength.weak) {
-                        return 'Password is too weak';
-                      }
                       return null;
                     },
                   ),
-                  const SizedBox(height: 8),
-                  _PasswordStrengthIndicator(strength: _passwordStrength),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _confirmPasswordController,
@@ -188,66 +174,6 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _PasswordStrengthIndicator extends StatelessWidget {
-  final PasswordStrength strength;
-
-  const _PasswordStrengthIndicator({required this.strength});
-
-  @override
-  Widget build(BuildContext context) {
-    Color color;
-    double progress;
-    
-    switch (strength) {
-      case PasswordStrength.weak:
-        color = Colors.red;
-        progress = 0.33;
-        break;
-      case PasswordStrength.medium:
-        color = Colors.orange;
-        progress = 0.66;
-        break;
-      case PasswordStrength.strong:
-        color = Colors.green;
-        progress = 1.0;
-        break;
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: LinearProgressIndicator(
-                value: progress,
-                backgroundColor: Colors.grey[300],
-                valueColor: AlwaysStoppedAnimation<Color>(color),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              strength.label,
-              style: TextStyle(
-                color: color,
-                fontWeight: FontWeight.w500,
-                fontSize: 12,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        Text(
-          strength.description,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Colors.grey[600],
-          ),
-        ),
-      ],
     );
   }
 }

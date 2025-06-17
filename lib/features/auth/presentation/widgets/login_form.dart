@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/utils/username_validator.dart';
-import '../../../../core/security/password_security.dart';
 import '../bloc/auth_bloc.dart';
 
 class LoginForm extends StatefulWidget {
@@ -17,7 +16,6 @@ class _LoginFormState extends State<LoginForm> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
-  bool _rememberMe = false;
 
   @override
   void dispose() {
@@ -92,7 +90,7 @@ class _LoginFormState extends State<LoginForm> {
         if (state is AuthPasswordResetEmailSent) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Password reset instructions have been sent to your email.'),
+              content: Text('Password reset instructions have been sent.'),
               backgroundColor: Colors.green,
             ),
           );
@@ -152,15 +150,6 @@ class _LoginFormState extends State<LoginForm> {
             const SizedBox(height: 16),
             Row(
               children: [
-                Checkbox(
-                  value: _rememberMe,
-                  onChanged: (value) {
-                    setState(() {
-                      _rememberMe = value ?? false;
-                    });
-                  },
-                ),
-                const Text('Remember me'),
                 const Spacer(),
                 TextButton(
                   onPressed: _onForgotPassword,
@@ -185,46 +174,8 @@ class _LoginFormState extends State<LoginForm> {
                 );
               },
             ),
-            const SizedBox(height: 16),
-            const _SecurityNotice(),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _SecurityNotice extends StatelessWidget {
-  const _SecurityNotice();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
-        ),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.security,
-            size: 16,
-            color: Theme.of(context).colorScheme.primary,
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              'Your account is protected with advanced security measures including account lockout after failed attempts.',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

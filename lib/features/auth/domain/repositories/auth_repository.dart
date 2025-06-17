@@ -14,5 +14,4 @@ abstract class AuthRepository {
   Future<Either<Failure, void>> changePassword(String currentPassword, String newPassword);
   Future<Either<Failure, bool>> checkUsernameAvailability(String username);
   Future<bool> isLoggedIn();
-  Future<void> logAuthAttempt(String username, String action, bool success, {String? errorMessage});
 }

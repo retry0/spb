@@ -13,7 +13,6 @@ class RequestPasswordResetUseCase {
     // Validate username format
     final usernameError = UsernameValidator.validateFormat(username);
     if (usernameError != null) {
-      await repository.logAuthAttempt(username, 'password_reset_request', false, errorMessage: usernameError);
       return Left(ValidationFailure(usernameError));
     }
 
@@ -21,14 +20,6 @@ class RequestPasswordResetUseCase {
     final normalizedUsername = UsernameValidator.normalize(username);
 
     // Request password reset
-    final result = await repository.requestPasswordReset(normalizedUsername);
-    
-    // Log the attempt
-    result.fold(
-      (failure) => repository.logAuthAttempt(normalizedUsername, 'password_reset_request', false, errorMessage: failure.message),
-      (_) => repository.logAuthAttempt(normalizedUsername, 'password_reset_request', true),
-    );
-
-    return result;
+    return await repository.requestPasswordReset(normalizedUsername);
   }
 }
