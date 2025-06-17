@@ -23,8 +23,8 @@ class ApiEndpoints {
   static String get metrics => '$baseUrl/dashboard/metrics';
   static String get activities => '$baseUrl/dashboard/activities';
 
-  // Username availability
-  static String get usernameCheck => '$baseUrl/auth/username/check';
+  // UserName availability
+  static String get userNameCheck => '$baseUrl/auth/userName/check';
 
   // Password management
   static String get changePassword => '$baseUrl/auth/password/change';
@@ -57,7 +57,7 @@ class ApiEndpoints {
       'dashboard': dashboard,
       'metrics': metrics,
       'activities': activities,
-      'usernameCheck': usernameCheck,
+      'userNameCheck': userNameCheck,
       'changePassword': changePassword,
     };
   }

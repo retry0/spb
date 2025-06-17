@@ -14,19 +14,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LoginUseCase loginUseCase;
   final LogoutUseCase logoutUseCase;
   final RefreshTokenUseCase refreshTokenUseCase;
-  final CheckUsernameAvailabilityUseCase checkUsernameAvailabilityUseCase;
+  final CheckUserNameAvailabilityUseCase checkUserNameAvailabilityUseCase;
 
   AuthBloc({
     required this.loginUseCase,
     required this.logoutUseCase,
     required this.refreshTokenUseCase,
-    required this.checkUsernameAvailabilityUseCase,
+    required this.checkUserNameAvailabilityUseCase,
   }) : super(const AuthInitial()) {
     on<AuthCheckRequested>(_onAuthCheckRequested);
     on<AuthLoginRequested>(_onAuthLoginRequested);
     on<AuthLogoutRequested>(_onAuthLogoutRequested);
     on<AuthTokenRefreshRequested>(_onAuthTokenRefreshRequested);
-    on<AuthUsernameAvailabilityRequested>(_onAuthUsernameAvailabilityRequested);
+    on<AuthUserNameAvailabilityRequested>(_onAuthUserNameAvailabilityRequested);
   }
 
   Future _onAuthCheckRequested(AuthCheckRequested event, Emitter emit) async {
@@ -38,7 +38,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future _onAuthLoginRequested(AuthLoginRequested event, Emitter emit) async {
     emit(const AuthLoading());
-    final result = await loginUseCase(event.username, event.password);
+    final result = await loginUseCase(event.userName, event.password);
 
     result.fold(
       (failure) => emit(AuthError(failure.message)),
@@ -46,9 +46,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         AuthAuthenticated(
           user: User(
             id: '1',
-            username: event.username,
-            email: '${event.username}@example.com',
-            name: event.username
+            userName: event.userName,
+            email: '${event.userName}@example.com',
+            name: event.userName
                 .replaceAll('_', ' ')
                 .split(' ')
                 .map(
@@ -89,16 +89,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     });
   }
 
-  Future _onAuthUsernameAvailabilityRequested(
-    AuthUsernameAvailabilityRequested event,
+  Future _onAuthUserNameAvailabilityRequested(
+    AuthUserNameAvailabilityRequested event,
     Emitter emit,
   ) async {
-    final result = await checkUsernameAvailabilityUseCase(event.username);
+    final result = await checkUserNameAvailabilityUseCase(event.userName);
     result.fold(
-      (failure) => emit(AuthUsernameCheckError(failure.message)),
+      (failure) => emit(AuthUserNameCheckError(failure.message)),
       (isAvailable) => emit(
-        AuthUsernameCheckResult(
-          username: event.username,
+        AuthUserNameCheckResult(
+          userName: event.userName,
           isAvailable: isAvailable,
         ),
       ),

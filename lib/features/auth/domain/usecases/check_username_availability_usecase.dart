@@ -4,22 +4,22 @@ import '../../../../core/error/failures.dart';
 import '../../../../core/utils/username_validator.dart';
 import '../repositories/auth_repository.dart';
 
-class CheckUsernameAvailabilityUseCase {
+class CheckUserNameAvailabilityUseCase {
   final AuthRepository repository;
 
-  CheckUsernameAvailabilityUseCase(this.repository);
+  CheckUserNameAvailabilityUseCase(this.repository);
 
-  Future<Either<Failure, bool>> call(String username) async {
-    // Validate username format first
-    final validationError = UsernameValidator.validateFormat(username);
+  Future<Either<Failure, bool>> call(String userName) async {
+    // Validate userName format first
+    final validationError = UserNameValidator.validateFormat(userName);
     if (validationError != null) {
       return Left(ValidationFailure(validationError));
     }
 
-    // Normalize username
-    final normalizedUsername = UsernameValidator.normalize(username);
+    // Normalize userName
+    final normalizedUserName = UserNameValidator.normalize(userName);
 
     // Check availability
-    return await repository.checkUsernameAvailability(normalizedUsername);
+    return await repository.checkUserNameAvailability(normalizedUserName);
   }
 }

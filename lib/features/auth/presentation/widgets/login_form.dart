@@ -13,13 +13,13 @@ class LoginForm extends StatefulWidget {
 
 class _LoginFormState extends State<LoginForm> {
   final _formKey = GlobalKey<FormState>();
-  final _usernameController = TextEditingController();
+  final _userNameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
   @override
   void dispose() {
-    _usernameController.dispose();
+    _userNameController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -28,7 +28,7 @@ class _LoginFormState extends State<LoginForm> {
     if (_formKey.currentState?.validate() ?? false) {
       context.read<AuthBloc>().add(
         AuthLoginRequested(
-          username: _usernameController.text.trim(),
+          userName: _userNameController.text.trim(),
           password: _passwordController.text,
         ),
       );
@@ -43,16 +43,16 @@ class _LoginFormState extends State<LoginForm> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           TextFormField(
-            controller: _usernameController,
+            controller: _userNameController,
             keyboardType: TextInputType.text,
             textInputAction: TextInputAction.next,
-            inputFormatters: UsernameValidator.getInputFormatters(),
+            inputFormatters: UserNameValidator.getInputFormatters(),
             decoration: const InputDecoration(
               labelText: 'Username',
               prefixIcon: Icon(Icons.person_outlined),
               helperText: '3-20 characters, letters, numbers, underscore, hyphen',
             ),
-            validator: UsernameValidator.validateFormat,
+            validator: UserNameValidator.validateFormat,
           ),
           const SizedBox(height: 16),
           TextFormField(

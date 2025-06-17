@@ -10,11 +10,11 @@ class LoginUseCase {
 
   LoginUseCase(this.repository);
 
-  Future<Either<Failure, AuthTokens>> call(String username, String password) async {
-    // Validate username format
-    final usernameError = UsernameValidator.validateFormat(username);
-    if (usernameError != null) {
-      return Left(ValidationFailure(usernameError));
+  Future<Either<Failure, AuthTokens>> call(String userName, String password) async {
+    // Validate userName format
+    final userNameError = UserNameValidator.validateFormat(userName);
+    if (userNameError != null) {
+      return Left(ValidationFailure(userNameError));
     }
 
     // Validate password
@@ -22,10 +22,10 @@ class LoginUseCase {
       return Left(ValidationFailure('Password is required'));
     }
 
-    // Normalize username
-    final normalizedUsername = UsernameValidator.normalize(username);
+    // Normalize userName
+    final normalizedUserName = UserNameValidator.normalize(userName);
 
     // Attempt login
-    return await repository.loginWithUsername(normalizedUsername, password);
+    return await repository.loginWithUserName(normalizedUserName, password);
   }
 }

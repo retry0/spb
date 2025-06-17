@@ -10,11 +10,11 @@ abstract class AuthLocalDataSource {
   Future<String?> getRefreshToken();
   Future<void> clearTokens();
   Future<void> saveUser(UserModel user);
-  Future<UserModel?> getUser(String username);
+  Future<UserModel?> getUser(String userName);
   Future<UserModel?> getUserById(String userId);
   Future<void> updateUser(UserModel user);
-  Future<void> deleteUser(String username);
-  Future<bool> isUsernameAvailable(String username);
+  Future<void> deleteUser(String userName);
+  Future<bool> isUserNameAvailable(String userName);
 }
 
 class AuthLocalDataSourceImpl implements AuthLocalDataSource {
@@ -56,12 +56,12 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   }
 
   @override
-  Future<UserModel?> getUser(String username) async {
+  Future<UserModel?> getUser(String userName) async {
     try {
       final results = await _dbHelper.query(
         'users',
         where: 'username = ?',
-        whereArgs: [username],
+        whereArgs: [userName],
         limit: 1,
       );
       
@@ -70,7 +70,7 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
       }
       return null;
     } catch (e) {
-      AppLogger.error('Failed to get user by username', e);
+      AppLogger.error('Failed to get user by userName', e);
       return null;
     }
   }
@@ -111,9 +111,9 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   }
 
   @override
-  Future<void> deleteUser(String username) async {
+  Future<void> deleteUser(String userName) async {
     try {
-      await _dbHelper.delete('users', where: 'username = ?', whereArgs: [username]);
+      await _dbHelper.delete('users', where: 'username = ?', whereArgs: [userName]);
     } catch (e) {
       AppLogger.error('Failed to delete user', e);
       rethrow;
@@ -121,19 +121,19 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   }
 
   @override
-  Future<bool> isUsernameAvailable(String username) async {
+  Future<bool> isUserNameAvailable(String userName) async {
     try {
       final results = await _dbHelper.query(
         'users',
         columns: ['id'],
         where: 'username = ?',
-        whereArgs: [username],
+        whereArgs: [userName],
         limit: 1,
       );
       
       return results.isEmpty;
     } catch (e) {
-      AppLogger.error('Failed to check username availability', e);
+      AppLogger.error('Failed to check userName availability', e);
       return false;
     }
   }

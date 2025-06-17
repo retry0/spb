@@ -19,10 +19,10 @@ class AuthRepositoryImpl implements AuthRepository {
   });
 
   @override
-  Future<Either<Failure, AuthTokens>> loginWithUsername(String username, String password) async {
+  Future<Either<Failure, AuthTokens>> loginWithUserName(String userName, String password) async {
     try {
-      final tokens = await remoteDataSource.loginWithUsername({
-        'username': username,
+      final tokens = await remoteDataSource.loginWithUserName({
+        'userName': userName,
         'password': password,
       });
       
@@ -110,16 +110,16 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, bool>> checkUsernameAvailability(String username) async {
+  Future<Either<Failure, bool>> checkUserNameAvailability(String userName) async {
     try {
       // Check locally first
-      final isLocallyAvailable = await localDataSource.isUsernameAvailable(username);
+      final isLocallyAvailable = await localDataSource.isUserNameAvailable(userName);
       if (!isLocallyAvailable) {
         return const Right(false);
       }
       
       // Check remotely
-      final response = await remoteDataSource.checkUsernameAvailability(username);
+      final response = await remoteDataSource.checkUserNameAvailability(userName);
       final isAvailable = response['available'] as bool? ?? false;
       
       return Right(isAvailable);

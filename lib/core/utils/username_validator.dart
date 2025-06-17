@@ -1,44 +1,42 @@
-import 'package:flutter/services.dart';
-
-class UsernameValidator {
+class UserNameValidator {
   static const int minLength = 3;
   static const int maxLength = 20;
   
   // Allowed characters: letters, numbers, underscore, hyphen
   static final RegExp _validPattern = RegExp(r'^[a-zA-Z0-9_-]+$');
 
-  /// Validates username format and returns error message if invalid
-  static String? validateFormat(String? username) {
-    if (username == null || username.isEmpty) {
+  /// Validates userName format and returns error message if invalid
+  static String? validateFormat(String? userName) {
+    if (userName == null || userName.isEmpty) {
       return 'Username is required';
     }
 
-    if (username.length < minLength) {
+    if (userName.length < minLength) {
       return 'Username must be at least $minLength characters long';
     }
 
-    if (username.length > maxLength) {
+    if (userName.length > maxLength) {
       return 'Username must be no more than $maxLength characters long';
     }
 
-    if (!_validPattern.hasMatch(username)) {
+    if (!_validPattern.hasMatch(userName)) {
       return 'Username can only contain letters, numbers, underscore, and hyphen';
     }
 
-    return null; // Valid username
+    return null; // Valid userName
   }
 
-  /// Normalizes username by converting to lowercase and trimming
-  static String normalize(String username) {
-    return username.toLowerCase().trim();
+  /// Normalizes userName by converting to lowercase and trimming
+  static String normalize(String userName) {
+    return userName.toLowerCase().trim();
   }
 
-  /// Checks if username is available (format validation only)
-  static bool isValidFormat(String username) {
-    return validateFormat(username) == null;
+  /// Checks if userName is available (format validation only)
+  static bool isValidFormat(String userName) {
+    return validateFormat(userName) == null;
   }
 
-  /// Creates a text input formatter for username fields
+  /// Creates a text input formatter for userName fields
   static List<TextInputFormatter> getInputFormatters() {
     return [
       FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9_-]')),
