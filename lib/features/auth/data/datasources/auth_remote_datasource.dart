@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import '../../../../core/config/api_endpoints.dart';
 import '../models/user_model.dart';
 import '../models/auth_tokens_model.dart';
 
@@ -17,44 +18,44 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   AuthRemoteDataSourceImpl(this._dio);
 
   @override
-  @override
   Future<AuthTokensModel> loginWithUsername(
     Map<String, dynamic> credentials,
   ) async {
-    final response = await _dio.post('/auth/login', data: credentials);
+    final response = await _dio.post(ApiEndpoints.login, data: credentials);
     return AuthTokensModel.fromJson(response.data);
   }
 
   @override
-  Future logout() async {
-    await _dio.post('/auth/logout');
+  Future<void> logout() async {
+    await _dio.post(ApiEndpoints.logout);
   }
 
   @override
   Future<AuthTokensModel> refreshToken(Map<String, dynamic> refreshData) async {
-    final response = await _dio.post('/auth/refresh', data: refreshData);
+    final response = await _dio.post(ApiEndpoints.refresh, data: refreshData);
     return AuthTokensModel.fromJson(response.data);
   }
 
   @override
   Future<UserModel> getCurrentUser() async {
-    final response = await _dio.get('/user/profile');
+    final response = await _dio.get(ApiEndpoints.profile);
     return UserModel.fromJson(response.data);
   }
 
   @override
   Future<void> changePassword(Map<String, dynamic> data) async {
-    await _dio.post('/auth/password/change', data: data);
+    await _dio.post(ApiEndpoints.changePassword, data: data);
   }
 
   @override
   Future<Map<String, dynamic>> checkUsernameAvailability(
     String username,
   ) async {
-    final response = await _dio.get(
-      '/auth/username/check',
-      queryParameters: {'username': username},
+    final endpoint = ApiEndpoints.withQuery(
+      ApiEndpoints.usernameCheck,
+      {'username': username},
     );
+    final response = await _dio.get(endpoint);
     return response.data;
   }
 }

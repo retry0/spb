@@ -8,6 +8,8 @@ import 'core/router/app_router.dart';
 import 'core/utils/bloc_observer.dart';
 import 'core/utils/logger.dart';
 import 'core/storage/database_helper.dart';
+import 'core/config/environment_config.dart';
+import 'core/config/environment_validator.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/theme/presentation/bloc/theme_bloc.dart';
 
@@ -16,6 +18,46 @@ void main() async {
   
   // Initialize logging
   AppLogger.init();
+  
+  try {
+    // Initialize environment configuration
+    await EnvironmentConfig.initialize();
+    AppLogger.info('Environment: ${EnvironmentConfig.environmentName}');
+    AppLogger.info('Base URL: ${EnvironmentConfig.baseUrl}');
+    
+    // Validate environment configuration
+    final validation = EnvironmentValidator.validateEnvironment();
+    if (!validation.isValid) {
+      AppLogger.error('Environment validation failed:');
+      AppLogger.error(validation.getReport());
+      
+      // In development, show validation errors but continue
+      if (EnvironmentConfig.isDevelopment) {
+        AppLogger.warning('Continuing with invalid configuration in development mode');
+      } else {
+        // In production/staging, fail fast
+        throw Exception('Invalid environment configuration');
+      }
+    }
+    
+    if (validation.warnings.isNotEmpty) {
+      AppLogger.warning('Environment warnings:');
+      for (final warning in validation.warnings) {
+        AppLogger.warning('  • $warning');
+      }
+    }
+    
+  } catch (e) {
+    AppLogger.error('Failed to initialize environment configuration: $e');
+    
+    // Show user-friendly error in debug mode
+    if (EnvironmentConfig.isDevelopment) {
+      runApp(ErrorApp(error: e.toString()));
+      return;
+    } else {
+      rethrow;
+    }
+  }
   
   // Initialize SQLite database
   await DatabaseHelper.instance.database;
@@ -70,6 +112,59 @@ class MyApp extends StatelessWidget {
             },
           );
         },
+      ),
+    );
+  }
+}
+
+/// Error app shown when environment configuration fails
+class ErrorApp extends StatelessWidget {
+  final String error;
+  
+  const ErrorApp({super.key, required this.error});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Configuration Error',
+      home: Scaffold(
+        backgroundColor: Colors.red[50],
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  size: 64,
+                  color: Colors.red[700],
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'Configuration Error',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.red[700],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  error,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 24),
+                const Text(
+                  'Please check your environment configuration and try again.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 14, color: Colors.grey),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

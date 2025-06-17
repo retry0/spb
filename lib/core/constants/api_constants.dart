@@ -1,22 +1,27 @@
+import '../config/api_endpoints.dart';
+
+/// Legacy API constants class - now delegates to ApiEndpoints
+/// Kept for backward compatibility
+@Deprecated('Use ApiEndpoints instead')
 class ApiConstants {
-  static const String baseUrl = 'http://10.0.2.2:8000/api';
-
+  static String get baseUrl => ApiEndpoints.baseUrl;
+  
   // Auth endpoints
-  static const String login = '/auth/login';
-  static const String logout = '/auth/logout';
-  static const String refresh = '/auth/refresh';
-  static const String register = '/auth/register';
-
+  static String get login => ApiEndpoints.login;
+  static String get logout => ApiEndpoints.logout;
+  static String get refresh => ApiEndpoints.refresh;
+  static String get register => ApiEndpoints.register;
+  
   // User endpoints
-  static const String profile = '/user/profile';
-  static const String updateProfile = '/user/profile';
-
+  static String get profile => ApiEndpoints.profile;
+  static String get updateProfile => ApiEndpoints.updateProfile;
+  
   // Data endpoints
-  static const String data = '/data';
-  static const String dataExport = '/data/export';
-
+  static String get data => ApiEndpoints.data;
+  static String get dataExport => ApiEndpoints.dataExport;
+  
   // Dashboard endpoints
-  static const String dashboard = '/dashboard';
-  static const String metrics = '/dashboard/metrics';
-  static const String activities = '/dashboard/activities';
+  static String get dashboard => ApiEndpoints.dashboard;
+  static String get metrics => ApiEndpoints.metrics;
+  static String get activities => ApiEndpoints.activities;
 }
