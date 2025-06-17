@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'android_emulator_config.dart';
 
 /// Environment types supported by the application
 enum Environment {
@@ -155,11 +156,14 @@ class EnvironmentConfig {
       throw EnvironmentConfigException('Invalid URL format: $url');
     }
 
-    // Ensure HTTPS in production
+    // Ensure HTTPS in production (but allow 10.0.2.2 for Android emulator in dev)
     if (_currentEnvironment == Environment.production && uri.scheme != 'https') {
-      throw EnvironmentConfigException(
-        'Production environment requires HTTPS URLs. Got: ${uri.scheme}'
-      );
+      // Allow 10.0.2.2 for Android emulator testing in production builds
+      if (!(uri.host == '10.0.2.2' && Platform.isAndroid)) {
+        throw EnvironmentConfigException(
+          'Production environment requires HTTPS URLs. Got: ${uri.scheme}'
+        );
+      }
     }
 
     // Validate scheme
@@ -181,8 +185,20 @@ class EnvironmentConfig {
     return _currentEnvironment!;
   }
 
-  /// Get base API URL
+  /// Get base API URL (automatically converted for Android emulator)
   static String get baseUrl {
+    _ensureInitialized();
+    
+    // Convert localhost URLs for Android emulator
+    if (Platform.isAndroid && AndroidEmulatorConfig.isAndroidEmulator) {
+      return AndroidEmulatorConfig.convertUrlForEmulator(_baseUrl!);
+    }
+    
+    return _baseUrl!;
+  }
+
+  /// Get raw base URL without emulator conversion
+  static String get rawBaseUrl {
     _ensureInitialized();
     return _baseUrl!;
   }
@@ -243,10 +259,13 @@ class EnvironmentConfig {
     _ensureInitialized();
     return {
       'environment': environmentName,
-      'baseUrl': baseUrl,
+      'rawBaseUrl': rawBaseUrl,
+      'effectiveBaseUrl': baseUrl,
       'loggingEnabled': isLoggingEnabled,
       'timeout': '${timeout.inSeconds}s',
       'isProduction': isProduction,
+      'isAndroidEmulator': Platform.isAndroid ? AndroidEmulatorConfig.isAndroidEmulator : false,
+      'platform': Platform.operatingSystem,
     };
   }
 }

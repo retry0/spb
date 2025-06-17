@@ -10,6 +10,7 @@ import 'core/utils/logger.dart';
 import 'core/storage/database_helper.dart';
 import 'core/config/environment_config.dart';
 import 'core/config/environment_validator.dart';
+import 'core/config/android_emulator_config.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/theme/presentation/bloc/theme_bloc.dart';
 
@@ -23,7 +24,14 @@ void main() async {
     // Initialize environment configuration
     await EnvironmentConfig.initialize();
     AppLogger.info('Environment: ${EnvironmentConfig.environmentName}');
-    AppLogger.info('Base URL: ${EnvironmentConfig.baseUrl}');
+    AppLogger.info('Raw Base URL: ${EnvironmentConfig.rawBaseUrl}');
+    AppLogger.info('Effective Base URL: ${EnvironmentConfig.baseUrl}');
+    
+    // Log Android emulator information
+    if (EnvironmentConfig.isDevelopment) {
+      final emulatorInfo = AndroidEmulatorConfig.getDebugInfo();
+      AppLogger.info('Platform Info: $emulatorInfo');
+    }
     
     // Validate environment configuration
     final validation = EnvironmentValidator.validateEnvironment();
@@ -161,6 +169,20 @@ class ErrorApp extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 14, color: Colors.grey),
                 ),
+                const SizedBox(height: 16),
+                if (EnvironmentConfig.isDevelopment) ...[
+                  const Text(
+                    'Development Mode Tips:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    '• For Android emulator, use http://10.0.2.2:PORT/api\n'
+                    '• Ensure your backend server is running\n'
+                    '• Check environment variables are set correctly',
+                    style: TextStyle(fontSize: 12),
+                  ),
+                ],
               ],
             ),
           ),
