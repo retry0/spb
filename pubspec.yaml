@@ -52,7 +52,7 @@ dependencies:
   csv: ^6.0.0
   
   # Networking & Sync
-  connectivity_plus: ^6.0.5
+  connectivity_plus: ^6.1.4
   #workmanager: ^0.5.2
   
   # Utils
