@@ -28,7 +28,7 @@ class DatabaseHelper {
       
       return await openDatabase(
         path,
-        version: 1,
+        version: 2, // Incremented version for username migration
         onCreate: _onCreate,
         onUpgrade: _onUpgrade,
         onConfigure: _onConfigure,
@@ -60,16 +60,49 @@ class DatabaseHelper {
         )
       ''');
 
-      // Users table for caching user data
+      // Users table with username support
       await db.execute('''
         CREATE TABLE users (
           id TEXT PRIMARY KEY,
+          username TEXT UNIQUE NOT NULL,
           email TEXT UNIQUE NOT NULL,
           name TEXT NOT NULL,
           avatar TEXT,
+          password_hash TEXT,
+          salt TEXT,
+          last_login INTEGER,
+          failed_login_attempts INTEGER NOT NULL DEFAULT 0,
+          locked_until INTEGER,
           created_at INTEGER NOT NULL,
           updated_at INTEGER NOT NULL,
           synced_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
+        )
+      ''');
+
+      // Authentication audit logs
+      await db.execute('''
+        CREATE TABLE auth_audit_logs (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          username TEXT,
+          action TEXT NOT NULL,
+          success INTEGER NOT NULL DEFAULT 0,
+          ip_address TEXT,
+          user_agent TEXT,
+          error_message TEXT,
+          created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
+        )
+      ''');
+
+      // Password reset tokens
+      await db.execute('''
+        CREATE TABLE password_reset_tokens (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          username TEXT NOT NULL,
+          token TEXT UNIQUE NOT NULL,
+          expires_at INTEGER NOT NULL,
+          used INTEGER NOT NULL DEFAULT 0,
+          created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
+          FOREIGN KEY (username) REFERENCES users (username) ON DELETE CASCADE
         )
       ''');
 
@@ -95,9 +128,11 @@ class DatabaseHelper {
           type TEXT NOT NULL,
           description TEXT NOT NULL,
           user_id TEXT,
+          username TEXT,
           metadata TEXT,
           created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
-          FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE SET NULL
+          FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE SET NULL,
+          FOREIGN KEY (username) REFERENCES users (username) ON DELETE SET NULL
         )
       ''');
 
@@ -117,10 +152,17 @@ class DatabaseHelper {
 
       // Create indexes for better performance
       await db.execute('CREATE INDEX idx_settings_key ON settings (key)');
+      await db.execute('CREATE INDEX idx_users_username ON users (username)');
       await db.execute('CREATE INDEX idx_users_email ON users (email)');
+      await db.execute('CREATE INDEX idx_users_last_login ON users (last_login)');
+      await db.execute('CREATE INDEX idx_auth_audit_username ON auth_audit_logs (username)');
+      await db.execute('CREATE INDEX idx_auth_audit_created ON auth_audit_logs (created_at)');
+      await db.execute('CREATE INDEX idx_password_reset_token ON password_reset_tokens (token)');
+      await db.execute('CREATE INDEX idx_password_reset_expires ON password_reset_tokens (expires_at)');
       await db.execute('CREATE INDEX idx_data_entries_status ON data_entries (status)');
       await db.execute('CREATE INDEX idx_data_entries_synced ON data_entries (synced_at)');
       await db.execute('CREATE INDEX idx_activity_logs_type ON activity_logs (type)');
+      await db.execute('CREATE INDEX idx_activity_logs_username ON activity_logs (username)');
       await db.execute('CREATE INDEX idx_activity_logs_created ON activity_logs (created_at)');
       await db.execute('CREATE INDEX idx_sync_queue_operation ON sync_queue (operation)');
 
@@ -134,10 +176,83 @@ class DatabaseHelper {
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     AppLogger.info('Upgrading database from version $oldVersion to $newVersion');
     
-    // Handle database migrations here
     if (oldVersion < 2) {
-      // Example migration for version 2
-      // await db.execute('ALTER TABLE users ADD COLUMN phone TEXT');
+      // Migration to add username support
+      await _migrateToUsernameAuth(db);
+    }
+  }
+
+  Future<void> _migrateToUsernameAuth(Database db) async {
+    try {
+      AppLogger.info('Migrating to username-based authentication...');
+      
+      // Add username column to users table
+      await db.execute('ALTER TABLE users ADD COLUMN username TEXT');
+      
+      // Add authentication-related columns
+      await db.execute('ALTER TABLE users ADD COLUMN password_hash TEXT');
+      await db.execute('ALTER TABLE users ADD COLUMN salt TEXT');
+      await db.execute('ALTER TABLE users ADD COLUMN last_login INTEGER');
+      await db.execute('ALTER TABLE users ADD COLUMN failed_login_attempts INTEGER NOT NULL DEFAULT 0');
+      await db.execute('ALTER TABLE users ADD COLUMN locked_until INTEGER');
+      
+      // Create auth audit logs table
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS auth_audit_logs (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          username TEXT,
+          action TEXT NOT NULL,
+          success INTEGER NOT NULL DEFAULT 0,
+          ip_address TEXT,
+          user_agent TEXT,
+          error_message TEXT,
+          created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
+        )
+      ''');
+      
+      // Create password reset tokens table
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS password_reset_tokens (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          username TEXT NOT NULL,
+          token TEXT UNIQUE NOT NULL,
+          expires_at INTEGER NOT NULL,
+          used INTEGER NOT NULL DEFAULT 0,
+          created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
+        )
+      ''');
+      
+      // Add username column to activity_logs
+      await db.execute('ALTER TABLE activity_logs ADD COLUMN username TEXT');
+      
+      // Create new indexes
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_users_username ON users (username)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_auth_audit_username ON auth_audit_logs (username)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_password_reset_token ON password_reset_tokens (token)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_activity_logs_username ON activity_logs (username)');
+      
+      // Generate usernames for existing users (email prefix)
+      final existingUsers = await db.query('users');
+      for (final user in existingUsers) {
+        if (user['username'] == null && user['email'] != null) {
+          final email = user['email'] as String;
+          final username = email.split('@')[0];
+          await db.update(
+            'users',
+            {'username': username},
+            where: 'id = ?',
+            whereArgs: [user['id']],
+          );
+        }
+      }
+      
+      // Make username unique and not null
+      await db.execute('CREATE UNIQUE INDEX idx_users_username_unique ON users (username)');
+      
+      AppLogger.info('Username authentication migration completed');
+    } catch (e) {
+      AppLogger.error('Failed to migrate to username authentication', e);
+      rethrow;
     }
   }
 
@@ -229,6 +344,8 @@ class DatabaseHelper {
     await db.transaction((txn) async {
       await txn.delete('settings');
       await txn.delete('users');
+      await txn.delete('auth_audit_logs');
+      await txn.delete('password_reset_tokens');
       await txn.delete('data_entries');
       await txn.delete('activity_logs');
       await txn.delete('sync_queue');
