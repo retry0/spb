@@ -12,30 +12,29 @@ class NetworkTroubleshooter {
   /// Perform comprehensive network diagnostics
   static Future<NetworkDiagnostics> diagnoseNetwork() async {
     final diagnostics = NetworkDiagnostics();
-    
+
     try {
       // Check connectivity
       diagnostics.connectivity = await _checkConnectivity();
-      
+
       // Check if we can reach the internet
       diagnostics.internetAccess = await _checkInternetAccess();
-      
+
       // Check backend server accessibility
       diagnostics.backendAccess = await _checkBackendAccess();
-      
+
       // Android emulator specific checks
       if (Platform.isAndroid) {
         diagnostics.emulatorChecks = await _checkEmulatorSpecific();
       }
-      
+
       // DNS resolution checks
       diagnostics.dnsResolution = await _checkDnsResolution();
-      
     } catch (e) {
       AppLogger.error('Network diagnostics failed: $e');
       diagnostics.error = e.toString();
     }
-    
+
     return diagnostics;
   }
 
@@ -43,11 +42,22 @@ class NetworkTroubleshooter {
   static Future<ConnectivityStatus> _checkConnectivity() async {
     try {
       final connectivityResult = await Connectivity().checkConnectivity();
-      
+
+      // Handle connectivity result
+      ConnectivityResult result;
+      if (connectivityResult is ConnectivityResult) {
+        result = connectivityResult;
+      } else if (connectivityResult is List<ConnectivityResult> &&
+          connectivityResult.isNotEmpty) {
+        result = connectivityResult.first;
+      } else {
+        result = ConnectivityResult.none;
+      }
+
       return ConnectivityStatus(
-        isConnected: connectivityResult != ConnectivityResult.none,
-        connectionType: connectivityResult.toString(),
-        details: _getConnectivityDetails(connectivityResult),
+        isConnected: result != ConnectivityResult.none,
+        connectionType: result.toString(),
+        details: _getConnectivityDetails(result),
       );
     } catch (e) {
       return ConnectivityStatus(
@@ -68,7 +78,7 @@ class NetworkTroubleshooter {
           receiveTimeout: const Duration(seconds: 5),
         ),
       );
-      
+
       return InternetAccessStatus(
         hasAccess: response.statusCode == 200,
         responseTime: DateTime.now().millisecondsSinceEpoch,
@@ -88,7 +98,7 @@ class NetworkTroubleshooter {
     try {
       final baseUrl = EnvironmentConfig.baseUrl;
       final healthEndpoint = '$baseUrl/health';
-      
+
       // Try to reach the health endpoint
       final response = await _dio.get(
         healthEndpoint,
@@ -97,7 +107,7 @@ class NetworkTroubleshooter {
           receiveTimeout: const Duration(seconds: 10),
         ),
       );
-      
+
       return BackendAccessStatus(
         isAccessible: response.statusCode! >= 200 && response.statusCode! < 300,
         statusCode: response.statusCode,
@@ -107,7 +117,7 @@ class NetworkTroubleshooter {
       );
     } catch (e) {
       final baseUrl = EnvironmentConfig.baseUrl;
-      
+
       return BackendAccessStatus(
         isAccessible: false,
         statusCode: null,
@@ -121,27 +131,26 @@ class NetworkTroubleshooter {
   /// Android emulator specific checks
   static Future<EmulatorChecks> _checkEmulatorSpecific() async {
     final checks = EmulatorChecks();
-    
+
     try {
       checks.isEmulator = AndroidEmulatorConfig.isAndroidEmulator;
       checks.originalUrl = EnvironmentConfig.rawBaseUrl;
       checks.convertedUrl = EnvironmentConfig.baseUrl;
-      
+
       if (checks.isEmulator) {
         // Test localhost accessibility (should fail)
         checks.localhostAccessible = await _testUrl('http://localhost:8000');
-        
+
         // Test 10.0.2.2 accessibility
         checks.emulatorIpAccessible = await _testUrl('http://10.0.2.2:8000');
-        
+
         // Check if URL was converted
         checks.urlWasConverted = checks.originalUrl != checks.convertedUrl;
       }
-      
     } catch (e) {
       checks.error = e.toString();
     }
-    
+
     return checks;
   }
 
@@ -150,10 +159,10 @@ class NetworkTroubleshooter {
     try {
       final baseUrl = EnvironmentConfig.baseUrl;
       final uri = Uri.parse(baseUrl);
-      
+
       // Try to resolve the hostname
       final addresses = await InternetAddress.lookup(uri.host);
-      
+
       return DnsResolutionStatus(
         canResolve: addresses.isNotEmpty,
         hostname: uri.host,
@@ -163,7 +172,7 @@ class NetworkTroubleshooter {
     } catch (e) {
       final baseUrl = EnvironmentConfig.baseUrl;
       final uri = Uri.parse(baseUrl);
-      
+
       return DnsResolutionStatus(
         canResolve: false,
         hostname: uri.host,
@@ -210,35 +219,37 @@ class NetworkTroubleshooter {
   /// Generate troubleshooting report
   static String generateTroubleshootingReport(NetworkDiagnostics diagnostics) {
     final buffer = StringBuffer();
-    
+
     buffer.writeln('🔍 Network Diagnostics Report');
     buffer.writeln('Generated: ${DateTime.now()}');
     buffer.writeln('Platform: ${Platform.operatingSystem}');
     buffer.writeln('Environment: ${EnvironmentConfig.environmentName}');
     buffer.writeln('Base URL: ${EnvironmentConfig.baseUrl}');
     buffer.writeln();
-    
+
     // Connectivity
     buffer.writeln('📶 Connectivity Status');
     buffer.writeln('Connected: ${diagnostics.connectivity.isConnected}');
     buffer.writeln('Type: ${diagnostics.connectivity.connectionType}');
     buffer.writeln('Details: ${diagnostics.connectivity.details}');
     buffer.writeln();
-    
+
     // Internet Access
     buffer.writeln('🌐 Internet Access');
     buffer.writeln('Has Access: ${diagnostics.internetAccess.hasAccess}');
     buffer.writeln('Details: ${diagnostics.internetAccess.details}');
     buffer.writeln();
-    
+
     // Backend Access
     buffer.writeln('🖥️ Backend Server Access');
     buffer.writeln('Accessible: ${diagnostics.backendAccess.isAccessible}');
     buffer.writeln('Endpoint: ${diagnostics.backendAccess.endpoint}');
-    buffer.writeln('Status Code: ${diagnostics.backendAccess.statusCode ?? 'N/A'}');
+    buffer.writeln(
+      'Status Code: ${diagnostics.backendAccess.statusCode ?? 'N/A'}',
+    );
     buffer.writeln('Details: ${diagnostics.backendAccess.details}');
     buffer.writeln();
-    
+
     // Android Emulator Specific
     if (Platform.isAndroid && diagnostics.emulatorChecks != null) {
       final emulator = diagnostics.emulatorChecks!;
@@ -254,74 +265,88 @@ class NetworkTroubleshooter {
       }
       buffer.writeln();
     }
-    
+
     // DNS Resolution
     buffer.writeln('🔍 DNS Resolution');
     buffer.writeln('Can Resolve: ${diagnostics.dnsResolution.canResolve}');
     buffer.writeln('Hostname: ${diagnostics.dnsResolution.hostname}');
-    buffer.writeln('Resolved IPs: ${diagnostics.dnsResolution.resolvedAddresses.join(', ')}');
+    buffer.writeln(
+      'Resolved IPs: ${diagnostics.dnsResolution.resolvedAddresses.join(', ')}',
+    );
     buffer.writeln('Details: ${diagnostics.dnsResolution.details}');
     buffer.writeln();
-    
+
     // Recommendations
     buffer.writeln('💡 Recommendations');
     buffer.writeln(_generateRecommendations(diagnostics));
-    
+
     return buffer.toString();
   }
 
   /// Generate recommendations based on diagnostics
   static String _generateRecommendations(NetworkDiagnostics diagnostics) {
     final recommendations = <String>[];
-    
+
     if (!diagnostics.connectivity.isConnected) {
       recommendations.add('• Check your device\'s network connection');
       recommendations.add('• Ensure WiFi or mobile data is enabled');
     }
-    
+
     if (!diagnostics.internetAccess.hasAccess) {
       recommendations.add('• Verify internet connectivity');
       recommendations.add('• Check firewall or proxy settings');
     }
-    
+
     if (!diagnostics.backendAccess.isAccessible) {
       recommendations.add('• Ensure your backend server is running');
-      recommendations.add('• Verify the server is bound to 0.0.0.0, not just localhost');
+      recommendations.add(
+        '• Verify the server is bound to 0.0.0.0, not just localhost',
+      );
       recommendations.add('• Check if the port number is correct');
-      
+
       if (Platform.isAndroid && AndroidEmulatorConfig.isAndroidEmulator) {
-        recommendations.add('• For Android emulator, use 10.0.2.2 instead of localhost');
-        recommendations.add('• Test backend accessibility: curl http://10.0.2.2:YOUR_PORT/api');
+        recommendations.add(
+          '• For Android emulator, use 10.0.2.2 instead of localhost',
+        );
+        recommendations.add(
+          '• Test backend accessibility: curl http://10.0.2.2:YOUR_PORT/api',
+        );
       }
     }
-    
+
     if (Platform.isAndroid && diagnostics.emulatorChecks != null) {
       final emulator = diagnostics.emulatorChecks!;
-      
+
       if (emulator.isEmulator && !emulator.urlWasConverted) {
         recommendations.add('• URL conversion for emulator may have failed');
-        recommendations.add('• Try setting DEV_API_BASE_URL=http://10.0.2.2:YOUR_PORT/api explicitly');
+        recommendations.add(
+          '• Try setting DEV_API_BASE_URL=http://10.0.2.2:YOUR_PORT/api explicitly',
+        );
       }
-      
+
       if (emulator.isEmulator && !emulator.emulatorIpAccessible) {
-        recommendations.add('• Backend server may not be accessible from emulator');
-        recommendations.add('• Ensure server binds to all interfaces (0.0.0.0)');
+        recommendations.add(
+          '• Backend server may not be accessible from emulator',
+        );
+        recommendations.add(
+          '• Ensure server binds to all interfaces (0.0.0.0)',
+        );
         recommendations.add('• Check CORS configuration for 10.0.2.2');
       }
     }
-    
+
     if (!diagnostics.dnsResolution.canResolve) {
       recommendations.add('• DNS resolution failed for your backend hostname');
       recommendations.add('• Check if the hostname is correct');
       recommendations.add('• Try using an IP address instead');
     }
-    
+
     if (recommendations.isEmpty) {
       recommendations.add('• Configuration appears correct');
       recommendations.add('• Check backend server logs for errors');
       recommendations.add('• Verify API endpoints are implemented');
     }
-    
+
     return recommendations.join('\n');
   }
 }
