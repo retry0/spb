@@ -75,6 +75,7 @@ class NetworkTroubleshooter {
         options: Options(
           connectTimeout: const Duration(seconds: 5),
           receiveTimeout: const Duration(seconds: 5),
+          sendTimeout: const Duration(seconds: 5),
         ),
       );
       
@@ -104,6 +105,7 @@ class NetworkTroubleshooter {
         options: Options(
           connectTimeout: const Duration(seconds: 10),
           receiveTimeout: const Duration(seconds: 10),
+          sendTimeout: const Duration(seconds: 10),
         ),
       );
       
@@ -190,6 +192,7 @@ class NetworkTroubleshooter {
         options: Options(
           connectTimeout: const Duration(seconds: 3),
           receiveTimeout: const Duration(seconds: 3),
+          sendTimeout: const Duration(seconds: 3),
         ),
       );
       return response.statusCode! >= 200 && response.statusCode! < 500;
