@@ -40,25 +40,3 @@ class AuthUsernameAvailabilityRequested extends AuthEvent {
   @override
   List<Object> get props => [username];
 }
-
-class AuthPasswordResetRequested extends AuthEvent {
-  final String username;
-
-  const AuthPasswordResetRequested(this.username);
-
-  @override
-  List<Object> get props => [username];
-}
-
-class AuthPasswordResetConfirmRequested extends AuthEvent {
-  final String token;
-  final String newPassword;
-
-  const AuthPasswordResetConfirmRequested({
-    required this.token,
-    required this.newPassword,
-  });
-
-  @override
-  List<Object> get props => [token, newPassword];
-}

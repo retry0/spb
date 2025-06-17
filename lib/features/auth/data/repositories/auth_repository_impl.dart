@@ -92,41 +92,6 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, void>> requestPasswordReset(String username) async {
-    try {
-      await remoteDataSource.requestPasswordReset({
-        'username': username,
-      });
-      
-      return const Right(null);
-    } on AuthException catch (e) {
-      return Left(AuthFailure(e.message));
-    } on NetworkException catch (e) {
-      return Left(NetworkFailure(e.message));
-    } catch (e) {
-      return Left(ServerFailure('Failed to request password reset'));
-    }
-  }
-
-  @override
-  Future<Either<Failure, void>> resetPassword(String token, String newPassword) async {
-    try {
-      await remoteDataSource.resetPassword({
-        'token': token,
-        'new_password': newPassword,
-      });
-      
-      return const Right(null);
-    } on AuthException catch (e) {
-      return Left(AuthFailure(e.message));
-    } on NetworkException catch (e) {
-      return Left(NetworkFailure(e.message));
-    } catch (e) {
-      return Left(ServerFailure('Failed to reset password'));
-    }
-  }
-
-  @override
   Future<Either<Failure, void>> changePassword(String currentPassword, String newPassword) async {
     try {
       await remoteDataSource.changePassword({
