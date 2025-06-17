@@ -42,12 +42,21 @@ class NetworkTroubleshooter {
   /// Check device connectivity status
   static Future<ConnectivityStatus> _checkConnectivity() async {
     try {
-      final connectivityResult = await Connectivity().checkConnectivity();
+      final connectivityResults = await Connectivity().checkConnectivity();
+      
+      // Handle the new List<ConnectivityResult> return type
+      final isConnected = connectivityResults.isNotEmpty && 
+                         !connectivityResults.contains(ConnectivityResult.none);
+      
+      final connectionTypes = connectivityResults
+          .where((result) => result != ConnectivityResult.none)
+          .map((result) => result.toString().split('.').last)
+          .join(', ');
       
       return ConnectivityStatus(
-        isConnected: connectivityResult != ConnectivityResult.none,
-        connectionType: connectivityResult.toString(),
-        details: _getConnectivityDetails(connectivityResult),
+        isConnected: isConnected,
+        connectionType: connectionTypes.isNotEmpty ? connectionTypes : 'none',
+        details: _getConnectivityDetails(connectivityResults),
       );
     } catch (e) {
       return ConnectivityStatus(
@@ -190,21 +199,44 @@ class NetworkTroubleshooter {
   }
 
   /// Get connectivity details
-  static String _getConnectivityDetails(ConnectivityResult result) {
-    switch (result) {
-      case ConnectivityResult.wifi:
-        return 'Connected via WiFi';
-      case ConnectivityResult.mobile:
-        return 'Connected via Mobile Data';
-      case ConnectivityResult.ethernet:
-        return 'Connected via Ethernet';
-      case ConnectivityResult.bluetooth:
-        return 'Connected via Bluetooth';
-      case ConnectivityResult.none:
-        return 'No network connection';
-      default:
-        return 'Unknown connection type';
+  static String _getConnectivityDetails(List<ConnectivityResult> results) {
+    if (results.isEmpty || results.contains(ConnectivityResult.none)) {
+      return 'No network connection';
     }
+    
+    final connectionTypes = <String>[];
+    
+    for (final result in results) {
+      switch (result) {
+        case ConnectivityResult.wifi:
+          connectionTypes.add('WiFi');
+          break;
+        case ConnectivityResult.mobile:
+          connectionTypes.add('Mobile Data');
+          break;
+        case ConnectivityResult.ethernet:
+          connectionTypes.add('Ethernet');
+          break;
+        case ConnectivityResult.bluetooth:
+          connectionTypes.add('Bluetooth');
+          break;
+        case ConnectivityResult.vpn:
+          connectionTypes.add('VPN');
+          break;
+        case ConnectivityResult.other:
+          connectionTypes.add('Other');
+          break;
+        case ConnectivityResult.none:
+          // Skip none results
+          break;
+      }
+    }
+    
+    if (connectionTypes.isEmpty) {
+      return 'Unknown connection type';
+    }
+    
+    return 'Connected via ${connectionTypes.join(', ')}';
   }
 
   /// Generate troubleshooting report
