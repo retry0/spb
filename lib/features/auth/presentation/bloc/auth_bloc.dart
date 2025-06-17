@@ -6,8 +6,6 @@ import '../../domain/usecases/login_usecase.dart';
 import '../../domain/usecases/logout_usecase.dart';
 import '../../domain/usecases/refresh_token_usecase.dart';
 import '../../domain/usecases/check_username_availability_usecase.dart';
-import '../../domain/usecases/request_password_reset_usecase.dart';
-import '../../domain/usecases/reset_password_usecase.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
@@ -17,17 +15,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LogoutUseCase logoutUseCase;
   final RefreshTokenUseCase refreshTokenUseCase;
   final CheckUsernameAvailabilityUseCase checkUsernameAvailabilityUseCase;
-  final RequestPasswordResetUseCase requestPasswordResetUseCase;
-  final ResetPasswordUseCase resetPasswordUseCase;
 
   AuthBloc({
     required this.loginUseCase,
     required this.logoutUseCase,
     required this.refreshTokenUseCase,
     required this.checkUsernameAvailabilityUseCase,
-    required this.requestPasswordResetUseCase,
-    required this.resetPasswordUseCase,
   }) : super(const AuthInitial()) {
+<<<<<<< HEAD
     on(_onAuthCheckRequested);
     on(_onAuthLoginRequested);
     on(_onAuthLogoutRequested);
@@ -35,6 +30,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on(_onAuthUsernameAvailabilityRequested);
     on(_onAuthPasswordResetRequested);
     on(_onAuthPasswordResetConfirmRequested);
+=======
+    on<AuthCheckRequested>(_onAuthCheckRequested);
+    on<AuthLoginRequested>(_onAuthLoginRequested);
+    on<AuthLogoutRequested>(_onAuthLogoutRequested);
+    on<AuthTokenRefreshRequested>(_onAuthTokenRefreshRequested);
+    on<AuthUsernameAvailabilityRequested>(_onAuthUsernameAvailabilityRequested);
+>>>>>>> 51ee234352a17f5d388bc3b671fd5e5a8578b12a
   }
 
   Future _onAuthCheckRequested(AuthCheckRequested event, Emitter emit) async {
@@ -50,6 +52,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     result.fold(
       (failure) => emit(AuthError(failure.message)),
+<<<<<<< HEAD
       (tokens) => emit(
         AuthAuthenticated(
           user: User(
@@ -69,6 +72,18 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             createdAt: DateTime.now().subtract(const Duration(days: 30)),
             updatedAt: DateTime.now(),
           ),
+=======
+      (tokens) => emit(AuthAuthenticated(
+        user: User(
+          id: '1',
+          username: event.username,
+          email: '${event.username}@example.com',
+          name: event.username.replaceAll('_', ' ').split(' ').map((word) => 
+            word.isNotEmpty ? word[0].toUpperCase() + word.substring(1) : word
+          ).join(' '),
+          createdAt: DateTime.now().subtract(const Duration(days: 30)),
+          updatedAt: DateTime.now(),
+>>>>>>> 51ee234352a17f5d388bc3b671fd5e5a8578b12a
         ),
       ),
     );
@@ -112,6 +127,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       ),
     );
   }
+<<<<<<< HEAD
 
   Future _onAuthPasswordResetRequested(
     AuthPasswordResetRequested event,
@@ -139,3 +155,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
   }
 }
+=======
+}
+>>>>>>> 51ee234352a17f5d388bc3b671fd5e5a8578b12a
