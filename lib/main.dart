@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
 import 'core/di/injection.dart';
 import 'core/theme/app_theme.dart';
 import 'core/router/app_router.dart';
 import 'core/utils/bloc_observer.dart';
 import 'core/utils/logger.dart';
+import 'core/storage/database_helper.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/theme/presentation/bloc/theme_bloc.dart';
 
@@ -17,8 +17,8 @@ void main() async {
   // Initialize logging
   AppLogger.init();
   
-  // Initialize Hive
-  await Hive.initFlutter();
+  // Initialize SQLite database
+  await DatabaseHelper.instance.database;
   
   // Configure dependency injection
   await configureDependencies();

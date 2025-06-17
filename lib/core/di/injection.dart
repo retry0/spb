@@ -7,6 +7,8 @@ import 'package:dio/dio.dart';
 import '../network/dio_client.dart';
 import '../storage/secure_storage.dart';
 import '../storage/local_storage.dart';
+import '../storage/database_helper.dart';
+import '../storage/data_repository.dart';
 import '../../features/auth/data/datasources/auth_remote_datasource.dart';
 import '../../features/auth/data/datasources/auth_local_datasource.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
@@ -39,13 +41,23 @@ Future<void> configureDependencies() async {
   );
   getIt.registerSingleton<FlutterSecureStorage>(secureStorage);
   
+  // Database
+  getIt.registerSingleton<DatabaseHelper>(DatabaseHelper.instance);
+  
   // Core services
   getIt.registerLazySingleton<SecureStorage>(
     () => SecureStorageImpl(getIt<FlutterSecureStorage>()),
   );
   
   getIt.registerLazySingleton<LocalStorage>(
-    () => LocalStorageImpl(getIt<SharedPreferences>()),
+    () => LocalStorageImpl(
+      getIt<SharedPreferences>(),
+      getIt<DatabaseHelper>(),
+    ),
+  );
+  
+  getIt.registerLazySingleton<DataRepository>(
+    () => DataRepository(getIt<DatabaseHelper>()),
   );
   
   getIt.registerLazySingleton<Dio>(() => DioClient.createDio());
