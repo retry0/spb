@@ -5,9 +5,14 @@ import '../entities/user.dart';
 import '../entities/auth_tokens.dart';
 
 abstract class AuthRepository {
-  Future<Either<Failure, AuthTokens>> login(String email, String password);
+  Future<Either<Failure, AuthTokens>> loginWithUsername(String username, String password);
   Future<Either<Failure, void>> logout();
   Future<Either<Failure, AuthTokens>> refreshToken();
   Future<Either<Failure, User>> getCurrentUser();
+  Future<Either<Failure, void>> requestPasswordReset(String username);
+  Future<Either<Failure, void>> resetPassword(String token, String newPassword);
+  Future<Either<Failure, void>> changePassword(String currentPassword, String newPassword);
+  Future<Either<Failure, bool>> checkUsernameAvailability(String username);
   Future<bool> isLoggedIn();
+  Future<void> logAuthAttempt(String username, String action, bool success, {String? errorMessage});
 }

@@ -16,6 +16,9 @@ import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/domain/usecases/login_usecase.dart';
 import '../../features/auth/domain/usecases/logout_usecase.dart';
 import '../../features/auth/domain/usecases/refresh_token_usecase.dart';
+import '../../features/auth/domain/usecases/check_username_availability_usecase.dart';
+import '../../features/auth/domain/usecases/request_password_reset_usecase.dart';
+import '../../features/auth/domain/usecases/reset_password_usecase.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/theme/presentation/bloc/theme_bloc.dart';
 import '../../features/home/data/datasources/home_remote_datasource.dart';
@@ -68,7 +71,10 @@ Future<void> configureDependencies() async {
   );
   
   getIt.registerLazySingleton<AuthLocalDataSource>(
-    () => AuthLocalDataSourceImpl(getIt<SecureStorage>()),
+    () => AuthLocalDataSourceImpl(
+      getIt<SecureStorage>(),
+      getIt<DatabaseHelper>(),
+    ),
   );
   
   getIt.registerLazySingleton<HomeRemoteDataSource>(
@@ -93,6 +99,9 @@ Future<void> configureDependencies() async {
   getIt.registerLazySingleton(() => LoginUseCase(getIt<AuthRepository>()));
   getIt.registerLazySingleton(() => LogoutUseCase(getIt<AuthRepository>()));
   getIt.registerLazySingleton(() => RefreshTokenUseCase(getIt<AuthRepository>()));
+  getIt.registerLazySingleton(() => CheckUsernameAvailabilityUseCase(getIt<AuthRepository>()));
+  getIt.registerLazySingleton(() => RequestPasswordResetUseCase(getIt<AuthRepository>()));
+  getIt.registerLazySingleton(() => ResetPasswordUseCase(getIt<AuthRepository>()));
   
   // BLoCs
   getIt.registerFactory(
@@ -100,6 +109,9 @@ Future<void> configureDependencies() async {
       loginUseCase: getIt<LoginUseCase>(),
       logoutUseCase: getIt<LogoutUseCase>(),
       refreshTokenUseCase: getIt<RefreshTokenUseCase>(),
+      checkUsernameAvailabilityUseCase: getIt<CheckUsernameAvailabilityUseCase>(),
+      requestPasswordResetUseCase: getIt<RequestPasswordResetUseCase>(),
+      resetPasswordUseCase: getIt<ResetPasswordUseCase>(),
     ),
   );
   

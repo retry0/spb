@@ -36,3 +36,46 @@ class AuthError extends AuthState {
   @override
   List<Object> get props => [message];
 }
+
+class AuthUsernameCheckResult extends AuthState {
+  final String username;
+  final bool isAvailable;
+
+  const AuthUsernameCheckResult({
+    required this.username,
+    required this.isAvailable,
+  });
+
+  @override
+  List<Object> get props => [username, isAvailable];
+}
+
+class AuthUsernameCheckError extends AuthState {
+  final String message;
+
+  const AuthUsernameCheckError(this.message);
+
+  @override
+  List<Object> get props => [message];
+}
+
+class AuthPasswordResetLoading extends AuthState {
+  const AuthPasswordResetLoading();
+}
+
+class AuthPasswordResetEmailSent extends AuthState {
+  const AuthPasswordResetEmailSent();
+}
+
+class AuthPasswordResetSuccess extends AuthState {
+  const AuthPasswordResetSuccess();
+}
+
+class AuthPasswordResetError extends AuthState {
+  final String message;
+
+  const AuthPasswordResetError(this.message);
+
+  @override
+  List<Object> get props => [message];
+}
