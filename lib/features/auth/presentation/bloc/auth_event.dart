@@ -28,8 +28,8 @@ class AuthLogoutRequested extends AuthEvent {
   const AuthLogoutRequested();
 }
 
-class AuthTokenRefreshRequested extends AuthEvent {
-  const AuthTokenRefreshRequested();
+class AuthTokenValidationRequested extends AuthEvent {
+  const AuthTokenValidationRequested();
 }
 
 class AuthUserNameAvailabilityRequested extends AuthEvent {
