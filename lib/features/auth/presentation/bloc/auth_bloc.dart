@@ -5,7 +5,6 @@ import '../../domain/entities/user.dart';
 import '../../domain/usecases/login_usecase.dart';
 import '../../domain/usecases/logout_usecase.dart';
 import '../../domain/usecases/refresh_token_usecase.dart';
-import '../../domain/usecases/check_username_availability_usecase.dart';
 import '../../../../core/utils/session_manager.dart';
 
 part 'auth_event.dart';
@@ -15,21 +14,18 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LoginUseCase loginUseCase;
   final LogoutUseCase logoutUseCase;
   final RefreshTokenUseCase refreshTokenUseCase;
-  final CheckUserNameAvailabilityUseCase checkUserNameAvailabilityUseCase;
   final SessionManager sessionManager;
 
   AuthBloc({
     required this.loginUseCase,
     required this.logoutUseCase,
     required this.refreshTokenUseCase,
-    required this.checkUserNameAvailabilityUseCase,
     required this.sessionManager,
   }) : super(const AuthInitial()) {
     on<AuthCheckRequested>(_onAuthCheckRequested);
     on<AuthLoginRequested>(_onAuthLoginRequested);
     on<AuthLogoutRequested>(_onAuthLogoutRequested);
     on<AuthTokenValidationRequested>(_onAuthTokenValidationRequested);
-    on<AuthUserNameAvailabilityRequested>(_onAuthUserNameAvailabilityRequested);
     on<AuthSessionStatusChanged>(_onAuthSessionStatusChanged);
     
     // Listen to session state changes
@@ -170,26 +166,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         }
         // If valid, keep current state
       }
-    );
-  }
-
-  Future<void> _onAuthUserNameAvailabilityRequested(
-    AuthUserNameAvailabilityRequested event,
-    Emitter<AuthState> emit,
-  ) async {
-    final result = await checkUserNameAvailabilityUseCase(event.userName);
-    await result.fold(
-      (failure) async {
-        emit(AuthUserNameCheckError(failure.message));
-      },
-      (isAvailable) async {
-        emit(
-          AuthUserNameCheckResult(
-            userName: event.userName,
-            isAvailable: isAvailable,
-          ),
-        );
-      },
     );
   }
 

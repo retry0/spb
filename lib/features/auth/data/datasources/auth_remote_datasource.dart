@@ -6,7 +6,6 @@ abstract class AuthRemoteDataSource {
   Future<AuthTokensModel> loginWithUserName(Map<String, dynamic> credentials);
   Future<void> logout();
   Future<void> changePassword(Map<String, dynamic> data);
-  Future<Map<String, dynamic>> checkUserNameAvailability(String userName);
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -30,16 +29,5 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<void> changePassword(Map<String, dynamic> data) async {
     await _dio.post(ApiEndpoints.changePassword, data: data);
-  }
-
-  @override
-  Future<Map<String, dynamic>> checkUserNameAvailability(
-    String userName,
-  ) async {
-    final endpoint = ApiEndpoints.withQuery(ApiEndpoints.userNameCheck, {
-      'userName': userName,
-    });
-    final response = await _dio.get(endpoint);
-    return response.data;
   }
 }

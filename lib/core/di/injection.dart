@@ -18,7 +18,6 @@ import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/domain/usecases/login_usecase.dart';
 import '../../features/auth/domain/usecases/logout_usecase.dart';
 import '../../features/auth/domain/usecases/refresh_token_usecase.dart';
-import '../../features/auth/domain/usecases/check_username_availability_usecase.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/theme/presentation/bloc/theme_bloc.dart';
 import '../../features/home/data/datasources/home_remote_datasource.dart';
@@ -114,7 +113,6 @@ Future<void> configureDependencies() async {
   getIt.registerLazySingleton(() => LoginUseCase(getIt<AuthRepository>()));
   getIt.registerLazySingleton(() => LogoutUseCase(getIt<AuthRepository>()));
   getIt.registerLazySingleton(() => RefreshTokenUseCase(getIt<AuthRepository>()));
-  getIt.registerLazySingleton(() => CheckUserNameAvailabilityUseCase(getIt<AuthRepository>()));
   
   // BLoCs
   getIt.registerFactory(
@@ -122,7 +120,6 @@ Future<void> configureDependencies() async {
       loginUseCase: getIt<LoginUseCase>(),
       logoutUseCase: getIt<LogoutUseCase>(),
       refreshTokenUseCase: getIt<RefreshTokenUseCase>(),
-      checkUserNameAvailabilityUseCase: getIt<CheckUserNameAvailabilityUseCase>(),
       sessionManager: getIt<SessionManager>(),
     ),
   );

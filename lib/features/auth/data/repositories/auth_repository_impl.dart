@@ -173,33 +173,6 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, bool>> checkUserNameAvailability(
-    String userName,
-  ) async {
-    try {
-      // Check locally first
-      final isLocallyAvailable = await localDataSource.isUserNameAvailable(
-        userName,
-      );
-      if (!isLocallyAvailable) {
-        return const Right(false);
-      }
-
-      // Check remotely
-      final response = await remoteDataSource.checkUserNameAvailability(
-        userName,
-      );
-      final isAvailable = response['available'] as bool? ?? false;
-
-      return Right(isAvailable);
-    } on NetworkException catch (e) {
-      return Left(NetworkFailure(e.message));
-    } catch (e) {
-      return Left(ServerFailure('Failed to check username availability'));
-    }
-  }
-
-  @override
   Future<bool> isLoggedIn() async {
     try {
       final token = await localDataSource.getAccessToken();

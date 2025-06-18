@@ -37,15 +37,6 @@ class AuthTokenValidationRequested extends AuthEvent {
   const AuthTokenValidationRequested();
 }
 
-class AuthUserNameAvailabilityRequested extends AuthEvent {
-  final String userName;
-
-  const AuthUserNameAvailabilityRequested(this.userName);
-
-  @override
-  List<Object> get props => [userName];
-}
-
 class AuthSessionStatusChanged extends AuthEvent {
   final SessionState sessionState;
 
