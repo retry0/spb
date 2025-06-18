@@ -81,16 +81,22 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         // Get user data from token
         final result = await refreshTokenUseCase();
         
-        result.fold(
-          (failure) => emit(const AuthUnauthenticated()),
+        await result.fold(
+          (failure) async {
+            emit(const AuthUnauthenticated());
+          },
           (isValid) async {
             if (isValid) {
               // Get current user
               final userResult = await loginUseCase.repository.getCurrentUser();
               
-              userResult.fold(
-                (failure) => emit(const AuthUnauthenticated()),
-                (user) => emit(AuthAuthenticated(user: user)),
+              await userResult.fold(
+                (failure) async {
+                  emit(const AuthUnauthenticated());
+                },
+                (user) async {
+                  emit(AuthAuthenticated(user: user));
+                },
               );
             } else {
               emit(const AuthUnauthenticated());
@@ -109,8 +115,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(const AuthLoading());
     final result = await loginUseCase(event.userName, event.password);
 
-    result.fold(
-      (failure) => emit(AuthError(failure.message)),
+    await result.fold(
+      (failure) async {
+        emit(AuthError(failure.message));
+      },
       (tokens) async {
         // Update session after successful login
         await sessionManager.updateLastActivity();
@@ -118,9 +126,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         // Get user from token
         final userResult = await loginUseCase.repository.getCurrentUser();
         
-        userResult.fold(
-          (failure) => emit(AuthError(failure.message)),
-          (user) => emit(AuthAuthenticated(user: user)),
+        await userResult.fold(
+          (failure) async {
+            emit(AuthError(failure.message));
+          },
+          (user) async {
+            emit(AuthAuthenticated(user: user));
+          },
         );
       },
     );
@@ -133,9 +145,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     // Clear session data
     await sessionManager.clearSession();
 
-    result.fold(
-      (failure) => emit(AuthError(failure.message)),
-      (_) => emit(const AuthUnauthenticated()),
+    await result.fold(
+      (failure) async {
+        emit(AuthError(failure.message));
+      },
+      (_) async {
+        emit(const AuthUnauthenticated());
+      },
     );
   }
 
@@ -144,12 +160,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     final result = await refreshTokenUseCase();
-    result.fold((failure) => emit(const AuthUnauthenticated()), (isValid) {
-      if (!isValid) {
+    await result.fold(
+      (failure) async {
         emit(const AuthUnauthenticated());
+      }, 
+      (isValid) async {
+        if (!isValid) {
+          emit(const AuthUnauthenticated());
+        }
+        // If valid, keep current state
       }
-      // If valid, keep current state
-    });
+    );
   }
 
   Future<void> _onAuthUserNameAvailabilityRequested(
@@ -157,14 +178,18 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     final result = await checkUserNameAvailabilityUseCase(event.userName);
-    result.fold(
-      (failure) => emit(AuthUserNameCheckError(failure.message)),
-      (isAvailable) => emit(
-        AuthUserNameCheckResult(
-          userName: event.userName,
-          isAvailable: isAvailable,
-        ),
-      ),
+    await result.fold(
+      (failure) async {
+        emit(AuthUserNameCheckError(failure.message));
+      },
+      (isAvailable) async {
+        emit(
+          AuthUserNameCheckResult(
+            userName: event.userName,
+            isAvailable: isAvailable,
+          ),
+        );
+      },
     );
   }
 

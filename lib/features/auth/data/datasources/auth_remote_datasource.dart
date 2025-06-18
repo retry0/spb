@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import '../../../../core/config/api_endpoints.dart';
-import '../models/user_model.dart';
 import '../models/auth_tokens_model.dart';
 
 abstract class AuthRemoteDataSource {

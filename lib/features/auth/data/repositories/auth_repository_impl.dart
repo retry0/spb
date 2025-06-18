@@ -158,8 +158,8 @@ class AuthRepositoryImpl implements AuthRepository {
   ) async {
     try {
       await remoteDataSource.changePassword({
-        'current_password': currentPassword,
-        'new_password': newPassword,
+        'currentPassword': currentPassword,
+        'newPassword': newPassword,
       });
 
       return const Right(null);
