@@ -1,10 +1,6 @@
-import 'package:json_annotation/json_annotation.dart';
 import 'package:equatable/equatable.dart';
 
-part 'api_error_response.g.dart';
-
 /// Professional REST API error response model following industry best practices
-@JsonSerializable()
 class ApiErrorResponse extends Equatable {
   /// HTTP status code
   final int statusCode;
@@ -16,16 +12,16 @@ class ApiErrorResponse extends Equatable {
   final String message;
   
   /// Detailed technical description for developers
-  final String details;
+  final String? details;
   
   /// Suggested actions to resolve the issue
-  final List<String> suggestedActions;
+  final List<String>? suggestedActions;
   
   /// ISO 8601 timestamp when the error occurred
-  final String timestamp;
+  final String? timestamp;
   
   /// Unique request identifier for tracking and debugging
-  final String requestId;
+  final String? requestId;
   
   /// Additional context or metadata about the error
   final Map<String, dynamic>? context;
@@ -37,26 +33,78 @@ class ApiErrorResponse extends Equatable {
   final String? documentationUrl;
   
   /// Whether this error can be retried
-  final bool retryable;
+  final bool? retryable;
 
   const ApiErrorResponse({
     required this.statusCode,
     required this.errorCode,
     required this.message,
-    required this.details,
-    required this.suggestedActions,
-    required this.timestamp,
-    required this.requestId,
+    this.details,
+    this.suggestedActions,
+    this.timestamp,
+    this.requestId,
     this.context,
     this.fieldErrors,
     this.documentationUrl,
-    this.retryable = false,
+    this.retryable,
   });
 
-  factory ApiErrorResponse.fromJson(Map<String, dynamic> json) => 
-      _$ApiErrorResponseFromJson(json);
-  
-  Map<String, dynamic> toJson() => _$ApiErrorResponseToJson(this);
+  factory ApiErrorResponse.fromJson(Map<String, dynamic> json) {
+    return ApiErrorResponse(
+      statusCode: json['statusCode'] ?? 0,
+      errorCode: json['errorCode'] ?? '',
+      message: json['message'] ?? '',
+      details: json['details'],
+      suggestedActions: json['suggestedActions'] != null 
+          ? List<String>.from(json['suggestedActions']) 
+          : null,
+      timestamp: json['timestamp'],
+      requestId: json['requestId'],
+      context: json['context'] as Map<String, dynamic>?,
+      fieldErrors: json['fieldErrors'] != null 
+          ? _parseFieldErrors(json['fieldErrors']) 
+          : null,
+      documentationUrl: json['documentationUrl'],
+      retryable: json['retryable'],
+    );
+  }
+
+  static Map<String, List<String>>? _parseFieldErrors(dynamic fieldErrors) {
+    if (fieldErrors == null) return null;
+    
+    try {
+      final result = <String, List<String>>{};
+      final map = fieldErrors as Map<String, dynamic>;
+      
+      map.forEach((key, value) {
+        if (value is List) {
+          result[key] = List<String>.from(value.map((e) => e.toString()));
+        } else if (value is String) {
+          result[key] = [value];
+        }
+      });
+      
+      return result;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'statusCode': statusCode,
+      'errorCode': errorCode,
+      'message': message,
+      'details': details,
+      'suggestedActions': suggestedActions,
+      'timestamp': timestamp,
+      'requestId': requestId,
+      'context': context,
+      'fieldErrors': fieldErrors,
+      'documentationUrl': documentationUrl,
+      'retryable': retryable,
+    };
+  }
 
   @override
   List<Object?> get props => [
@@ -78,14 +126,14 @@ class ApiErrorResponse extends Equatable {
     final buffer = StringBuffer();
     buffer.writeln('Error: $message');
     
-    if (suggestedActions.isNotEmpty) {
+    if (suggestedActions != null && suggestedActions!.isNotEmpty) {
       buffer.writeln('\nWhat you can do:');
-      for (int i = 0; i < suggestedActions.length; i++) {
-        buffer.writeln('${i + 1}. ${suggestedActions[i]}');
+      for (int i = 0; i < suggestedActions!.length; i++) {
+        buffer.writeln('${i + 1}. ${suggestedActions![i]}');
       }
     }
     
-    if (retryable) {
+    if (retryable == true) {
       buffer.writeln('\nThis operation can be retried.');
     }
     
@@ -96,9 +144,9 @@ class ApiErrorResponse extends Equatable {
   String get technicalSummary {
     final buffer = StringBuffer();
     buffer.writeln('HTTP $statusCode - $errorCode');
-    buffer.writeln('Request ID: $requestId');
-    buffer.writeln('Timestamp: $timestamp');
-    buffer.writeln('Details: $details');
+    if (requestId != null) buffer.writeln('Request ID: $requestId');
+    if (timestamp != null) buffer.writeln('Timestamp: $timestamp');
+    if (details != null) buffer.writeln('Details: $details');
     
     if (context != null && context!.isNotEmpty) {
       buffer.writeln('Context: $context');

@@ -159,23 +159,23 @@ class _NetworkErrorWidgetState extends State<NetworkErrorWidget> {
             ),
             const SizedBox(height: 12),
             
-            if (apiError.details.isNotEmpty) ...[
+            if (apiError.details != null && apiError.details!.isNotEmpty) ...[
               Text(
                 'Details:',
                 style: const TextStyle(fontWeight: FontWeight.w500),
               ),
               const SizedBox(height: 4),
-              Text(apiError.details),
+              Text(apiError.details!),
               const SizedBox(height: 12),
             ],
             
-            if (apiError.suggestedActions.isNotEmpty) ...[
+            if (apiError.suggestedActions != null && apiError.suggestedActions!.isNotEmpty) ...[
               Text(
                 'Suggested Actions:',
                 style: const TextStyle(fontWeight: FontWeight.w500),
               ),
               const SizedBox(height: 8),
-              ...apiError.suggestedActions.map((action) => Padding(
+              ...apiError.suggestedActions!.map((action) => Padding(
                 padding: const EdgeInsets.only(bottom: 4),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -212,7 +212,7 @@ class _NetworkErrorWidgetState extends State<NetworkErrorWidget> {
               )),
             ],
             
-            if (apiError.requestId.isNotEmpty) ...[
+            if (apiError.requestId != null && apiError.requestId!.isNotEmpty) ...[
               const SizedBox(height: 12),
               Container(
                 padding: const EdgeInsets.all(8),
