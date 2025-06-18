@@ -1,12 +1,12 @@
 import 'package:dartz/dartz.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
-import 'package:spb/core/utils/logger.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/utils/jwt_decoder_util.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/utils/jwt_token_manager.dart';
+import '../../../../core/utils/session_manager.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/entities/auth_tokens.dart';
 import '../../domain/repositories/auth_repository.dart';
@@ -32,38 +32,27 @@ class AuthRepositoryImpl implements AuthRepository {
         'userName': userName,
         'password': password,
       });
-      AppLogger.info('tttttttt: ${tokens}');
-      await localDataSource.saveToken(tokens.accessToken);
+
+      await localDataSource.saveToken(tokens.token);
 
       // Extract and store user data from JWT token
       final tokenManager = getIt<JwtTokenManager>();
-      final userData = await tokenManager.storeAndExtractToken(
-        tokens.accessToken,
-      );
+      final userData = await tokenManager.storeAndExtractToken(tokens.token);
 
       if (userData != null) {
         // Log extracted user data (excluding sensitive fields)
-        final userInfo = JwtDecoderUtil.extractUserInfo(tokens.accessToken);
-        AppLogger.info('userInfo: ${tokens.accessToken}');
-
+        final userInfo = JwtDecoderUtil.extractUserInfo(tokens.token);
         if (userInfo != null) {
           print('User logged in: ${userInfo['userName'] ?? userInfo['sub']}');
           print(
-            'Available claims: ${JwtDecoderUtil.getAvailableClaims(tokens.accessToken)}',
+            'Available claims: ${JwtDecoderUtil.getAvailableClaims(tokens.token)}',
           );
         }
       }
 
-      //   return Right(tokens);
-      // } on AuthException catch (e) {
-      //   return Left(AuthFailure(e.message));
-      // } on NetworkException catch (e) {
-      //   return Left(NetworkFailure(e.message));
-      // } on ServerException catch (e) {
-      //   return Left(ServerFailure(e.message));
-      // } catch (e) {
-      //   return Left(ServerFailure('An unexpected error occurred during login'));
-      // }
+      // Update session after successful login
+      final sessionManager = getIt<SessionManager>();
+      await sessionManager.updateLastActivity();
 
       return Right(tokens);
     } on AuthException catch (e) {
@@ -73,7 +62,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message));
     } catch (e) {
-      return const Left(ServerFailure('test'));
+      return Left(ServerFailure('An unexpected error occurred during login'));
     }
   }
 
@@ -87,12 +76,20 @@ class AuthRepositoryImpl implements AuthRepository {
       final tokenManager = getIt<JwtTokenManager>();
       await tokenManager.clearStoredToken();
 
+      // Clear session data
+      final sessionManager = getIt<SessionManager>();
+      await sessionManager.clearSession();
+
       return const Right(null);
     } catch (e) {
       // Even if remote logout fails, clear local tokens
       await localDataSource.clearToken();
       final tokenManager = getIt<JwtTokenManager>();
       await tokenManager.clearStoredToken();
+
+      final sessionManager = getIt<SessionManager>();
+      await sessionManager.clearSession();
+
       return const Right(null);
     }
   }
@@ -103,12 +100,12 @@ class AuthRepositoryImpl implements AuthRepository {
       // Get user data from JWT token
       final tokenManager = getIt<JwtTokenManager>();
       final userData = await tokenManager.getCurrentUserData();
-      AppLogger.info('Token Manager User Data: $userData');
+
       if (userData != null) {
         // Create User entity from JWT data
         final user = User(
           id: userData['sub'] ?? userData['id'] ?? '',
-          userName: userData['UserName'] ?? '',
+          userName: userData['userName'] ?? '',
           Nama: userData['Nama'] ?? '',
         );
 
@@ -116,10 +113,10 @@ class AuthRepositoryImpl implements AuthRepository {
       }
 
       // If no valid token or user data, try to get from local database
-      final accessToken = await localDataSource.getAccessToken();
-      if (accessToken != null) {
+      final token = await localDataSource.getAccessToken();
+      if (token != null) {
         // Try to extract user ID from token
-        final decodedToken = JwtDecoderUtil.decodeAndFilterToken(accessToken);
+        final decodedToken = JwtDecoderUtil.decodeAndFilterToken(token);
         if (decodedToken != null) {
           final userId = decodedToken['sub'] ?? decodedToken['id'];
           if (userId != null) {
@@ -133,13 +130,8 @@ class AuthRepositoryImpl implements AuthRepository {
         }
       }
 
-      // Fallback to remote API call only if necessary
-      final user = await remoteDataSource.getCurrentUser();
-
-      // Save user to local database for future use
-      await localDataSource.saveUser(user);
-
-      return Right(user);
+      // No need to make a remote API call - we should have the data from the token
+      return Left(AuthFailure('No valid user data found'));
     } on AuthException catch (e) {
       return Left(AuthFailure(e.message));
     } on NetworkException catch (e) {
@@ -156,8 +148,8 @@ class AuthRepositoryImpl implements AuthRepository {
   ) async {
     try {
       await remoteDataSource.changePassword({
-        'current_password': currentPassword,
-        'new_password': newPassword,
+        'currentPassword': currentPassword,
+        'newPassword': newPassword,
       });
 
       return const Right(null);
@@ -170,14 +162,41 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
+  // @override
+  // Future<Either<Failure, bool>> checkUserNameAvailability(
+  //   String userName,
+  // ) async {
+  //   try {
+  //     // Check locally first
+  //     final isLocallyAvailable = await localDataSource.isUserNameAvailable(
+  //       userName,
+  //     );
+  //     if (!isLocallyAvailable) {
+  //       return const Right(false);
+  //     }
+
+  //     // Check remotely
+  //     final response = await remoteDataSource.checkUserNameAvailability(
+  //       userName,
+  //     );
+  //     final isAvailable = response['available'] as bool? ?? false;
+
+  //     return Right(isAvailable);
+  //   } on NetworkException catch (e) {
+  //     return Left(NetworkFailure(e.message));
+  //   } catch (e) {
+  //     return Left(ServerFailure('Failed to check username availability'));
+  //   }
+  // }
+
   @override
   Future<bool> isLoggedIn() async {
     try {
-      final accessToken = await localDataSource.getAccessToken();
+      final token = await localDataSource.getAccessToken();
 
-      if (accessToken == null) return false;
+      if (token == null) return false;
 
-      return !JwtDecoder.isExpired(accessToken);
+      return !JwtDecoder.isExpired(token);
     } catch (e) {
       return false;
     }

@@ -22,18 +22,32 @@ class AuthLoginRequested extends AuthEvent {
 }
 
 class AuthLogoutRequested extends AuthEvent {
-  const AuthLogoutRequested();
+  final String? reason;
+
+  const AuthLogoutRequested({this.reason});
+
+  @override
+  List<Object> get props => reason != null ? [reason!] : [];
 }
 
 class AuthTokenValidationRequested extends AuthEvent {
   const AuthTokenValidationRequested();
 }
 
-// class AuthUserNameAvailabilityRequested extends AuthEvent {
-//   final String userName;
+class AuthUserNameAvailabilityRequested extends AuthEvent {
+  final String userName;
 
-//   const AuthUserNameAvailabilityRequested(this.userName);
+  const AuthUserNameAvailabilityRequested(this.userName);
 
-//   @override
-//   List<Object> get props => [userName];
-// }
+  @override
+  List<Object> get props => [userName];
+}
+
+class AuthSessionStatusChanged extends AuthEvent {
+  final SessionState sessionState;
+
+  const AuthSessionStatusChanged(this.sessionState);
+
+  @override
+  List<Object> get props => [sessionState];
+}

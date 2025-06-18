@@ -5,7 +5,7 @@ import '../../../../core/utils/logger.dart';
 import '../models/user_model.dart';
 
 abstract class AuthLocalDataSource {
-  Future<void> saveToken(String accessToken);
+  Future<void> saveToken(String token);
   Future<String?> getAccessToken();
   Future<void> clearToken();
   Future<void> saveUser(UserModel user);
@@ -23,8 +23,8 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   AuthLocalDataSourceImpl(this._secureStorage, this._dbHelper);
 
   @override
-  Future<void> saveToken(String accessToken) async {
-    await _secureStorage.write(StorageKeys.accessToken, accessToken);
+  Future<void> saveToken(String token) async {
+    await _secureStorage.write(StorageKeys.accessToken, token);
   }
 
   @override

@@ -58,3 +58,17 @@ class AuthUserNameCheckError extends AuthState {
   @override
   List<Object> get props => [message];
 }
+
+class AuthSessionExpiring extends AuthState {
+  final User user;
+  final int minutesRemaining;
+
+  const AuthSessionExpiring({required this.user, this.minutesRemaining = 5});
+
+  @override
+  List<Object> get props => [user, minutesRemaining];
+}
+
+class AuthSessionTimeout extends AuthState {
+  const AuthSessionTimeout();
+}

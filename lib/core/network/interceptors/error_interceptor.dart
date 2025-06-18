@@ -293,15 +293,14 @@ class NetworkErrorHandler {
   }) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder:
-            (context) => NetworkErrorWidget(
-              errorMessage: message,
-              apiErrorResponse: apiErrorResponse,
-              onRetry: () {
-                Navigator.of(context).pop();
-                onRetry?.call();
-              },
-            ),
+        builder: (context) => NetworkErrorWidget(
+          errorMessage: message,
+          apiErrorResponse: apiErrorResponse,
+          onRetry: () {
+            Navigator.of(context).pop();
+            onRetry?.call();
+          },
+        ),
       ),
     );
   }

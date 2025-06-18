@@ -8,7 +8,6 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 abstract class AuthRemoteDataSource {
   Future<AuthTokensModel> loginWithUserName(Map<String, dynamic> credentials);
   Future<void> logout();
-  Future<UserModel> getCurrentUser();
   Future<void> changePassword(Map<String, dynamic> data);
 }
 
@@ -37,12 +36,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<void> logout() async {
     await _dio.post(ApiEndpoints.logout);
-  }
-
-  @override
-  Future<UserModel> getCurrentUser() async {
-    final response = await _dio.get(ApiEndpoints.profile);
-    return UserModel.fromJson(response.data);
   }
 
   @override
