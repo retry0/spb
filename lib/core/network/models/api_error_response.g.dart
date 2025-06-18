@@ -12,9 +12,10 @@ ApiErrorResponse _$ApiErrorResponseFromJson(Map<String, dynamic> json) =>
       errorCode: json['errorCode'] as String,
       message: json['message'] as String,
       details: json['details'] as String,
-      suggestedActions: (json['suggestedActions'] as List<dynamic>)
-          .map((e) => e as String)
-          .toList(),
+      suggestedActions:
+          (json['suggestedActions'] as List<dynamic>)
+              .map((e) => e as String)
+              .toList(),
       timestamp: json['timestamp'] as String,
       requestId: json['requestId'] as String,
       context: json['context'] as Map<String, dynamic>?,

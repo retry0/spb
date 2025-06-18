@@ -73,7 +73,6 @@ class _NetworkErrorWidgetState extends State<NetworkErrorWidget> {
 
               // Action buttons
               _buildActionButtons(),
-
               const SizedBox(height: 24),
 
               // Diagnostics results
@@ -135,7 +134,6 @@ class _NetworkErrorWidgetState extends State<NetworkErrorWidget> {
 
   Widget _buildApiErrorDetails() {
     final apiError = widget.apiErrorResponse!;
-
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -155,7 +153,6 @@ class _NetworkErrorWidgetState extends State<NetworkErrorWidget> {
               ],
             ),
             const SizedBox(height: 12),
-
             if (apiError.details.isNotEmpty) ...[
               Text(
                 'Details:',
@@ -165,7 +162,6 @@ class _NetworkErrorWidgetState extends State<NetworkErrorWidget> {
               Text(apiError.details),
               const SizedBox(height: 12),
             ],
-
             if (apiError.suggestedActions.isNotEmpty) ...[
               Text(
                 'Suggested Actions:',
@@ -300,7 +296,6 @@ class _NetworkErrorWidgetState extends State<NetworkErrorWidget> {
 
   Widget _buildActionButtons() {
     final canRetry = widget.apiErrorResponse?.retryable ?? true;
-
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
