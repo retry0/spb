@@ -14,8 +14,4 @@ AuthTokensModel _$AuthTokensModelFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$AuthTokensModelToJson(AuthTokensModel instance) =>
     <String, dynamic>{
       'accessToken': instance.accessToken,
-<<<<<<< HEAD
     };
-=======
-    };
->>>>>>> 7e673b2efd350e2bf1e589bf03e92b671c9f9d55

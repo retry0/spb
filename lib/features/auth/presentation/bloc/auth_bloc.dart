@@ -25,7 +25,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthCheckRequested>(_onAuthCheckRequested);
     on<AuthLoginRequested>(_onAuthLoginRequested);
     on<AuthLogoutRequested>(_onAuthLogoutRequested);
-    on<AuthTokenRefreshRequested>(_onAuthTokenRefreshRequested);
     on<AuthUserNameAvailabilityRequested>(_onAuthUserNameAvailabilityRequested);
   }
 
@@ -74,19 +73,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       (failure) => emit(AuthError(failure.message)),
       (_) => emit(const AuthUnauthenticated()),
     );
-  }
-
-  Future _onAuthTokenRefreshRequested(
-    AuthTokenRefreshRequested event,
-    Emitter emit,
-  ) async {
-    //final result = await refreshTokenUseCase();
-    result.fold((failure) => emit(const AuthUnauthenticated()), (tokens) {
-      // Keep current state but with refreshed tokens
-      if (state is AuthAuthenticated) {
-        emit(state);
-      }
-    });
   }
 
   Future _onAuthUserNameAvailabilityRequested(
