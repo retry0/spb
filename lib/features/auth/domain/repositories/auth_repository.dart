@@ -10,7 +10,6 @@ abstract class AuthRepository {
     String password,
   );
   Future<Either<Failure, void>> logout();
-  // Future<Either<Failure, AuthTokens>> refreshToken();
   Future<Either<Failure, User>> getCurrentUser();
   Future<Either<Failure, void>> changePassword(
     String currentPassword,

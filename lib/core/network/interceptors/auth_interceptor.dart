@@ -20,12 +20,9 @@ class AuthInterceptor extends Interceptor {
       if (token != null && !JwtDecoder.isExpired(token)) {
         options.headers['Authorization'] = 'Bearer $token';
       } else if (token != null) {
-        // Token is expired, try to refresh
-        // await _refreshToken();
-        // final newToken = await _secureStorage.read(StorageKeys.accessToken);
-        // if (newToken != null) {
-        //   options.headers['Authorization'] = 'Bearer $newToken';
-        // }
+        // Token is expired, clear it
+        await _secureStorage.delete(StorageKeys.accessToken);
+        AppLogger.warning('Expired JWT token cleared');
       }
     } catch (e) {
       AppLogger.error('Auth interceptor error: $e');
@@ -38,23 +35,11 @@ class AuthInterceptor extends Interceptor {
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     if (err.response?.statusCode == 401) {
       try {
-        // await _refreshToken();
-        final newToken = await _secureStorage.read(StorageKeys.accessToken);
-
-        if (newToken != null) {
-          // Retry the original request with new token
-          final requestOptions = err.requestOptions;
-          requestOptions.headers['Authorization'] = 'Bearer $newToken';
-
-          final dio = Dio();
-          final response = await dio.fetch(requestOptions);
-          handler.resolve(response);
-          return;
-        }
-      } catch (e) {
-        AppLogger.error('Token refresh failed: $e');
-        // Clear tokens and redirect to login
+        // Clear expired or invalid token
         await _secureStorage.delete(StorageKeys.accessToken);
+        AppLogger.warning('Invalid token cleared due to 401 response');
+      } catch (e) {
+        AppLogger.error('Failed to clear invalid token: $e');
       }
     }
 

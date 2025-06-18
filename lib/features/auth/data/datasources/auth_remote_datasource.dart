@@ -6,7 +6,6 @@ import '../models/auth_tokens_model.dart';
 abstract class AuthRemoteDataSource {
   Future<AuthTokensModel> loginWithUserName(Map<String, dynamic> credentials);
   Future<void> logout();
-  Future<AuthTokensModel> refreshToken(Map<String, dynamic> refreshData);
   Future<UserModel> getCurrentUser();
   Future<void> changePassword(Map<String, dynamic> data);
   Future<Map<String, dynamic>> checkUserNameAvailability(String userName);
@@ -28,12 +27,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<void> logout() async {
     await _dio.post(ApiEndpoints.logout);
-  }
-
-  @override
-  Future<AuthTokensModel> refreshToken(Map<String, dynamic> refreshData) async {
-    final response = await _dio.post(ApiEndpoints.refresh, data: refreshData);
-    return AuthTokensModel.fromJson(response.data);
   }
 
   @override
