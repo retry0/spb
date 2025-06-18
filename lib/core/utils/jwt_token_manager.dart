@@ -48,6 +48,18 @@ class JwtTokenManager {
   /// Retrieves stored token and extracts current user data
   Future<Map<String, dynamic>?> getCurrentUserData() async {
     try {
+      // First try to get from cached user info for better performance
+      final userInfoJson = await _secureStorage.read(key: 'user_info');
+      if (userInfoJson != null) {
+        try {
+          return jsonDecode(userInfoJson) as Map<String, dynamic>;
+        } catch (e) {
+          // If parsing fails, continue to token-based extraction
+          AppLogger.warning('Failed to parse cached user info, falling back to token extraction');
+        }
+      }
+      
+      // Get from token if cache not available
       final token = await _secureStorage.read(key: StorageKeys.accessToken);
       if (token == null) {
         AppLogger.debug('No stored JWT token found');
@@ -61,7 +73,17 @@ class JwtTokenManager {
         return null;
       }
 
-      return JwtDecoderUtil.extractUserInfo(token);
+      // Extract user info and update cache
+      final userInfo = JwtDecoderUtil.extractUserInfo(token);
+      if (userInfo != null) {
+        // Update cached user info
+        await _secureStorage.write(
+          key: 'user_info', 
+          value: jsonEncode(userInfo),
+        );
+      }
+      
+      return userInfo;
     } catch (e) {
       AppLogger.error('Failed to get current user data: $e');
       return null;
@@ -164,6 +186,26 @@ class JwtTokenManager {
       AppLogger.error('Failed to get cached user info: $e');
       // Fallback to extracting from token
       return getCurrentUserData();
+    }
+  }
+  
+  /// Checks if token is about to expire (within 5 minutes)
+  Future<bool> isTokenExpiringSoon() async {
+    try {
+      final token = await _secureStorage.read(key: StorageKeys.accessToken);
+      if (token == null) return true; // No token means we need to login
+      
+      final metadata = JwtDecoderUtil.getTokenMetadata(token);
+      if (metadata == null) return true;
+      
+      final timeUntilExpiration = metadata['timeUntilExpiration'] as int?;
+      if (timeUntilExpiration == null) return true;
+      
+      // Check if token expires in less than 5 minutes (300 seconds)
+      return timeUntilExpiration < 300;
+    } catch (e) {
+      AppLogger.error('Failed to check token expiration: $e');
+      return true; // Assume token is expiring to be safe
     }
   }
 }

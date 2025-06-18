@@ -86,7 +86,7 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, User>> getCurrentUser() async {
     try {
-      // Try to get user data from JWT token first
+      // Get user data from JWT token
       final tokenManager = getIt<JwtTokenManager>();
       final userData = await tokenManager.getCurrentUserData();
 
@@ -111,8 +111,28 @@ class AuthRepositoryImpl implements AuthRepository {
         return Right(user);
       }
 
-      // Fallback to remote API call
+      // If no valid token or user data, try to get from local database
+      final accessToken = await localDataSource.getAccessToken();
+      if (accessToken != null) {
+        // Try to extract user ID from token
+        final decodedToken = JwtDecoderUtil.decodeAndFilterToken(accessToken);
+        if (decodedToken != null) {
+          final userId = decodedToken['sub'] ?? decodedToken['id'];
+          if (userId != null) {
+            final localUser = await localDataSource.getUserById(userId.toString());
+            if (localUser != null) {
+              return Right(localUser);
+            }
+          }
+        }
+      }
+
+      // Fallback to remote API call only if necessary
       final user = await remoteDataSource.getCurrentUser();
+      
+      // Save user to local database for future use
+      await localDataSource.saveUser(user);
+      
       return Right(user);
     } on AuthException catch (e) {
       return Left(AuthFailure(e.message));
