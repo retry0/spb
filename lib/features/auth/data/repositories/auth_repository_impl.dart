@@ -19,15 +19,18 @@ class AuthRepositoryImpl implements AuthRepository {
   });
 
   @override
-  Future<Either<Failure, AuthTokens>> loginWithUserName(String userName, String password) async {
+  Future<Either<Failure, AuthTokens>> loginWithUserName(
+    String userName,
+    String password,
+  ) async {
     try {
       final tokens = await remoteDataSource.loginWithUserName({
         'userName': userName,
         'password': password,
       });
-      
-      await localDataSource.saveTokens(tokens.accessToken, tokens.refreshToken);
-      
+
+      await localDataSource.saveTokens(tokens.accessToken);
+
       return Right(tokens);
     } on AuthException catch (e) {
       return Left(AuthFailure(e.message));
@@ -54,30 +57,6 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, AuthTokens>> refreshToken() async {
-    try {
-      final refreshToken = await localDataSource.getRefreshToken();
-      
-      if (refreshToken == null) {
-        return const Left(AuthFailure('No refresh token available'));
-      }
-
-      final tokens = await remoteDataSource.refreshToken({
-        'refresh_token': refreshToken,
-      });
-      
-      await localDataSource.saveTokens(tokens.accessToken, tokens.refreshToken);
-      
-      return Right(tokens);
-    } on AuthException catch (e) {
-      await localDataSource.clearTokens();
-      return Left(AuthFailure(e.message));
-    } catch (e) {
-      return Left(ServerFailure('Failed to refresh token'));
-    }
-  }
-
-  @override
   Future<Either<Failure, User>> getCurrentUser() async {
     try {
       final user = await remoteDataSource.getCurrentUser();
@@ -92,13 +71,16 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, void>> changePassword(String currentPassword, String newPassword) async {
+  Future<Either<Failure, void>> changePassword(
+    String currentPassword,
+    String newPassword,
+  ) async {
     try {
       await remoteDataSource.changePassword({
         'current_password': currentPassword,
         'new_password': newPassword,
       });
-      
+
       return const Right(null);
     } on AuthException catch (e) {
       return Left(AuthFailure(e.message));
@@ -110,18 +92,24 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, bool>> checkUserNameAvailability(String userName) async {
+  Future<Either<Failure, bool>> checkUserNameAvailability(
+    String userName,
+  ) async {
     try {
       // Check locally first
-      final isLocallyAvailable = await localDataSource.isUserNameAvailable(userName);
+      final isLocallyAvailable = await localDataSource.isUserNameAvailable(
+        userName,
+      );
       if (!isLocallyAvailable) {
         return const Right(false);
       }
-      
+
       // Check remotely
-      final response = await remoteDataSource.checkUserNameAvailability(userName);
+      final response = await remoteDataSource.checkUserNameAvailability(
+        userName,
+      );
       final isAvailable = response['available'] as bool? ?? false;
-      
+
       return Right(isAvailable);
     } on NetworkException catch (e) {
       return Left(NetworkFailure(e.message));
@@ -134,9 +122,9 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<bool> isLoggedIn() async {
     try {
       final accessToken = await localDataSource.getAccessToken();
-      
+
       if (accessToken == null) return false;
-      
+
       return !JwtDecoder.isExpired(accessToken);
     } catch (e) {
       return false;

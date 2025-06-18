@@ -1,7 +1,9 @@
+import 'package:flutter/services.dart';
+
 class UserNameValidator {
   static const int minLength = 3;
   static const int maxLength = 20;
-  
+
   // Allowed characters: letters, numbers, underscore, hyphen
   static final RegExp _validPattern = RegExp(r'^[a-zA-Z0-9_-]+$');
 

@@ -80,7 +80,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthTokenRefreshRequested event,
     Emitter emit,
   ) async {
-    final result = await refreshTokenUseCase();
+    //final result = await refreshTokenUseCase();
     result.fold((failure) => emit(const AuthUnauthenticated()), (tokens) {
       // Keep current state but with refreshed tokens
       if (state is AuthAuthenticated) {

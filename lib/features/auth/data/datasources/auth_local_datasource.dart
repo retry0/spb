@@ -5,9 +5,8 @@ import '../../../../core/utils/logger.dart';
 import '../models/user_model.dart';
 
 abstract class AuthLocalDataSource {
-  Future<void> saveTokens(String accessToken, String refreshToken);
+  Future<void> saveTokens(String accessToken);
   Future<String?> getAccessToken();
-  Future<String?> getRefreshToken();
   Future<void> clearTokens();
   Future<void> saveUser(UserModel user);
   Future<UserModel?> getUser(String userName);
@@ -24,9 +23,8 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   AuthLocalDataSourceImpl(this._secureStorage, this._dbHelper);
 
   @override
-  Future<void> saveTokens(String accessToken, String refreshToken) async {
+  Future<void> saveTokens(String accessToken) async {
     await _secureStorage.write(StorageKeys.accessToken, accessToken);
-    await _secureStorage.write(StorageKeys.refreshToken, refreshToken);
   }
 
   @override
@@ -35,14 +33,8 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   }
 
   @override
-  Future<String?> getRefreshToken() async {
-    return await _secureStorage.read(StorageKeys.refreshToken);
-  }
-
-  @override
   Future<void> clearTokens() async {
     await _secureStorage.delete(StorageKeys.accessToken);
-    await _secureStorage.delete(StorageKeys.refreshToken);
   }
 
   @override
@@ -64,7 +56,7 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
         whereArgs: [userName],
         limit: 1,
       );
-      
+
       if (results.isNotEmpty) {
         return UserModel.fromDatabase(results.first);
       }
@@ -84,7 +76,7 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
         whereArgs: [userId],
         limit: 1,
       );
-      
+
       if (results.isNotEmpty) {
         return UserModel.fromDatabase(results.first);
       }
@@ -113,7 +105,11 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   @override
   Future<void> deleteUser(String userName) async {
     try {
-      await _dbHelper.delete('users', where: 'username = ?', whereArgs: [userName]);
+      await _dbHelper.delete(
+        'users',
+        where: 'username = ?',
+        whereArgs: [userName],
+      );
     } catch (e) {
       AppLogger.error('Failed to delete user', e);
       rethrow;
@@ -130,7 +126,7 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
         whereArgs: [userName],
         limit: 1,
       );
-      
+
       return results.isEmpty;
     } catch (e) {
       AppLogger.error('Failed to check userName availability', e);

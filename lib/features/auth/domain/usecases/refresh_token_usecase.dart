@@ -9,7 +9,7 @@ class RefreshTokenUseCase {
 
   RefreshTokenUseCase(this.repository);
 
-  Future<Either<Failure, AuthTokens>> call() async {
-    return await repository.refreshToken();
-  }
+  // Future<Either<Failure, AuthTokens>> call() async {
+  //   return await repository.refreshToken();
+  // }
 }

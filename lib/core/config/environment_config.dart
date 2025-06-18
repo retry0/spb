@@ -67,7 +67,7 @@ class EnvironmentConfig {
         _baseUrl = _getRequiredEnvVar(
           env,
           'DEV_API_BASE_URL',
-          'http://10.0.2.2:8000/api',
+          'http://10.88.115.131:8097/v1',
         );
         _enableLogging = _getBoolEnvVar(env, 'DEV_ENABLE_LOGGING', true);
         _timeout = Duration(

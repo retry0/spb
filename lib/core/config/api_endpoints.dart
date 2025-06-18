@@ -5,7 +5,7 @@ class ApiEndpoints {
   static String get baseUrl => EnvironmentConfig.baseUrl;
 
   // Auth endpoints
-  static String get login => '$baseUrl/auth/login';
+  static String get login => '$baseUrl/Account/LoginUser';
   static String get logout => '$baseUrl/auth/logout';
   static String get refresh => '$baseUrl/auth/refresh';
   static String get register => '$baseUrl/auth/register';
@@ -32,13 +32,12 @@ class ApiEndpoints {
   /// Get endpoint with query parameters
   static String withQuery(String endpoint, Map<String, String> params) {
     if (params.isEmpty) return endpoint;
-    
+
     final uri = Uri.parse(endpoint);
-    final newUri = uri.replace(queryParameters: {
-      ...uri.queryParameters,
-      ...params,
-    });
-    
+    final newUri = uri.replace(
+      queryParameters: {...uri.queryParameters, ...params},
+    );
+
     return newUri.toString();
   }
 

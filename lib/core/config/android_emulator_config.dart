@@ -19,11 +19,11 @@ class AndroidEmulatorConfig {
       final brand = Platform.environment['ro.product.brand'] ?? '';
       final model = Platform.environment['ro.product.model'] ?? '';
       final device = Platform.environment['ro.product.device'] ?? '';
-      
+
       return brand.toLowerCase().contains('generic') ||
-             model.toLowerCase().contains('emulator') ||
-             device.toLowerCase().contains('emulator') ||
-             model.toLowerCase().contains('sdk');
+          model.toLowerCase().contains('emulator') ||
+          device.toLowerCase().contains('emulator') ||
+          model.toLowerCase().contains('sdk');
     } catch (e) {
       // If we can't determine, assume it's a real device
       return false;
@@ -37,7 +37,7 @@ class AndroidEmulatorConfig {
     }
 
     final uri = Uri.parse(url);
-    
+
     // Convert localhost and 127.0.0.1 to 10.0.2.2 for Android emulator
     if (uri.host == 'localhost' || uri.host == '127.0.0.1') {
       final newUri = uri.replace(host: '10.0.2.2');
@@ -50,19 +50,19 @@ class AndroidEmulatorConfig {
   /// Get the appropriate base URL for the current platform
   static String getBaseUrl() {
     String baseUrl = EnvironmentConfig.baseUrl;
-    
+
     // Convert for Android emulator if needed
     if (isAndroidEmulator) {
       baseUrl = convertUrlForEmulator(baseUrl);
     }
-    
+
     return baseUrl;
   }
 
   /// Get emulator-specific development configuration
   static Map<String, String> getEmulatorDevConfig() {
     return {
-      'DEV_API_BASE_URL': 'http://10.0.2.2:8000/api',
+      'DEV_API_BASE_URL': 'http://10.88.115.131:8097/v1',
       'DEV_ENABLE_LOGGING': 'true',
       'DEV_TIMEOUT_SECONDS': '45', // Slightly longer for emulator
     };
@@ -71,28 +71,28 @@ class AndroidEmulatorConfig {
   /// Validate emulator configuration
   static List<String> validateEmulatorConfig() {
     final warnings = <String>[];
-    
+
     if (isAndroidEmulator) {
       final baseUrl = EnvironmentConfig.baseUrl;
       final uri = Uri.parse(baseUrl);
-      
+
       // Warn if using localhost in emulator
       if (uri.host == 'localhost' || uri.host == '127.0.0.1') {
         warnings.add(
           'Android emulator detected with localhost URL. '
-          'Consider using 10.0.2.2 instead of ${uri.host} for better connectivity.'
+          'Consider using 10.0.2.2 instead of ${uri.host} for better connectivity.',
         );
       }
-      
+
       // Check if port is commonly used for development
       if (uri.port == 8000 || uri.port == 3000 || uri.port == 8080) {
         warnings.add(
           'Using common development port ${uri.port}. '
-          'Ensure your backend server is running on this port.'
+          'Ensure your backend server is running on this port.',
         );
       }
     }
-    
+
     return warnings;
   }
 
