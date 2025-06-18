@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class QuickActions extends StatelessWidget {
   const QuickActions({super.key});
@@ -33,11 +34,12 @@ class QuickActions extends StatelessWidget {
                 },
               ),
               _QuickActionItem(
-                icon: Icons.search,
-                label: 'Search',
+                icon: Icons.qr_code_2,
+                label: 'QR Code',
                 color: Theme.of(context).colorScheme.secondary,
                 onTap: () {
-                  // Navigate to search
+                  // Navigate to QR code generator
+                  context.push('/qr-generator');
                 },
               ),
               _QuickActionItem(

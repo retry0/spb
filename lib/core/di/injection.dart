@@ -3,6 +3,7 @@ import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:dio/dio.dart';
+import 'package:uuid/uuid.dart';
 
 import '../network/dio_client.dart';
 import '../storage/secure_storage.dart';
@@ -29,6 +30,16 @@ import '../../features/profile/data/repositories/profile_repository_impl.dart';
 import '../../features/profile/domain/repositories/profile_repository.dart';
 import '../../features/profile/domain/usecases/change_password_usecase.dart';
 import '../../features/profile/presentation/bloc/profile_bloc.dart';
+import '../../features/qr_code/data/datasources/qr_code_remote_datasource.dart';
+import '../../features/qr_code/data/datasources/qr_code_local_datasource.dart';
+import '../../features/qr_code/data/repositories/qr_code_repository_impl.dart';
+import '../../features/qr_code/domain/repositories/qr_code_repository.dart';
+import '../../features/qr_code/domain/usecases/generate_qr_code_usecase.dart';
+import '../../features/qr_code/domain/usecases/save_qr_code_usecase.dart';
+import '../../features/qr_code/domain/usecases/get_saved_qr_codes_usecase.dart';
+import '../../features/qr_code/domain/usecases/export_qr_code_usecase.dart';
+import '../../features/qr_code/domain/usecases/share_qr_code_usecase.dart';
+import '../../features/qr_code/presentation/bloc/qr_code_bloc.dart';
 
 final getIt = GetIt.instance;
 
@@ -84,6 +95,9 @@ Future<void> configureDependencies() async {
   
   getIt.registerLazySingleton<Dio>(() => DioClient.createDio());
   
+  // Utilities
+  getIt.registerLazySingleton<Uuid>(() => const Uuid());
+  
   // Data sources
   getIt.registerLazySingleton<AuthRemoteDataSource>(
     () => AuthRemoteDataSourceImpl(getIt<Dio>()),
@@ -102,6 +116,17 @@ Future<void> configureDependencies() async {
   
   getIt.registerLazySingleton<ProfileRemoteDataSource>(
     () => ProfileRemoteDataSourceImpl(getIt<Dio>()),
+  );
+  
+  getIt.registerLazySingleton<QrCodeRemoteDataSource>(
+    () => QrCodeRemoteDataSourceImpl(dio: getIt<Dio>()),
+  );
+  
+  getIt.registerLazySingleton<QrCodeLocalDataSource>(
+    () => QrCodeLocalDataSourceImpl(
+      dbHelper: getIt<DatabaseHelper>(),
+      prefs: getIt<SharedPreferences>(),
+    ),
   );
   
   // Repositories
@@ -125,11 +150,26 @@ Future<void> configureDependencies() async {
     ),
   );
   
+  getIt.registerLazySingleton<QrCodeRepository>(
+    () => QrCodeRepositoryImpl(
+      remoteDataSource: getIt<QrCodeRemoteDataSource>(),
+      localDataSource: getIt<QrCodeLocalDataSource>(),
+      uuid: getIt<Uuid>(),
+    ),
+  );
+  
   // Use cases
   getIt.registerLazySingleton(() => LoginUseCase(getIt<AuthRepository>()));
   getIt.registerLazySingleton(() => LogoutUseCase(getIt<AuthRepository>()));
   getIt.registerLazySingleton(() => RefreshTokenUseCase(getIt<AuthRepository>()));
   getIt.registerLazySingleton(() => ChangePasswordUseCase(getIt<ProfileRepository>()));
+  
+  // QR Code use cases
+  getIt.registerLazySingleton(() => GenerateQrCodeUseCase(getIt<QrCodeRepository>()));
+  getIt.registerLazySingleton(() => SaveQrCodeUseCase(getIt<QrCodeRepository>()));
+  getIt.registerLazySingleton(() => GetSavedQrCodesUseCase(getIt<QrCodeRepository>()));
+  getIt.registerLazySingleton(() => ExportQrCodeUseCase(getIt<QrCodeRepository>()));
+  getIt.registerLazySingleton(() => ShareQrCodeUseCase(getIt<QrCodeRepository>()));
   
   // BLoCs
   getIt.registerFactory(
@@ -147,6 +187,16 @@ Future<void> configureDependencies() async {
     () => ProfileBloc(
       profileRepository: getIt<ProfileRepository>(),
       changePasswordUseCase: getIt<ChangePasswordUseCase>(),
+    ),
+  );
+  
+  getIt.registerFactory(
+    () => QrCodeBloc(
+      generateQrCodeUseCase: getIt<GenerateQrCodeUseCase>(),
+      saveQrCodeUseCase: getIt<SaveQrCodeUseCase>(),
+      getSavedQrCodesUseCase: getIt<GetSavedQrCodesUseCase>(),
+      exportQrCodeUseCase: getIt<ExportQrCodeUseCase>(),
+      shareQrCodeUseCase: getIt<ShareQrCodeUseCase>(),
     ),
   );
 }

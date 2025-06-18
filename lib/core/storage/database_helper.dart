@@ -28,7 +28,7 @@ class DatabaseHelper {
       
       return await openDatabase(
         path,
-        version: 2,
+        version: 3, // Increased version for QR code table
         onCreate: _onCreate,
         onUpgrade: _onUpgrade,
         onConfigure: _onConfigure,
@@ -117,6 +117,22 @@ class DatabaseHelper {
           last_error TEXT
         )
       ''');
+      
+      // QR codes table
+      await db.execute('''
+        CREATE TABLE qr_codes (
+          id TEXT PRIMARY KEY,
+          driver TEXT NOT NULL,
+          kd_vendor TEXT NOT NULL,
+          content TEXT NOT NULL,
+          size INTEGER NOT NULL,
+          error_correction_level TEXT NOT NULL,
+          foreground_color TEXT NOT NULL,
+          background_color TEXT NOT NULL,
+          created_at INTEGER NOT NULL,
+          updated_at INTEGER NOT NULL
+        )
+      ''');
 
       // Create indexes for better performance
       await db.execute('CREATE INDEX idx_settings_key ON settings (key)');
@@ -128,6 +144,8 @@ class DatabaseHelper {
       await db.execute('CREATE INDEX idx_activity_logs_username ON activity_logs (username)');
       await db.execute('CREATE INDEX idx_activity_logs_created ON activity_logs (created_at)');
       await db.execute('CREATE INDEX idx_sync_queue_operation ON sync_queue (operation)');
+      await db.execute('CREATE INDEX idx_qr_codes_driver ON qr_codes (driver)');
+      await db.execute('CREATE INDEX idx_qr_codes_created_at ON qr_codes (created_at)');
 
       AppLogger.info('Database tables created successfully');
     } catch (e) {
@@ -142,6 +160,11 @@ class DatabaseHelper {
     if (oldVersion < 2) {
       // Migration to add username support
       await _migrateToUsernameAuth(db);
+    }
+    
+    if (oldVersion < 3) {
+      // Migration to add QR codes table
+      await _migrateToAddQrCodesTable(db);
     }
   }
 
@@ -180,6 +203,46 @@ class DatabaseHelper {
       AppLogger.info('Username authentication migration completed');
     } catch (e) {
       AppLogger.error('Failed to migrate to username authentication', e);
+      rethrow;
+    }
+  }
+  
+  Future<void> _migrateToAddQrCodesTable(Database db) async {
+    try {
+      AppLogger.info('Migrating to add QR codes table...');
+      
+      // Check if qr_codes table already exists
+      final tables = await db.rawQuery(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='qr_codes'"
+      );
+      
+      if (tables.isEmpty) {
+        // Create QR codes table
+        await db.execute('''
+          CREATE TABLE qr_codes (
+            id TEXT PRIMARY KEY,
+            driver TEXT NOT NULL,
+            kd_vendor TEXT NOT NULL,
+            content TEXT NOT NULL,
+            size INTEGER NOT NULL,
+            error_correction_level TEXT NOT NULL,
+            foreground_color TEXT NOT NULL,
+            background_color TEXT NOT NULL,
+            created_at INTEGER NOT NULL,
+            updated_at INTEGER NOT NULL
+          )
+        ''');
+        
+        // Create indexes
+        await db.execute('CREATE INDEX idx_qr_codes_driver ON qr_codes (driver)');
+        await db.execute('CREATE INDEX idx_qr_codes_created_at ON qr_codes (created_at)');
+        
+        AppLogger.info('QR codes table created successfully');
+      } else {
+        AppLogger.info('QR codes table already exists, skipping migration');
+      }
+    } catch (e) {
+      AppLogger.error('Failed to migrate to add QR codes table', e);
       rethrow;
     }
   }
@@ -275,6 +338,7 @@ class DatabaseHelper {
       await txn.delete('data_entries');
       await txn.delete('activity_logs');
       await txn.delete('sync_queue');
+      await txn.delete('qr_codes');
     });
     AppLogger.info('All database data cleared');
   }

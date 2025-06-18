@@ -8,6 +8,7 @@ import '../../features/main/presentation/pages/main_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/data/presentation/pages/data_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
+import '../../features/qr_code/presentation/pages/qr_code_generator_page.dart';
 import '../../ui/screens/splash_screen.dart';
 
 class AppRouter {
@@ -61,6 +62,11 @@ class AppRouter {
             path: '/profile',
             name: 'profile',
             builder: (context, state) => const ProfilePage(),
+          ),
+          GoRoute(
+            path: '/qr-generator',
+            name: 'qrGenerator',
+            builder: (context, state) => const QrCodeGeneratorPage(),
           ),
         ],
       ),
