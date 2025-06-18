@@ -12,6 +12,7 @@ import 'core/config/environment_config.dart';
 import 'core/config/environment_validator.dart';
 import 'core/config/android_emulator_config.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
+import 'features/auth/presentation/widgets/session_timeout_dialog.dart';
 import 'features/theme/presentation/bloc/theme_bloc.dart';
 
 void main() async {
@@ -101,23 +102,25 @@ class MyApp extends StatelessWidget {
       ],
       child: BlocBuilder<ThemeBloc, ThemeState>(
         builder: (context, themeState) {
-          return MaterialApp.router(
-            title: 'SPB Secure App',
-            debugShowCheckedModeBanner: false,
-            theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
-            themeMode: themeState.themeMode,
-            routerConfig: AppRouter.router,
-            builder: (context, child) {
-              return MediaQuery(
-                data: MediaQuery.of(context).copyWith(
-                  textScaler: TextScaler.linear(
-                    MediaQuery.of(context).textScaler.scale(1.0).clamp(0.8, 1.4),
+          return SessionTimeoutManager(
+            child: MaterialApp.router(
+              title: 'SPB Secure App',
+              debugShowCheckedModeBanner: false,
+              theme: AppTheme.lightTheme,
+              darkTheme: AppTheme.darkTheme,
+              themeMode: themeState.themeMode,
+              routerConfig: AppRouter.router,
+              builder: (context, child) {
+                return MediaQuery(
+                  data: MediaQuery.of(context).copyWith(
+                    textScaler: TextScaler.linear(
+                      MediaQuery.of(context).textScaler.scale(1.0).clamp(0.8, 1.4),
+                    ),
                   ),
-                ),
-                child: child!,
-              );
-            },
+                  child: child!,
+                );
+              },
+            ),
           );
         },
       ),

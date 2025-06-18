@@ -10,6 +10,7 @@ import '../storage/local_storage.dart';
 import '../storage/database_helper.dart';
 import '../storage/data_repository.dart';
 import '../utils/jwt_token_manager.dart';
+import '../utils/session_manager.dart';
 import '../../features/auth/data/datasources/auth_remote_datasource.dart';
 import '../../features/auth/data/datasources/auth_local_datasource.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
@@ -67,6 +68,16 @@ Future<void> configureDependencies() async {
     () => JwtTokenManager(getIt<FlutterSecureStorage>()),
   );
   
+  // Session Manager
+  getIt.registerLazySingleton<SessionManager>(
+    () => SessionManager(
+      getIt<SharedPreferences>(),
+      getIt<FlutterSecureStorage>(),
+      getIt<JwtTokenManager>(),
+      sessionTimeoutMinutes: 30,
+    ),
+  );
+  
   getIt.registerLazySingleton<Dio>(() => DioClient.createDio());
   
   // Data sources
@@ -112,6 +123,7 @@ Future<void> configureDependencies() async {
       logoutUseCase: getIt<LogoutUseCase>(),
       refreshTokenUseCase: getIt<RefreshTokenUseCase>(),
       checkUserNameAvailabilityUseCase: getIt<CheckUserNameAvailabilityUseCase>(),
+      sessionManager: getIt<SessionManager>(),
     ),
   );
   

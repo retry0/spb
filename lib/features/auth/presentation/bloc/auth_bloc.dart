@@ -6,6 +6,7 @@ import '../../domain/usecases/login_usecase.dart';
 import '../../domain/usecases/logout_usecase.dart';
 import '../../domain/usecases/refresh_token_usecase.dart';
 import '../../domain/usecases/check_username_availability_usecase.dart';
+import '../../../../core/utils/session_manager.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
@@ -15,60 +16,122 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LogoutUseCase logoutUseCase;
   final RefreshTokenUseCase refreshTokenUseCase;
   final CheckUserNameAvailabilityUseCase checkUserNameAvailabilityUseCase;
+  final SessionManager sessionManager;
 
   AuthBloc({
     required this.loginUseCase,
     required this.logoutUseCase,
     required this.refreshTokenUseCase,
     required this.checkUserNameAvailabilityUseCase,
+    required this.sessionManager,
   }) : super(const AuthInitial()) {
     on<AuthCheckRequested>(_onAuthCheckRequested);
     on<AuthLoginRequested>(_onAuthLoginRequested);
     on<AuthLogoutRequested>(_onAuthLogoutRequested);
     on<AuthTokenValidationRequested>(_onAuthTokenValidationRequested);
     on<AuthUserNameAvailabilityRequested>(_onAuthUserNameAvailabilityRequested);
+    on<AuthSessionStatusChanged>(_onAuthSessionStatusChanged);
+    
+    // Listen to session state changes
+    sessionManager.sessionState.addListener(_onSessionStateChanged);
+    
+    // Initialize session
+    sessionManager.initializeSession();
   }
 
-  Future _onAuthCheckRequested(AuthCheckRequested event, Emitter emit) async {
+  void _onSessionStateChanged() {
+    final sessionState = sessionManager.sessionState.value;
+    
+    switch (sessionState) {
+      case SessionState.active:
+        // Session is active, no action needed
+        break;
+      case SessionState.expiring:
+        // Token is expiring soon, trigger token validation
+        add(const AuthTokenValidationRequested());
+        break;
+      case SessionState.timeout:
+        // Session timed out, log out user
+        add(const AuthLogoutRequested(reason: 'Session timed out due to inactivity'));
+        break;
+      case SessionState.inactive:
+        // No active session, ensure user is logged out
+        if (state is AuthAuthenticated) {
+          add(const AuthLogoutRequested(reason: 'Session became inactive'));
+        }
+        break;
+      case SessionState.error:
+        // Error with session, log out user
+        add(const AuthLogoutRequested(reason: 'Session error occurred'));
+        break;
+      case SessionState.unknown:
+        // Initial state, no action needed
+        break;
+    }
+  }
+
+  Future<void> _onAuthCheckRequested(AuthCheckRequested event, Emitter<AuthState> emit) async {
     emit(const AuthLoading());
-    await Future.delayed(const Duration(seconds: 1)); // Simulate check
-
-    emit(const AuthUnauthenticated());
+    
+    try {
+      // Check if session is active
+      final isActive = await sessionManager.isSessionActive();
+      
+      if (isActive) {
+        // Get user data from token
+        final result = await refreshTokenUseCase();
+        
+        result.fold(
+          (failure) => emit(const AuthUnauthenticated()),
+          (isValid) async {
+            if (isValid) {
+              // Get current user
+              final userResult = await loginUseCase.repository.getCurrentUser();
+              
+              userResult.fold(
+                (failure) => emit(const AuthUnauthenticated()),
+                (user) => emit(AuthAuthenticated(user: user)),
+              );
+            } else {
+              emit(const AuthUnauthenticated());
+            }
+          },
+        );
+      } else {
+        emit(const AuthUnauthenticated());
+      }
+    } catch (e) {
+      emit(AuthError('Failed to check authentication status: $e'));
+    }
   }
 
-  Future _onAuthLoginRequested(AuthLoginRequested event, Emitter emit) async {
+  Future<void> _onAuthLoginRequested(AuthLoginRequested event, Emitter<AuthState> emit) async {
     emit(const AuthLoading());
     final result = await loginUseCase(event.userName, event.password);
 
     result.fold(
       (failure) => emit(AuthError(failure.message)),
-      (tokens) => emit(
-        AuthAuthenticated(
-          user: User(
-            id: '1',
-            userName: event.userName,
-            email: '${event.userName}@example.com',
-            name: event.userName
-                .replaceAll('_', ' ')
-                .split(' ')
-                .map(
-                  (word) =>
-                      word.isNotEmpty
-                          ? word[0].toUpperCase() + word.substring(1)
-                          : word,
-                )
-                .join(' '),
-            createdAt: DateTime.now().subtract(const Duration(days: 30)),
-            updatedAt: DateTime.now(),
-          ),
-        ),
-      ),
+      (tokens) async {
+        // Update session after successful login
+        await sessionManager.updateLastActivity();
+        
+        // Get user from token
+        final userResult = await loginUseCase.repository.getCurrentUser();
+        
+        userResult.fold(
+          (failure) => emit(AuthError(failure.message)),
+          (user) => emit(AuthAuthenticated(user: user)),
+        );
+      },
     );
   }
 
-  Future _onAuthLogoutRequested(AuthLogoutRequested event, Emitter emit) async {
+  Future<void> _onAuthLogoutRequested(AuthLogoutRequested event, Emitter<AuthState> emit) async {
     emit(const AuthLoading());
     final result = await logoutUseCase();
+
+    // Clear session data
+    await sessionManager.clearSession();
 
     result.fold(
       (failure) => emit(AuthError(failure.message)),
@@ -76,9 +139,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
   }
 
-  Future _onAuthTokenValidationRequested(
+  Future<void> _onAuthTokenValidationRequested(
     AuthTokenValidationRequested event,
-    Emitter emit,
+    Emitter<AuthState> emit,
   ) async {
     final result = await refreshTokenUseCase();
     result.fold((failure) => emit(const AuthUnauthenticated()), (isValid) {
@@ -89,9 +152,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     });
   }
 
-  Future _onAuthUserNameAvailabilityRequested(
+  Future<void> _onAuthUserNameAvailabilityRequested(
     AuthUserNameAvailabilityRequested event,
-    Emitter emit,
+    Emitter<AuthState> emit,
   ) async {
     final result = await checkUserNameAvailabilityUseCase(event.userName);
     result.fold(
@@ -103,5 +166,45 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         ),
       ),
     );
+  }
+
+  Future<void> _onAuthSessionStatusChanged(
+    AuthSessionStatusChanged event,
+    Emitter<AuthState> emit,
+  ) async {
+    switch (event.sessionState) {
+      case SessionState.active:
+        // No state change needed if already authenticated
+        if (state is! AuthAuthenticated) {
+          add(const AuthCheckRequested());
+        }
+        break;
+      case SessionState.expiring:
+        // Notify user that session is expiring soon
+        if (state is AuthAuthenticated) {
+          emit(AuthSessionExpiring(user: (state as AuthAuthenticated).user));
+        }
+        break;
+      case SessionState.timeout:
+        // Session timed out, log out user
+        emit(const AuthSessionTimeout());
+        add(const AuthLogoutRequested(reason: 'Session timeout'));
+        break;
+      case SessionState.inactive:
+      case SessionState.error:
+        // Log out user
+        emit(const AuthUnauthenticated());
+        break;
+      case SessionState.unknown:
+        // No action needed
+        break;
+    }
+  }
+
+  @override
+  Future<void> close() {
+    // Clean up listeners
+    sessionManager.sessionState.removeListener(_onSessionStateChanged);
+    return super.close();
   }
 }
