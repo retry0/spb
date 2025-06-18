@@ -11,16 +11,49 @@ class LoginForm extends StatefulWidget {
   State<LoginForm> createState() => _LoginFormState();
 }
 
-class _LoginFormState extends State<LoginForm> {
+class _LoginFormState extends State<LoginForm> with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _userNameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+  
+  @override
+  void initState() {
+    super.initState();
+    
+    // Initialize animations
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+    
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeIn,
+      ),
+    );
+    
+    _slideAnimation = Tween<Offset>(begin: const Offset(0, 0.2), end: Offset.zero).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeOutCubic,
+      ),
+    );
+    
+    // Start animation
+    _animationController.forward();
+  }
 
   @override
   void dispose() {
     _userNameController.dispose();
     _passwordController.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -37,68 +70,129 @@ class _LoginFormState extends State<LoginForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          TextFormField(
-            controller: _userNameController,
-            keyboardType: TextInputType.text,
-            textInputAction: TextInputAction.next,
-            inputFormatters: UserNameValidator.getInputFormatters(),
-            decoration: const InputDecoration(
-              labelText: 'Username',
-              prefixIcon: Icon(Icons.person_outlined),
-              helperText: '3-20 characters, letters, numbers, underscore, hyphen',
-            ),
-            validator: UserNameValidator.validateFormat,
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
-            controller: _passwordController,
-            obscureText: _obscurePassword,
-            textInputAction: TextInputAction.done,
-            onFieldSubmitted: (_) => _onSubmit(),
-            decoration: InputDecoration(
-              labelText: 'Password',
-              prefixIcon: const Icon(Icons.lock_outlined),
-              suffixIcon: IconButton(
-                icon: Icon(
-                  _obscurePassword ? Icons.visibility : Icons.visibility_off,
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: SlideTransition(
+        position: _slideAnimation,
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Username field
+              TextFormField(
+                controller: _userNameController,
+                keyboardType: TextInputType.text,
+                textInputAction: TextInputAction.next,
+                inputFormatters: UserNameValidator.getInputFormatters(),
+                decoration: InputDecoration(
+                  labelText: 'Username',
+                  prefixIcon: const Icon(Icons.person_outlined),
+                  helperText: '3-20 characters, letters, numbers, underscore, hyphen',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
-                onPressed: () {
-                  setState(() {
-                    _obscurePassword = !_obscurePassword;
-                  });
+                validator: UserNameValidator.validateFormat,
+              ),
+              const SizedBox(height: 20),
+              
+              // Password field
+              TextFormField(
+                controller: _passwordController,
+                obscureText: _obscurePassword,
+                textInputAction: TextInputAction.done,
+                onFieldSubmitted: (_) => _onSubmit(),
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  prefixIcon: const Icon(Icons.lock_outlined),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      });
+                    },
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your password';
+                  }
+                  return null;
                 },
               ),
-            ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter your password';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 32),
-          BlocBuilder<AuthBloc, AuthState>(
-            builder: (context, state) {
-              final isLoading = state is AuthLoading;
               
-              return ElevatedButton(
-                onPressed: isLoading ? null : _onSubmit,
-                child: isLoading
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Text('Sign In'),
-              );
-            },
+              // Forgot password link
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () {
+                    // Navigate to forgot password
+                  },
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                  ),
+                  child: const Text('Forgot Password?'),
+                ),
+              ),
+              
+              const SizedBox(height: 24),
+              
+              // Login button
+              BlocBuilder<AuthBloc, AuthState>(
+                builder: (context, state) {
+                  final isLoading = state is AuthLoading;
+                  
+                  return ElevatedButton(
+                    onPressed: isLoading ? null : _onSubmit,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 2,
+                    ),
+                    child: isLoading
+                        ? const SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text(
+                            'Sign In',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                  );
+                },
+              ),
+              
+              const SizedBox(height: 16),
+              
+              // Biometric login option
+              Center(
+                child: TextButton.icon(
+                  onPressed: () {
+                    // Implement biometric login
+                  },
+                  icon: const Icon(Icons.fingerprint),
+                  label: const Text('Sign in with Biometrics'),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

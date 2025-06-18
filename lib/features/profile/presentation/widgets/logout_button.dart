@@ -24,6 +24,9 @@ class LogoutButton extends StatelessWidget {
         return AlertDialog(
           title: const Text('Logout Confirmation'),
           content: const Text('Are you sure you want to log out?'),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           actions: [
             TextButton(
               onPressed: () {
@@ -42,9 +45,14 @@ class LogoutButton extends StatelessWidget {
                   
                   // Show success message
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('You have been successfully logged out'),
+                    SnackBar(
+                      content: const Text('You have been successfully logged out'),
                       backgroundColor: Colors.green,
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      margin: const EdgeInsets.all(16),
                     ),
                   );
                 } else if (state is AuthError) {
@@ -55,6 +63,11 @@ class LogoutButton extends StatelessWidget {
                     SnackBar(
                       content: Text('Logout error: ${state.message}'),
                       backgroundColor: Colors.orange,
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      margin: const EdgeInsets.all(16),
                     ),
                   );
                   
@@ -70,6 +83,10 @@ class LogoutButton extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).colorScheme.error,
                     foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                   child: isLoading
                       ? const SizedBox(
