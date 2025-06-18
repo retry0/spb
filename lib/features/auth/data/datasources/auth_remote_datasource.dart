@@ -21,7 +21,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     Map<String, dynamic> credentials,
   ) async {
     final response = await _dio.post(ApiEndpoints.login, data: credentials);
-    return AuthTokensModel.toJson(response.data);
+    return AuthTokensModel.fromJson(response.data);
   }
 
   @override
@@ -32,7 +32,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<UserModel> getCurrentUser() async {
     final response = await _dio.get(ApiEndpoints.profile);
-    return UserModel.toJson(response.data);
+    return UserModel.fromJson(response.data);
   }
 
   @override

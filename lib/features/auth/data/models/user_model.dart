@@ -16,8 +16,8 @@ class UserModel extends User {
     required super.updatedAt,
   });
 
-  factory UserModel.toJson(Map<String, dynamic> json) =>
-      _$UserModeltoJson(json);
+  factory UserModel.fromJson(Map<String, dynamic> json) => 
+      _$UserModelFromJson(json);
 
   Map<String, dynamic> toJson() => _$UserModelToJson(this);
 
