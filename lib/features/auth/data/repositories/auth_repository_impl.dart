@@ -32,21 +32,21 @@ class AuthRepositoryImpl implements AuthRepository {
         'password': password,
       });
 
-      await localDataSource.saveToken(tokens.accessToken);
+      await localDataSource.saveToken(tokens.token);
 
       // Extract and store user data from JWT token
       final tokenManager = getIt<JwtTokenManager>();
       final userData = await tokenManager.storeAndExtractToken(
-        tokens.accessToken,
+        tokens.token,
       );
 
       if (userData != null) {
         // Log extracted user data (excluding sensitive fields)
-        final userInfo = JwtDecoderUtil.extractUserInfo(tokens.accessToken);
+        final userInfo = JwtDecoderUtil.extractUserInfo(tokens.token);
         if (userInfo != null) {
           print('User logged in: ${userInfo['userName'] ?? userInfo['sub']}');
           print(
-            'Available claims: ${JwtDecoderUtil.getAvailableClaims(tokens.accessToken)}',
+            'Available claims: ${JwtDecoderUtil.getAvailableClaims(tokens.token)}',
           );
         }
       }
@@ -112,10 +112,10 @@ class AuthRepositoryImpl implements AuthRepository {
       }
 
       // If no valid token or user data, try to get from local database
-      final accessToken = await localDataSource.getAccessToken();
-      if (accessToken != null) {
+      final token = await localDataSource.getAccessToken();
+      if (token != null) {
         // Try to extract user ID from token
-        final decodedToken = JwtDecoderUtil.decodeAndFilterToken(accessToken);
+        final decodedToken = JwtDecoderUtil.decodeAndFilterToken(token);
         if (decodedToken != null) {
           final userId = decodedToken['sub'] ?? decodedToken['id'];
           if (userId != null) {
@@ -194,11 +194,11 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<bool> isLoggedIn() async {
     try {
-      final accessToken = await localDataSource.getAccessToken();
+      final token = await localDataSource.getAccessToken();
 
-      if (accessToken == null) return false;
+      if (token == null) return false;
 
-      return !JwtDecoder.isExpired(accessToken);
+      return !JwtDecoder.isExpired(token);
     } catch (e) {
       return false;
     }
