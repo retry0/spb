@@ -147,9 +147,28 @@ class JwtTokenManager {
     try {
       await _secureStorage.delete(key: StorageKeys.accessToken);
       await _secureStorage.delete(key: 'user_info');
+      await _secureStorage.delete(key: StorageKeys.userCredentials);
+      await _secureStorage.delete(key: StorageKeys.sessionData);
+      
+      // Clear any other token-related data
+      final keys = await _secureStorage.readAll();
+      for (final key in keys.keys) {
+        if (key.startsWith('token_') || key.startsWith('auth_')) {
+          await _secureStorage.delete(key: key);
+        }
+      }
+      
       AppLogger.info('JWT token and user data cleared');
     } catch (e) {
       AppLogger.error('Failed to clear stored token: $e');
+      
+      // Try alternative approach if the first method fails
+      try {
+        await _secureStorage.deleteAll();
+        AppLogger.info('Deleted all secure storage as fallback');
+      } catch (e2) {
+        AppLogger.error('Failed to delete all secure storage: $e2');
+      }
     }
   }
 

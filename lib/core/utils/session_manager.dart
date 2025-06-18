@@ -103,13 +103,39 @@ class SessionManager {
   // Clear session data
   Future<void> clearSession() async {
     try {
+      // Clear token
       await _secureStorage.delete(StorageKeys.accessToken);
+      
+      // Clear session data
       await _secureStorage.delete(StorageKeys.sessionData);
+      await _secureStorage.delete(StorageKeys.userCredentials);
+      
+      // Clear activity timestamp
       await _prefs.remove(StorageKeys.lastActivity);
       
+      // Clear any other session-related data
+      final allPrefs = _prefs.getKeys();
+      for (final key in allPrefs) {
+        if (key.startsWith('session_') || key.startsWith('auth_')) {
+          await _prefs.remove(key);
+        }
+      }
+      
+      // Update session state
       sessionState.value = SessionState.inactive;
+      
+      AppLogger.info('Session cleared successfully');
     } catch (e) {
       AppLogger.error('Failed to clear session: $e');
+      
+      // Try alternative approach if the first method fails
+      try {
+        await _tokenManager.clearStoredToken();
+        AppLogger.info('Used token manager to clear session as fallback');
+        sessionState.value = SessionState.inactive;
+      } catch (e2) {
+        AppLogger.error('Failed to clear session via token manager: $e2');
+      }
     }
   }
 

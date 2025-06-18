@@ -136,7 +136,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _onAuthLogoutRequested(AuthLogoutRequested event, Emitter<AuthState> emit) async {
     emit(const AuthLoading());
-    final result = await logoutUseCase();
+    
+    // Log the reason if provided
+    if (event.reason != null) {
+      print('Logout requested: ${event.reason}');
+    }
+    
+    // Use the logout use case with retry mechanism
+    final result = await logoutUseCase(maxRetries: 3);
 
     // Clear session data
     await sessionManager.clearSession();

@@ -8,7 +8,23 @@ class LogoutUseCase {
 
   LogoutUseCase(this.repository);
 
-  Future<Either<Failure, void>> call() async {
-    return await repository.logout();
+  Future<Either<Failure, void>> call({int maxRetries = 3}) async {
+    int attempts = 0;
+    Either<Failure, void> result;
+
+    do {
+      attempts++;
+      result = await repository.logout();
+      
+      // If successful or reached max retries, break the loop
+      if (result.isRight() || attempts >= maxRetries) {
+        break;
+      }
+      
+      // Wait before retrying (exponential backoff)
+      await Future.delayed(Duration(milliseconds: 500 * attempts));
+    } while (attempts < maxRetries);
+
+    return result;
   }
 }

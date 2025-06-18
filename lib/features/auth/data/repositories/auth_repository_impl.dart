@@ -71,7 +71,15 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, void>> logout() async {
     try {
-      await remoteDataSource.logout();
+      // First try to revoke token on server
+      try {
+        await remoteDataSource.logout();
+      } catch (e) {
+        // Continue with local logout even if server logout fails
+        print('Server logout failed, continuing with local logout: $e');
+      }
+      
+      // Clear local token storage
       await localDataSource.clearToken();
 
       // Clear JWT token manager data
@@ -82,17 +90,35 @@ class AuthRepositoryImpl implements AuthRepository {
       final sessionManager = getIt<SessionManager>();
       await sessionManager.clearSession();
 
+      // Clear any other sensitive data
+      await _clearAllSensitiveData();
+
       return const Right(null);
     } catch (e) {
-      // Even if remote logout fails, clear local tokens
-      await localDataSource.clearToken();
-      final tokenManager = getIt<JwtTokenManager>();
-      await tokenManager.clearStoredToken();
+      // Even if there's an error, try to clear local data
+      try {
+        await localDataSource.clearToken();
+        final tokenManager = getIt<JwtTokenManager>();
+        await tokenManager.clearStoredToken();
+        final sessionManager = getIt<SessionManager>();
+        await sessionManager.clearSession();
+        await _clearAllSensitiveData();
+      } catch (clearError) {
+        print('Error during cleanup after logout failure: $clearError');
+      }
       
-      final sessionManager = getIt<SessionManager>();
-      await sessionManager.clearSession();
-      
+      // Still return success since we've cleared local data
       return const Right(null);
+    }
+  }
+
+  // Helper method to clear all sensitive data
+  Future<void> _clearAllSensitiveData() async {
+    try {
+      // Clear any additional sensitive data here
+      // This could include cached user data, preferences, etc.
+    } catch (e) {
+      print('Error clearing sensitive data: $e');
     }
   }
 

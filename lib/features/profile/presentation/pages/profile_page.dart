@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
@@ -7,6 +8,7 @@ import '../bloc/profile_bloc.dart';
 import '../widgets/profile_header.dart';
 import '../widgets/profile_info_section.dart';
 import '../widgets/password_change_form.dart';
+import '../widgets/logout_button.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -25,6 +27,7 @@ class ProfilePage extends StatelessWidget {
                 context.read<ProfileBloc>().add(const ProfileLoadRequested());
               },
             ),
+            const LogoutButton(),
           ],
         ),
         body: BlocListener<ProfileBloc, ProfileState>(

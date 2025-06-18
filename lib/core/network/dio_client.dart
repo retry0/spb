@@ -6,6 +6,7 @@ import '../utils/logger.dart';
 import 'interceptors/auth_interceptor.dart';
 import 'interceptors/logging_interceptor.dart';
 import 'interceptors/error_interceptor.dart';
+import 'interceptors/csrf_interceptor.dart';
 
 class DioClient {
   static Dio createDio() {
@@ -43,6 +44,7 @@ class DioClient {
     // Add interceptors based on environment
     dio.interceptors.addAll([
       AuthInterceptor(),
+      CsrfInterceptor(), // Add CSRF protection
       ErrorInterceptor(),
       // Only add logging in development or when explicitly enabled
       if (EnvironmentConfig.isLoggingEnabled || kDebugMode) 
@@ -91,6 +93,7 @@ class DioClient {
     // Add basic interceptors
     dio.interceptors.addAll([
       ErrorInterceptor(),
+      CsrfInterceptor(), // Add CSRF protection
       if (EnvironmentConfig.isLoggingEnabled) LoggingInterceptor(),
     ]);
 
