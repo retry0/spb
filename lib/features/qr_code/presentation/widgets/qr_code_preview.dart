@@ -14,9 +14,10 @@ class QrCodePreview extends StatelessWidget {
         if (state is QrCodeGenerating) {
           return _buildLoadingState();
         } else if (state is QrCodeGenerated || state is QrCodeSaved) {
-          final qrCode = state is QrCodeGenerated
-              ? state.qrCode
-              : (state as QrCodeSaved).qrCode;
+          final qrCode =
+              state is QrCodeGenerated
+                  ? state.qrCode
+                  : (state as QrCodeSaved).qrCode;
           return _buildQrCodePreview(context, qrCode);
         } else if (state is QrCodeGenerationFailure) {
           return _buildErrorState(context, state.message);
@@ -30,9 +31,7 @@ class QrCodePreview extends StatelessWidget {
   Widget _buildEmptyState() {
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         height: 350,
         padding: const EdgeInsets.all(16),
@@ -40,11 +39,7 @@ class QrCodePreview extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.qr_code_2,
-                size: 80,
-                color: Colors.grey[400],
-              ),
+              Icon(Icons.qr_code_2, size: 80, color: Colors.grey[400]),
               const SizedBox(height: 16),
               Text(
                 'QR Code Preview',
@@ -57,9 +52,7 @@ class QrCodePreview extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 'Configure settings and generate a QR code',
-                style: TextStyle(
-                  color: Colors.grey[500],
-                ),
+                style: TextStyle(color: Colors.grey[500]),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -72,9 +65,7 @@ class QrCodePreview extends StatelessWidget {
   Widget _buildLoadingState() {
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         height: 350,
         padding: const EdgeInsets.all(16),
@@ -86,10 +77,7 @@ class QrCodePreview extends StatelessWidget {
               SizedBox(height: 24),
               Text(
                 'Generating QR Code...',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -101,9 +89,7 @@ class QrCodePreview extends StatelessWidget {
   Widget _buildErrorState(BuildContext context, String message) {
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         height: 350,
         padding: const EdgeInsets.all(16),
@@ -119,9 +105,9 @@ class QrCodePreview extends StatelessWidget {
               const SizedBox(height: 16),
               Text(
                 'Error Generating QR Code',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
@@ -148,21 +134,19 @@ class QrCodePreview extends StatelessWidget {
     // Convert hex color strings to Color objects
     final foregroundColor = _hexToColor(qrCode.foregroundColor);
     final backgroundColor = _hexToColor(qrCode.backgroundColor);
-    
+
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
             Text(
               'QR Code Preview',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 24),
             Center(
@@ -185,7 +169,9 @@ class QrCodePreview extends StatelessWidget {
                   size: 250,
                   backgroundColor: backgroundColor,
                   foregroundColor: foregroundColor,
-                  errorCorrectionLevel: _getErrorCorrectionLevel(qrCode.errorCorrectionLevel),
+                  errorCorrectionLevel: _getErrorCorrectionLevel(
+                    qrCode.errorCorrectionLevel,
+                  ),
                   gapless: true,
                   embeddedImageStyle: const QrEmbeddedImageStyle(
                     size: Size(40, 40),
@@ -225,7 +211,7 @@ class QrCodePreview extends StatelessWidget {
   }
 
   // Helper method to convert error correction level string to enum
-  QrErrorCorrectLevel _getErrorCorrectionLevel(String level) {
+  int _getErrorCorrectionLevel(String level) {
     switch (level) {
       case 'L':
         return QrErrorCorrectLevel.L;

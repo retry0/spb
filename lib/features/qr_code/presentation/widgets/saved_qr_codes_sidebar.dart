@@ -29,9 +29,7 @@ class SavedQrCodesSidebar extends StatelessWidget {
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
               border: Border(
-                bottom: BorderSide(
-                  color: Theme.of(context).dividerColor,
-                ),
+                bottom: BorderSide(color: Theme.of(context).dividerColor),
               ),
             ),
             child: Row(
@@ -62,15 +60,13 @@ class SavedQrCodesSidebar extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // Content
           Expanded(
             child: BlocBuilder<QrCodeBloc, QrCodeState>(
               builder: (context, state) {
                 if (state is QrCodeLoading) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
+                  return const Center(child: CircularProgressIndicator());
                 } else if (state is QrCodeLoaded) {
                   if (state.qrCodes.isEmpty) {
                     return _buildEmptyState(context);
@@ -79,9 +75,7 @@ class SavedQrCodesSidebar extends StatelessWidget {
                 } else if (state is QrCodeLoadFailure) {
                   return _buildErrorState(context, state.message);
                 } else {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
+                  return const Center(child: CircularProgressIndicator());
                 }
               },
             ),
@@ -98,25 +92,21 @@ class SavedQrCodesSidebar extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.qr_code_2,
-              size: 64,
-              color: Colors.grey[400],
-            ),
+            Icon(Icons.qr_code_2, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
             Text(
               'No Saved QR Codes',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
               'Generate and save QR codes to see them here',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey[600],
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
               textAlign: TextAlign.center,
             ),
           ],
@@ -140,9 +130,9 @@ class SavedQrCodesSidebar extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               'Error Loading QR Codes',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
@@ -154,7 +144,9 @@ class SavedQrCodesSidebar extends StatelessWidget {
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: () {
-                context.read<QrCodeBloc>().add(const LoadSavedQrCodesRequested());
+                context.read<QrCodeBloc>().add(
+                  const LoadSavedQrCodesRequested(),
+                );
               },
               icon: const Icon(Icons.refresh),
               label: const Text('Retry'),
@@ -187,7 +179,7 @@ class _SavedQrCodeItem extends StatelessWidget {
     // Convert hex color strings to Color objects
     final foregroundColor = _hexToColor(qrCode.foregroundColor);
     final backgroundColor = _hexToColor(qrCode.backgroundColor);
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: InkWell(
@@ -224,12 +216,14 @@ class _SavedQrCodeItem extends StatelessWidget {
                   size: 52,
                   backgroundColor: backgroundColor,
                   foregroundColor: foregroundColor,
-                  errorCorrectionLevel: _getErrorCorrectionLevel(qrCode.errorCorrectionLevel),
+                  errorCorrectionLevel: _getErrorCorrectionLevel(
+                    qrCode.errorCorrectionLevel,
+                  ),
                   gapless: true,
                 ),
               ),
               const SizedBox(width: 12),
-              
+
               // QR code details
               Expanded(
                 child: Column(
@@ -251,23 +245,20 @@ class _SavedQrCodeItem extends StatelessWidget {
                     ),
                     Text(
                       'Created: ${DateFormat('MMM d, yyyy').format(qrCode.createdAt)}',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey[600],
-                      ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
                     ),
                   ],
                 ),
               ),
-              
+
               // Actions
               IconButton(
                 icon: const Icon(Icons.share),
                 onPressed: () {
                   context.read<QrCodeBloc>().add(
-                    ShareQrCodeRequested(
-                      format: 'png',
-                      size: 800,
-                    ),
+                    ShareQrCodeRequested(format: 'png', size: 800),
                   );
                 },
                 tooltip: 'Share',
@@ -288,7 +279,7 @@ class _SavedQrCodeItem extends StatelessWidget {
   }
 
   // Helper method to convert error correction level string to enum
-  QrErrorCorrectLevel _getErrorCorrectionLevel(String level) {
+  int _getErrorCorrectionLevel(String level) {
     switch (level) {
       case 'L':
         return QrErrorCorrectLevel.L;

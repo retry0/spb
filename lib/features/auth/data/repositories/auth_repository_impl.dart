@@ -7,6 +7,7 @@ import '../../../../core/utils/jwt_decoder_util.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/utils/jwt_token_manager.dart';
 import '../../../../core/utils/session_manager.dart';
+import '../../../../core/utils/user_profile_validator.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/entities/auth_tokens.dart';
 import '../../domain/repositories/auth_repository.dart';
@@ -123,14 +124,16 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, User>> getCurrentUser() async {
     try {
-      // Get user data from JWT token
-      final tokenManager = getIt<JwtTokenManager>();
-      final userData = await tokenManager.getCurrentUserData();
+      // Use UserProfileValidator to get validated user data
+      final userProfileValidator = getIt<UserProfileValidator>();
+      final validProfile = await userProfileValidator.getValidUserProfile();
 
-      if (userData != null) {
-        // Create User entity from JWT data
+      if (validProfile != null) {
+        final userData = validProfile['userData'] as Map<String, dynamic>;
+
+        // Create User entity from validated data
         final user = User(
-          id: userData['sub'] ?? userData['id'] ?? '',
+          id: userData['Id'] ?? '',
           userName: userData['userName'] ?? '',
           Nama: userData['Nama'] ?? '',
         );
@@ -138,7 +141,7 @@ class AuthRepositoryImpl implements AuthRepository {
         return Right(user);
       }
 
-      // If no valid token or user data, try to get from local database
+      // If no valid profile, try to get from local database
       final token = await localDataSource.getAccessToken();
       if (token != null) {
         // Try to extract user ID from token
@@ -156,7 +159,6 @@ class AuthRepositoryImpl implements AuthRepository {
         }
       }
 
-      // No need to make a remote API call - we should have the data from the token
       return Left(AuthFailure('No valid user data found'));
     } on AuthException catch (e) {
       return Left(AuthFailure(e.message));
@@ -191,11 +193,11 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<bool> isLoggedIn() async {
     try {
-      final token = await localDataSource.getAccessToken();
+      // Use UserProfileValidator to check if valid profile exists
+      final userProfileValidator = getIt<UserProfileValidator>();
+      final validProfile = await userProfileValidator.getValidUserProfile();
 
-      if (token == null) return false;
-
-      return !JwtDecoder.isExpired(token);
+      return validProfile != null;
     } catch (e) {
       return false;
     }

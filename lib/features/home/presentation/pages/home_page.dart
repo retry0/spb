@@ -35,7 +35,9 @@ class HomePage extends StatelessWidget {
                       children: [
                         Text(
                           'Dashboard',
-                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                          style: Theme.of(
+                            context,
+                          ).textTheme.headlineMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: Theme.of(context).colorScheme.primary,
                           ),
@@ -45,16 +47,26 @@ class HomePage extends StatelessWidget {
                           builder: (context, state) {
                             if (state is HomeLoaded) {
                               return Text(
+                                //'Welcome back, ${state.metrics['userName'] ?? 'User'}',
                                 'Welcome back, ${state.metrics['userName'] ?? 'User'}',
-                                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                  color: Theme.of(context).colorScheme.onBackground.withOpacity(0.7),
+
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.bodyLarge?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onBackground.withOpacity(0.7),
                                 ),
                               );
                             }
                             return Text(
                               'Loading your dashboard...',
-                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                color: Theme.of(context).colorScheme.onBackground.withOpacity(0.7),
+                              style: Theme.of(
+                                context,
+                              ).textTheme.bodyLarge?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onBackground.withOpacity(0.7),
                               ),
                             );
                           },
@@ -79,7 +91,7 @@ class HomePage extends StatelessWidget {
                   const SizedBox(width: 8),
                 ],
               ),
-              
+
               // Content
               SliverToBoxAdapter(
                 child: RefreshIndicator(
