@@ -8,8 +8,6 @@ part 'auth_tokens_model.g.dart';
 class AuthTokensModel extends AuthTokens {
   const AuthTokensModel({
     required super.accessToken,
-    required super.refreshToken,
-    required super.expiresAt,
   });
 
   factory AuthTokensModel.fromJson(Map<String, dynamic> json) => _$AuthTokensModelFromJson(json);

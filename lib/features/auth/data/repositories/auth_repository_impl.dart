@@ -29,7 +29,7 @@ class AuthRepositoryImpl implements AuthRepository {
         'password': password,
       });
       
-      await localDataSource.saveTokens(tokens.accessToken, tokens.refreshToken);
+      await localDataSource.saveToken(tokens.accessToken);
       
       // Extract and store user data from JWT token
       final tokenManager = getIt<JwtTokenManager>();
@@ -60,7 +60,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, void>> logout() async {
     try {
       await remoteDataSource.logout();
-      await localDataSource.clearTokens();
+      await localDataSource.clearToken();
       
       // Clear JWT token manager data
       final tokenManager = getIt<JwtTokenManager>();
@@ -69,40 +69,10 @@ class AuthRepositoryImpl implements AuthRepository {
       return const Right(null);
     } catch (e) {
       // Even if remote logout fails, clear local tokens
-      await localDataSource.clearTokens();
+      await localDataSource.clearToken();
       final tokenManager = getIt<JwtTokenManager>();
       await tokenManager.clearStoredToken();
       return const Right(null);
-    }
-  }
-
-  @override
-  Future<Either<Failure, AuthTokens>> refreshToken() async {
-    try {
-      final refreshToken = await localDataSource.getRefreshToken();
-      
-      if (refreshToken == null) {
-        return const Left(AuthFailure('No refresh token available'));
-      }
-
-      final tokens = await remoteDataSource.refreshToken({
-        'refresh_token': refreshToken,
-      });
-      
-      await localDataSource.saveTokens(tokens.accessToken, tokens.refreshToken);
-      
-      // Update JWT token manager with new token
-      final tokenManager = getIt<JwtTokenManager>();
-      await tokenManager.storeAndExtractToken(tokens.accessToken);
-      
-      return Right(tokens);
-    } on AuthException catch (e) {
-      await localDataSource.clearTokens();
-      final tokenManager = getIt<JwtTokenManager>();
-      await tokenManager.clearStoredToken();
-      return Left(AuthFailure(e.message));
-    } catch (e) {
-      return Left(ServerFailure('Failed to refresh token'));
     }
   }
 
