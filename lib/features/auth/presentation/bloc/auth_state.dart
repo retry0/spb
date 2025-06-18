@@ -37,28 +37,6 @@ class AuthError extends AuthState {
   List<Object> get props => [message];
 }
 
-class AuthUserNameCheckResult extends AuthState {
-  final String userName;
-  final bool isAvailable;
-
-  const AuthUserNameCheckResult({
-    required this.userName,
-    required this.isAvailable,
-  });
-
-  @override
-  List<Object> get props => [userName, isAvailable];
-}
-
-class AuthUserNameCheckError extends AuthState {
-  final String message;
-
-  const AuthUserNameCheckError(this.message);
-
-  @override
-  List<Object> get props => [message];
-}
-
 class AuthSessionExpiring extends AuthState {
   final User user;
   final int minutesRemaining;

@@ -31,9 +31,14 @@ class _MetricsLoading extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Metrics',
-          style: Theme.of(context).textTheme.headlineSmall,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Text(
+            'Key Metrics',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
         const SizedBox(height: 16),
         GridView.count(
@@ -60,9 +65,14 @@ class _MetricsContent extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Metrics',
-          style: Theme.of(context).textTheme.headlineSmall,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Text(
+            'Key Metrics',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
         const SizedBox(height: 16),
         GridView.count(
@@ -77,25 +87,29 @@ class _MetricsContent extends StatelessWidget {
               title: 'Total Users',
               value: '1,234',
               icon: Icons.people,
-              color: Colors.blue,
+              color: Theme.of(context).colorScheme.primary,
+              trend: 5.2,
             ),
             _MetricCard(
               title: 'Active Sessions',
               value: '89',
               icon: Icons.timeline,
-              color: Colors.green,
+              color: Theme.of(context).colorScheme.secondary,
+              trend: 2.8,
             ),
             _MetricCard(
               title: 'Data Points',
               value: '5,678',
               icon: Icons.data_usage,
-              color: Colors.orange,
+              color: Theme.of(context).colorScheme.tertiary,
+              trend: -1.3,
             ),
             _MetricCard(
               title: 'Security Score',
               value: '98%',
               icon: Icons.security,
               color: Colors.purple,
+              trend: 0.5,
             ),
           ],
         ),
@@ -112,6 +126,9 @@ class _MetricsError extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -132,6 +149,19 @@ class _MetricsError extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyMedium,
               textAlign: TextAlign.center,
             ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: () {
+                context.read<HomeBloc>().add(const HomeDataRequested());
+              },
+              icon: const Icon(Icons.refresh),
+              label: const Text('Retry'),
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -144,17 +174,25 @@ class _MetricCard extends StatelessWidget {
   final String value;
   final IconData icon;
   final Color color;
+  final double trend;
 
   const _MetricCard({
     required this.title,
     required this.value,
     required this.icon,
     required this.color,
+    required this.trend,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isPositiveTrend = trend >= 0;
+    
     return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -162,18 +200,41 @@ class _MetricCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(icon, color: color, size: 24),
-                const Spacer(),
                 Container(
-                  padding: const EdgeInsets.all(4),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: color.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(
-                    Icons.trending_up,
-                    color: color,
-                    size: 16,
+                  child: Icon(icon, color: color, size: 20),
+                ),
+                const Spacer(),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: isPositiveTrend 
+                        ? Colors.green.withOpacity(0.1) 
+                        : Colors.red.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        isPositiveTrend ? Icons.trending_up : Icons.trending_down,
+                        color: isPositiveTrend ? Colors.green : Colors.red,
+                        size: 14,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${trend.abs().toStringAsFixed(1)}%',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: isPositiveTrend ? Colors.green : Colors.red,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -186,10 +247,11 @@ class _MetricCard extends StatelessWidget {
                 color: color,
               ),
             ),
+            const SizedBox(height: 4),
             Text(
               title,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey[600],
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
               ),
             ),
           ],
@@ -205,6 +267,10 @@ class _MetricCardSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -213,28 +279,28 @@ class _MetricCardSkeleton extends StatelessWidget {
             Row(
               children: [
                 Container(
-                  width: 24,
-                  height: 24,
+                  width: 36,
+                  height: 36,
                   decoration: BoxDecoration(
                     color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
                 const Spacer(),
                 Container(
-                  width: 24,
-                  height: 24,
+                  width: 50,
+                  height: 22,
                   decoration: BoxDecoration(
                     color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                 ),
               ],
             ),
             const Spacer(),
             Container(
-              width: 60,
-              height: 24,
+              width: 70,
+              height: 28,
               decoration: BoxDecoration(
                 color: Colors.grey[300],
                 borderRadius: BorderRadius.circular(4),
@@ -242,7 +308,7 @@ class _MetricCardSkeleton extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Container(
-              width: 80,
+              width: 100,
               height: 16,
               decoration: BoxDecoration(
                 color: Colors.grey[300],

@@ -4,11 +4,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
-import '../../features/auth/presentation/pages/splash_page.dart';
 import '../../features/main/presentation/pages/main_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/data/presentation/pages/data_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
+import '../../ui/screens/splash_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -37,7 +37,7 @@ class AppRouter {
       GoRoute(
         path: '/splash',
         name: 'splash',
-        builder: (context, state) => const SplashPage(),
+        builder: (context, state) => const SplashScreen(),
       ),
       GoRoute(
         path: '/login',
@@ -65,5 +65,34 @@ class AppRouter {
         ],
       ),
     ],
+    errorBuilder: (context, state) => Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 64,
+              color: Theme.of(context).colorScheme.error,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Page Not Found',
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'The page ${state.uri.path} does not exist',
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () => context.go('/home'),
+              child: const Text('Go Home'),
+            ),
+          ],
+        ),
+      ),
+    ),
   );
 }

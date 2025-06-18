@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../bloc/profile_bloc.dart';
 
 class ProfileHeader extends StatelessWidget {
   const ProfileHeader({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AuthBloc, AuthState>(
+    return BlocBuilder<ProfileBloc, ProfileState>(
       builder: (context, state) {
-        if (state is AuthAuthenticated) {
+        if (state is ProfileLoading) {
+          return const _ProfileHeaderSkeleton();
+        } else if (state is ProfileLoaded) {
           return Card(
             child: Padding(
               padding: const EdgeInsets.all(24),
@@ -56,13 +58,16 @@ class ProfileHeader extends StatelessWidget {
               ),
             ),
           );
+        } else {
+          return const SizedBox.shrink();
         }
-        return const SizedBox.shrink();
       },
     );
   }
 }
 
+class _ProfileHeaderSkeleton extends StatelessWidget {
+  const _ProfileHeaderSkeleton();
 class _StatItem extends StatelessWidget {
   final String label;
   final String value;
@@ -71,6 +76,49 @@ class _StatItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: [
+            Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                shape: BoxShape.circle,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              width: 150,
+              height: 24,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              width: 100,
+              height: 16,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              width: 180,
+              height: 16,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+          ],
+        ),
+      ),
     return Column(
       children: [
         Text(

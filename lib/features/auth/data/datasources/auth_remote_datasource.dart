@@ -25,22 +25,23 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<void> logout() async {
-    await _dio.post(ApiEndpoints.logout);
+    // Add CSRF token if available
+    final options = Options(
+      headers: {
+        'X-CSRF-TOKEN': 'csrf-token', // In a real app, get this from storage
+      },
+    );
+
+    try {
+      await _dio.post(ApiEndpoints.logout, options: options);
+    } catch (e) {
+      // Log the error but don't rethrow - we'll still clear local data
+      print('Error during remote logout: $e');
+    }
   }
 
   @override
   Future<void> changePassword(Map<String, dynamic> data) async {
     await _dio.post(ApiEndpoints.changePassword, data: data);
   }
-
-  // @override
-  // Future<Map<String, dynamic>> checkUserNameAvailability(
-  //   String userName,
-  // ) async {
-  //   final endpoint = ApiEndpoints.withQuery(ApiEndpoints.userNameCheck, {
-  //     'userName': userName,
-  //   });
-  //   final response = await _dio.get(endpoint);
-  //   return response.data;
-  // }
 }

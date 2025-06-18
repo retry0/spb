@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'core/di/injection.dart';
-import 'core/theme/app_theme.dart';
+import 'core/theme/app_theme.dart' as core_theme;
 import 'core/router/app_router.dart';
 import 'core/utils/bloc_observer.dart';
 import 'core/utils/logger.dart';
@@ -14,6 +14,8 @@ import 'core/config/android_emulator_config.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/widgets/session_timeout_dialog.dart';
 import 'features/theme/presentation/bloc/theme_bloc.dart';
+import 'ui/screens/splash_screen.dart';
+import 'ui/theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -84,6 +86,15 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
+  // Set system UI overlay style
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+      statusBarBrightness: Brightness.light,
+    ),
+  );
+
   runApp(const MyApp());
 }
 
@@ -94,11 +105,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(
+        BlocProvider<AuthBloc>(
           create:
               (context) => getIt<AuthBloc>()..add(const AuthCheckRequested()),
         ),
-        BlocProvider(
+        BlocProvider<ThemeBloc>(
           create:
               (context) => getIt<ThemeBloc>()..add(const ThemeInitialized()),
         ),
@@ -109,8 +120,8 @@ class MyApp extends StatelessWidget {
             child: MaterialApp.router(
               title: 'SPB Secure App',
               debugShowCheckedModeBanner: false,
-              theme: AppTheme.lightTheme,
-              darkTheme: AppTheme.darkTheme,
+              theme: core_theme.AppTheme.lightTheme,
+              darkTheme: core_theme.AppTheme.darkTheme,
               themeMode: themeState.themeMode,
               routerConfig: AppRouter.router,
               builder: (context, child) {

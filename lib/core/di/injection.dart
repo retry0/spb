@@ -18,13 +18,17 @@ import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/domain/usecases/login_usecase.dart';
 import '../../features/auth/domain/usecases/logout_usecase.dart';
 import '../../features/auth/domain/usecases/refresh_token_usecase.dart';
-// import '../../features/auth/domain/usecases/check_username_availability_usecase.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/theme/presentation/bloc/theme_bloc.dart';
 import '../../features/home/data/datasources/home_remote_datasource.dart';
 import '../../features/home/data/repositories/home_repository_impl.dart';
 import '../../features/home/domain/repositories/home_repository.dart';
 import '../../features/home/presentation/bloc/home_bloc.dart';
+import '../../features/profile/data/datasources/profile_remote_datasource.dart';
+import '../../features/profile/data/repositories/profile_repository_impl.dart';
+import '../../features/profile/domain/repositories/profile_repository.dart';
+import '../../features/profile/domain/usecases/change_password_usecase.dart';
+import '../../features/profile/presentation/bloc/profile_bloc.dart';
 
 final getIt = GetIt.instance;
 
@@ -90,7 +94,15 @@ Future<void> configureDependencies() async {
   getIt.registerLazySingleton<HomeRemoteDataSource>(
     () => HomeRemoteDataSourceImpl(getIt<Dio>()),
   );
+<<<<<<< HEAD
 
+=======
+  
+  getIt.registerLazySingleton<ProfileRemoteDataSource>(
+    () => ProfileRemoteDataSourceImpl(getIt<Dio>()),
+  );
+  
+>>>>>>> 33f23731c78ba8e281ca4ec5ee76eaa5b84d5eff
   // Repositories
   getIt.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(
@@ -102,6 +114,7 @@ Future<void> configureDependencies() async {
   getIt.registerLazySingleton<HomeRepository>(
     () => HomeRepositoryImpl(remoteDataSource: getIt<HomeRemoteDataSource>()),
   );
+<<<<<<< HEAD
 
   // Use cases
   getIt.registerLazySingleton(() => LoginUseCase(getIt<AuthRepository>()));
@@ -111,6 +124,22 @@ Future<void> configureDependencies() async {
   );
   // getIt.registerLazySingleton(() => CheckUserNameAvailabilityUseCase(getIt<AuthRepository>()));
 
+=======
+  
+  getIt.registerLazySingleton<ProfileRepository>(
+    () => ProfileRepositoryImpl(
+      authRepository: getIt<AuthRepository>(),
+      remoteDataSource: getIt<ProfileRemoteDataSource>(),
+    ),
+  );
+  
+  // Use cases
+  getIt.registerLazySingleton(() => LoginUseCase(getIt<AuthRepository>()));
+  getIt.registerLazySingleton(() => LogoutUseCase(getIt<AuthRepository>()));
+  getIt.registerLazySingleton(() => RefreshTokenUseCase(getIt<AuthRepository>()));
+  getIt.registerLazySingleton(() => ChangePasswordUseCase(getIt<ProfileRepository>()));
+  
+>>>>>>> 33f23731c78ba8e281ca4ec5ee76eaa5b84d5eff
   // BLoCs
   getIt.registerFactory(
     () => AuthBloc(
@@ -123,4 +152,14 @@ Future<void> configureDependencies() async {
 
   getIt.registerFactory(() => ThemeBloc(getIt<LocalStorage>()));
   getIt.registerFactory(() => HomeBloc(getIt<HomeRepository>()));
+<<<<<<< HEAD
 }
+=======
+  getIt.registerFactory(
+    () => ProfileBloc(
+      profileRepository: getIt<ProfileRepository>(),
+      changePasswordUseCase: getIt<ChangePasswordUseCase>(),
+    ),
+  );
+}
+>>>>>>> 33f23731c78ba8e281ca4ec5ee76eaa5b84d5eff

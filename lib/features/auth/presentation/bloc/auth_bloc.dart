@@ -5,7 +5,6 @@ import '../../domain/entities/user.dart';
 import '../../domain/usecases/login_usecase.dart';
 import '../../domain/usecases/logout_usecase.dart';
 import '../../domain/usecases/refresh_token_usecase.dart';
-import '../../domain/usecases/check_username_availability_usecase.dart';
 import '../../../../core/utils/session_manager.dart';
 
 part 'auth_event.dart';
@@ -84,7 +83,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       if (isActive) {
         // Get user data from token
         final result = await refreshTokenUseCase();
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> 33f23731c78ba8e281ca4ec5ee76eaa5b84d5eff
         await result.fold(
           (failure) async {
             emit(const AuthUnauthenticated());
@@ -93,7 +96,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             if (isValid) {
               // Get current user
               final userResult = await loginUseCase.repository.getCurrentUser();
-
+              
               await userResult.fold(
                 (failure) async {
                   emit(const AuthUnauthenticated());
@@ -132,7 +135,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
         // Get user from token
         final userResult = await loginUseCase.repository.getCurrentUser();
-
+        
         await userResult.fold(
           (failure) async {
             emit(AuthError(failure.message));
@@ -150,7 +153,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     emit(const AuthLoading());
-    final result = await logoutUseCase();
+    
+    // Log the reason if provided
+    if (event.reason != null) {
+      print('Logout requested: ${event.reason}');
+    }
+    
+    // Use the logout use case with retry mechanism
+    final result = await logoutUseCase(maxRetries: 3);
 
     // Clear session data
     await sessionManager.clearSession();
@@ -173,33 +183,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     await result.fold(
       (failure) async {
         emit(const AuthUnauthenticated());
-      },
+      }, 
       (isValid) async {
         if (!isValid) {
           emit(const AuthUnauthenticated());
         }
         // If valid, keep current state
-      },
-    );
-  }
-
-  Future<void> _onAuthUserNameAvailabilityRequested(
-    AuthUserNameAvailabilityRequested event,
-    Emitter<AuthState> emit,
-  ) async {
-    final result = await checkUserNameAvailabilityUseCase(event.userName);
-    await result.fold(
-      (failure) async {
-        emit(AuthUserNameCheckError(failure.message));
-      },
-      (isAvailable) async {
-        emit(
-          AuthUserNameCheckResult(
-            userName: event.userName,
-            isAvailable: isAvailable,
-          ),
-        );
-      },
+      }
     );
   }
 
