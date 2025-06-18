@@ -18,19 +18,6 @@ class ProfileHeader extends StatelessWidget {
               padding: const EdgeInsets.all(24),
               child: Column(
                 children: [
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    child: Text(
-                      state.user.Nama.substring(0, 1).toUpperCase(),
-                      style: const TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
                   Text(
                     state.user.Nama,
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -45,14 +32,37 @@ class ProfileHeader extends StatelessWidget {
                       fontWeight: FontWeight.w500,
                     ),
                   ),
+                ],
+              ),
+            ),
+          );
+        } else if (state is ProfileError) {
+          return Card(
+            color: Colors.red[50],
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  Icon(Icons.error_outline, size: 48, color: Colors.red[700]),
                   const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _StatItem(label: 'Sessions', value: '24'),
-                      _StatItem(label: 'Data Points', value: '156'),
-                      _StatItem(label: 'Security Score', value: '98%'),
-                    ],
+                  Text(
+                    'Failed to load profile',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    state.message,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      context.read<ProfileBloc>().add(
+                        const ProfileLoadRequested(),
+                      );
+                    },
+                    child: const Text('Retry'),
                   ),
                 ],
               ),
@@ -68,11 +78,6 @@ class ProfileHeader extends StatelessWidget {
 
 class _ProfileHeaderSkeleton extends StatelessWidget {
   const _ProfileHeaderSkeleton();
-class _StatItem extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const _StatItem({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -119,22 +124,6 @@ class _StatItem extends StatelessWidget {
           ],
         ),
       ),
-    return Column(
-      children: [
-        Text(
-          value,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.primary,
-          ),
-        ),
-        Text(
-          label,
-          style: Theme.of(
-            context,
-          ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
-        ),
-      ],
     );
   }
 }

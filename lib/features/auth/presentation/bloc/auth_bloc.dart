@@ -83,11 +83,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       if (isActive) {
         // Get user data from token
         final result = await refreshTokenUseCase();
-<<<<<<< HEAD
 
-=======
-        
->>>>>>> 33f23731c78ba8e281ca4ec5ee76eaa5b84d5eff
         await result.fold(
           (failure) async {
             emit(const AuthUnauthenticated());
@@ -96,7 +92,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             if (isValid) {
               // Get current user
               final userResult = await loginUseCase.repository.getCurrentUser();
-              
+
               await userResult.fold(
                 (failure) async {
                   emit(const AuthUnauthenticated());
@@ -135,7 +131,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
         // Get user from token
         final userResult = await loginUseCase.repository.getCurrentUser();
-        
+
         await userResult.fold(
           (failure) async {
             emit(AuthError(failure.message));
@@ -153,12 +149,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     emit(const AuthLoading());
-    
+
     // Log the reason if provided
     if (event.reason != null) {
       print('Logout requested: ${event.reason}');
     }
-    
+
     // Use the logout use case with retry mechanism
     final result = await logoutUseCase(maxRetries: 3);
 
@@ -183,13 +179,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     await result.fold(
       (failure) async {
         emit(const AuthUnauthenticated());
-      }, 
+      },
       (isValid) async {
         if (!isValid) {
           emit(const AuthUnauthenticated());
         }
         // If valid, keep current state
-      }
+      },
     );
   }
 

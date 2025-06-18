@@ -55,18 +55,17 @@ class LoginPage extends StatelessWidget {
                           ),
                         ],
                       ),
-                      child: const Center(
-                        child: Icon(
-                          Icons.security,
-                          size: 50,
-                          color: AppTheme.primaryColor,
+                      child: Center(
+                        child: Image.asset(
+                          'assets/icon/smart_logo.png',
+                          height: 200,
                         ),
                       ),
                     ),
                   ),
                   const SizedBox(height: 32),
                   Text(
-                    'Welcome Back',
+                    'ESPB SMART',
                     style: Theme.of(context).textTheme.displaySmall?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: Theme.of(context).colorScheme.primary,
@@ -75,34 +74,38 @@ class LoginPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Sign in to your secure account',
+                    'Silakan masuk ke akun Anda',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onBackground.withOpacity(0.7),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onBackground.withOpacity(0.7),
                     ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 48),
                   // Login form
                   const LoginForm(),
-                  const SizedBox(height: 24),
-                  // Additional options
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Need help?',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onBackground.withOpacity(0.7),
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          // Navigate to help page
-                        },
-                        child: const Text('Contact Support'),
-                      ),
-                    ],
-                  ),
+                  // const SizedBox(height: 24),
+                  // // Additional options
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.center,
+                  //   children: [
+                  //     Text(
+                  //       'Need help?',
+                  //       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  //         color: Theme.of(
+                  //           context,
+                  //         ).colorScheme.onBackground.withOpacity(0.7),
+                  //       ),
+                  //     ),
+                  //     TextButton(
+                  //       onPressed: () {
+                  //         // Navigate to help page
+                  //       },
+                  //       child: const Text('Contact Support'),
+                  //     ),
+                  //   ],
+                  // ),
                 ],
               ),
             ),

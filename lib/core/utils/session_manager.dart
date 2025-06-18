@@ -107,11 +107,11 @@ class SessionManager {
   Future<void> clearSession() async {
     try {
       // Clear token
-      await _secureStorage.delete(StorageKeys.accessToken);
+      await _secureStorage.delete(key: StorageKeys.accessToken);
 
       // Clear session data
-      await _secureStorage.delete(StorageKeys.sessionData);
-      await _secureStorage.delete(StorageKeys.userCredentials);
+      await _secureStorage.delete(key: StorageKeys.sessionData);
+      await _secureStorage.delete(key: StorageKeys.userCredentials);
 
       // Clear activity timestamp
       await _prefs.remove(StorageKeys.lastActivity);

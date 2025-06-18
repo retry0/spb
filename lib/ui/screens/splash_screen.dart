@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'dart:math';
 
 import '../../core/config/environment_config.dart';
 import '../../core/config/android_emulator_config.dart';
@@ -15,50 +16,51 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
   late Animation<double> _rotateAnimation;
-  
+
   @override
   void initState() {
     super.initState();
-    
+
     // Initialize animations
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 2500),
     );
-    
+
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _animationController,
         curve: const Interval(0.0, 0.6, curve: Curves.easeIn),
       ),
     );
-    
+
     _scaleAnimation = Tween<double>(begin: 0.6, end: 1.0).animate(
       CurvedAnimation(
         parent: _animationController,
         curve: const Interval(0.0, 0.6, curve: Curves.easeOutBack),
       ),
     );
-    
+
     _rotateAnimation = Tween<double>(begin: 0.0, end: 0.1).animate(
       CurvedAnimation(
         parent: _animationController,
         curve: const Interval(0.0, 0.5, curve: Curves.elasticOut),
       ),
     );
-    
+
     // Start animation
     _animationController.forward();
-    
+
     // Initialize app after animation
     _initializeApp();
   }
-  
+
   @override
   void dispose() {
     _animationController.dispose();
@@ -69,7 +71,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     try {
       // Add a delay to show splash screen animation
       await Future.delayed(const Duration(milliseconds: 2500));
-      
+
       // Check authentication status
       if (mounted) {
         context.read<AuthBloc>().add(const AuthCheckRequested());
@@ -85,13 +87,14 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   void _showInitializationError(String error) {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (context) => NetworkErrorWidget(
-          errorMessage: 'Failed to initialize app: $error',
-          onRetry: () {
-            Navigator.of(context).pop();
-            _initializeApp();
-          },
-        ),
+        builder:
+            (context) => NetworkErrorWidget(
+              errorMessage: 'Failed to initialize app: $error',
+              onRetry: () {
+                Navigator.of(context).pop();
+                _initializeApp();
+              },
+            ),
       ),
     );
   }
@@ -108,13 +111,14 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
           // Show network error widget for auth errors
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
-              builder: (context) => NetworkErrorWidget(
-                errorMessage: state.message,
-                onRetry: () {
-                  Navigator.of(context).pop();
-                  context.read<AuthBloc>().add(const AuthCheckRequested());
-                },
-              ),
+              builder:
+                  (context) => NetworkErrorWidget(
+                    errorMessage: state.message,
+                    onRetry: () {
+                      Navigator.of(context).pop();
+                      context.read<AuthBloc>().add(const AuthCheckRequested());
+                    },
+                  ),
             ),
           );
         }
@@ -175,7 +179,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                   },
                 ),
                 const SizedBox(height: 40),
-                
+
                 // Animated text
                 AnimatedBuilder(
                   animation: _animationController,
@@ -199,7 +203,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     );
                   },
                 ),
-                
+
                 const SizedBox(height: 16),
                 AnimatedBuilder(
                   animation: _animationController,
@@ -222,9 +226,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     );
                   },
                 ),
-                
+
                 const SizedBox(height: 60),
-                
+
                 // Loading indicator
                 AnimatedBuilder(
                   animation: _animationController,
@@ -240,18 +244,23 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                         width: 40,
                         height: 40,
                         child: CircularProgressIndicator(
-                          valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
                           strokeWidth: 3,
                           // Add a subtle animation to the progress indicator
-                          value: _animationController.value < 0.7 ? null : _waveAnimation(_animationController.value),
+                          value:
+                              _animationController.value < 0.7
+                                  ? null
+                                  : _waveAnimation(_animationController.value),
                         ),
                       ),
                     );
                   },
                 ),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Show configuration info in development mode
                 if (EnvironmentConfig.isDevelopment) ...[
                   AnimatedBuilder(
@@ -261,7 +270,11 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                         opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
                           CurvedAnimation(
                             parent: _animationController,
-                            curve: const Interval(0.7, 1.0, curve: Curves.easeIn),
+                            curve: const Interval(
+                              0.7,
+                              1.0,
+                              curve: Curves.easeIn,
+                            ),
                           ),
                         ),
                         child: Container(
@@ -318,7 +331,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       ),
     );
   }
-  
+
   // Creates a wave-like animation for the progress indicator
   double _waveAnimation(double value) {
     // Remap the value from 0.7-1.0 to 0.0-1.0

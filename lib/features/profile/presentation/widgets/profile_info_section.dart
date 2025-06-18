@@ -23,39 +23,16 @@ class ProfileInfoSection extends StatelessWidget {
                   Text(
                     'Account Information',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 16),
-                  _InfoRow(
-                    label: 'User ID',
-                    value: state.user.id,
-                  ),
+                  _InfoRow(label: 'User ID', value: state.user.id),
                   const Divider(),
-                  _InfoRow(
-                    label: 'Username',
-                    value: state.user.userName,
-                  ),
+                  _InfoRow(label: 'Username', value: state.user.userName),
+
                   const Divider(),
-                  _InfoRow(
-                    label: 'Email',
-                    value: state.user.email,
-                  ),
-                  const Divider(),
-                  _InfoRow(
-                    label: 'Full Name',
-                    value: state.user.name,
-                  ),
-                  const Divider(),
-                  _InfoRow(
-                    label: 'Created',
-                    value: DateFormat('MMM dd, yyyy').format(state.user.createdAt),
-                  ),
-                  const Divider(),
-                  _InfoRow(
-                    label: 'Last Updated',
-                    value: DateFormat('MMM dd, yyyy').format(state.user.updatedAt),
-                  ),
+                  _InfoRow(label: 'Full Name', value: state.user.Nama),
                 ],
               ),
             ),
@@ -72,10 +49,7 @@ class _InfoRow extends StatelessWidget {
   final String label;
   final String value;
 
-  const _InfoRow({
-    required this.label,
-    required this.value,
-  });
+  const _InfoRow({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -97,9 +71,7 @@ class _InfoRow extends StatelessWidget {
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(
-                fontWeight: FontWeight.w500,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.w500),
             ),
           ),
         ],

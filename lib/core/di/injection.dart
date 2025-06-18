@@ -94,15 +94,11 @@ Future<void> configureDependencies() async {
   getIt.registerLazySingleton<HomeRemoteDataSource>(
     () => HomeRemoteDataSourceImpl(getIt<Dio>()),
   );
-<<<<<<< HEAD
 
-=======
-  
   getIt.registerLazySingleton<ProfileRemoteDataSource>(
     () => ProfileRemoteDataSourceImpl(getIt<Dio>()),
   );
-  
->>>>>>> 33f23731c78ba8e281ca4ec5ee76eaa5b84d5eff
+
   // Repositories
   getIt.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(
@@ -114,7 +110,13 @@ Future<void> configureDependencies() async {
   getIt.registerLazySingleton<HomeRepository>(
     () => HomeRepositoryImpl(remoteDataSource: getIt<HomeRemoteDataSource>()),
   );
-<<<<<<< HEAD
+
+  getIt.registerLazySingleton<ProfileRepository>(
+    () => ProfileRepositoryImpl(
+      authRepository: getIt<AuthRepository>(),
+      remoteDataSource: getIt<ProfileRemoteDataSource>(),
+    ),
+  );
 
   // Use cases
   getIt.registerLazySingleton(() => LoginUseCase(getIt<AuthRepository>()));
@@ -122,24 +124,10 @@ Future<void> configureDependencies() async {
   getIt.registerLazySingleton(
     () => RefreshTokenUseCase(getIt<AuthRepository>()),
   );
-  // getIt.registerLazySingleton(() => CheckUserNameAvailabilityUseCase(getIt<AuthRepository>()));
-
-=======
-  
-  getIt.registerLazySingleton<ProfileRepository>(
-    () => ProfileRepositoryImpl(
-      authRepository: getIt<AuthRepository>(),
-      remoteDataSource: getIt<ProfileRemoteDataSource>(),
-    ),
+  getIt.registerLazySingleton(
+    () => ChangePasswordUseCase(getIt<ProfileRepository>()),
   );
-  
-  // Use cases
-  getIt.registerLazySingleton(() => LoginUseCase(getIt<AuthRepository>()));
-  getIt.registerLazySingleton(() => LogoutUseCase(getIt<AuthRepository>()));
-  getIt.registerLazySingleton(() => RefreshTokenUseCase(getIt<AuthRepository>()));
-  getIt.registerLazySingleton(() => ChangePasswordUseCase(getIt<ProfileRepository>()));
-  
->>>>>>> 33f23731c78ba8e281ca4ec5ee76eaa5b84d5eff
+
   // BLoCs
   getIt.registerFactory(
     () => AuthBloc(
@@ -152,9 +140,6 @@ Future<void> configureDependencies() async {
 
   getIt.registerFactory(() => ThemeBloc(getIt<LocalStorage>()));
   getIt.registerFactory(() => HomeBloc(getIt<HomeRepository>()));
-<<<<<<< HEAD
-}
-=======
   getIt.registerFactory(
     () => ProfileBloc(
       profileRepository: getIt<ProfileRepository>(),
@@ -162,4 +147,3 @@ Future<void> configureDependencies() async {
     ),
   );
 }
->>>>>>> 33f23731c78ba8e281ca4ec5ee76eaa5b84d5eff
