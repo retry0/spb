@@ -83,9 +83,10 @@ class _LoginFormState extends State<LoginForm>
                 keyboardType: TextInputType.text,
                 textInputAction: TextInputAction.next,
                 decoration: InputDecoration(
-                  labelText: 'Username',
+                  labelText: 'Nama Pengguna',
                   prefixIcon: const Icon(Icons.person_outlined),
-                  helperText: 'Input your username (e.g., john_doe)',
+                  helperText: 'Silakan masukkan nama pengguna Anda',
+                  hintText: 'e.g. johndoe',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -103,7 +104,8 @@ class _LoginFormState extends State<LoginForm>
                 decoration: InputDecoration(
                   labelText: 'Password',
                   prefixIcon: const Icon(Icons.lock_outlined),
-                  helperText: 'Input your password',
+                  helperText: 'Silakan masukkan kata sandi Anda',
+                  hintText: 'e.g. yourpassword',
 
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -169,7 +171,8 @@ class _LoginFormState extends State<LoginForm>
                               ),
                             )
                             : const Text(
-                              'Sign In',
+                              'Masuk',
+                              textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
