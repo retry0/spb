@@ -26,12 +26,20 @@ class ErrorInterceptor extends Interceptor {
           userFriendlyMessage = apiErrorResponse.message;
         } else {
           // Fallback for non-JSON error responses
-          exception = _handleStatusCode(err.response?.statusCode, err.response?.data, requestId);
+          exception = _handleStatusCode(
+            err.response?.statusCode,
+            err.response?.data,
+            requestId,
+          );
           userFriendlyMessage = exception.message;
         }
       } catch (parseError) {
         AppLogger.warning('Failed to parse API error response: $parseError');
-        exception = _handleStatusCode(err.response?.statusCode, err.response?.data, requestId);
+        exception = _handleStatusCode(
+          err.response?.statusCode,
+          err.response?.data,
+          requestId,
+        );
         userFriendlyMessage = exception.message;
       }
     } else {
@@ -44,19 +52,19 @@ class ErrorInterceptor extends Interceptor {
           exception = NetworkException(apiErrorResponse.message);
           userFriendlyMessage = apiErrorResponse.message;
           break;
-          
+
         case DioExceptionType.cancel:
           apiErrorResponse = _createCancelledErrorResponse(requestId);
           exception = AppException(apiErrorResponse.message);
           userFriendlyMessage = apiErrorResponse.message;
           break;
-          
+
         case DioExceptionType.connectionError:
           apiErrorResponse = _createConnectionErrorResponse(requestId, err);
           exception = NetworkException(apiErrorResponse.message);
           userFriendlyMessage = apiErrorResponse.message;
           break;
-          
+
         default:
           apiErrorResponse = _createUnknownErrorResponse(requestId);
           exception = AppException(apiErrorResponse.message);
@@ -66,7 +74,7 @@ class ErrorInterceptor extends Interceptor {
 
     // Log the error with full context
     _logError(err, exception, apiErrorResponse, requestId);
-    
+
     // Create enhanced DioException with structured error data
     final enhancedException = DioException(
       requestOptions: err.requestOptions,
@@ -78,7 +86,8 @@ class ErrorInterceptor extends Interceptor {
 
     // Attach the structured error response for client handling
     if (apiErrorResponse != null) {
-      enhancedException.requestOptions.extra['apiErrorResponse'] = apiErrorResponse;
+      enhancedException.requestOptions.extra['apiErrorResponse'] =
+          apiErrorResponse;
     }
 
     handler.reject(enhancedException);
@@ -108,26 +117,38 @@ class ErrorInterceptor extends Interceptor {
     }
   }
 
-  AppException _handleStatusCode(int? statusCode, dynamic data, String requestId) {
+  AppException _handleStatusCode(
+    int? statusCode,
+    dynamic data,
+    String requestId,
+  ) {
     switch (statusCode) {
       case 400:
         return ValidationException(data?['message'] ?? 'Bad request');
       case 401:
         return AuthException('Authentication failed. Please login again.');
       case 403:
-        return AuthException('Access denied. You don\'t have permission to perform this action.');
+        return AuthException(
+          'Access denied. You don\'t have permission to perform this action.',
+        );
       case 404:
         return const AppException('Resource not found');
       case 422:
         return ValidationException(data?['message'] ?? 'Validation failed');
       case 429:
-        return NetworkException('Too many requests. Please wait before trying again.');
+        return NetworkException(
+          'Too many requests. Please wait before trying again.',
+        );
       case 500:
-        return const ServerException('Internal server error. Please try again later.');
+        return const ServerException(
+          'Internal server error. Please try again later.',
+        );
       case 502:
       case 503:
       case 504:
-        return const ServerException('Server is temporarily unavailable. Please try again later.');
+        return const ServerException(
+          'Server is temporarily unavailable. Please try again later.',
+        );
       default:
         return AppException('Server error (${statusCode ?? 'Unknown'})');
     }
@@ -138,7 +159,8 @@ class ErrorInterceptor extends Interceptor {
       statusCode: 408,
       errorCode: 'REQUEST_TIMEOUT',
       message: 'Request timed out',
-      details: 'The request took too long to complete. This may be due to network connectivity issues or server load.',
+      details:
+          'The request took too long to complete. This may be due to network connectivity issues or server load.',
       suggestedActions: [
         'Check your internet connection',
         'Try the request again',
@@ -166,8 +188,12 @@ class ErrorInterceptor extends Interceptor {
     );
   }
 
-  ApiErrorResponse _createConnectionErrorResponse(String requestId, DioException err) {
-    String details = 'Unable to connect to the server. Please check your network connection.';
+  ApiErrorResponse _createConnectionErrorResponse(
+    String requestId,
+    DioException err,
+  ) {
+    String details =
+        'Unable to connect to the server. Please check your network connection.';
     List<String> actions = [
       'Check your internet connection',
       'Verify the server URL is correct',
@@ -175,8 +201,10 @@ class ErrorInterceptor extends Interceptor {
     ];
 
     // Add specific guidance for Android emulator
-    if (err.requestOptions.uri.host == 'localhost' || err.requestOptions.uri.host == '127.0.0.1') {
-      details = 'Cannot connect to localhost. For Android emulator, use 10.0.2.2 instead.';
+    if (err.requestOptions.uri.host == 'localhost' ||
+        err.requestOptions.uri.host == '127.0.0.1') {
+      details =
+          'Cannot connect to localhost. For Android emulator, use 10.0.2.2 instead.';
       actions = [
         'For Android emulator, use 10.0.2.2 instead of localhost',
         'Ensure your backend server is running',
@@ -207,7 +235,8 @@ class ErrorInterceptor extends Interceptor {
       statusCode: 0,
       errorCode: 'UNKNOWN_ERROR',
       message: 'An unexpected error occurred',
-      details: 'An unknown network error occurred while processing your request.',
+      details:
+          'An unknown network error occurred while processing your request.',
       suggestedActions: [
         'Try the request again',
         'Check your internet connection',
@@ -220,15 +249,17 @@ class ErrorInterceptor extends Interceptor {
   }
 
   void _logError(
-    DioException err, 
-    AppException exception, 
+    DioException err,
+    AppException exception,
     ApiErrorResponse? apiErrorResponse,
     String requestId,
   ) {
     AppLogger.error('API Error [Request ID: $requestId]');
-    AppLogger.error('URL: ${err.requestOptions.method} ${err.requestOptions.uri}');
+    AppLogger.error(
+      'URL: ${err.requestOptions.method} ${err.requestOptions.uri}',
+    );
     AppLogger.error('Exception: ${exception.message}');
-    
+
     if (apiErrorResponse != null) {
       AppLogger.error('API Error Response:');
       AppLogger.error('  Status: ${apiErrorResponse.statusCode}');
@@ -236,16 +267,16 @@ class ErrorInterceptor extends Interceptor {
       AppLogger.error('  Message: ${apiErrorResponse.message}');
       AppLogger.error('  Details: ${apiErrorResponse.details}');
       AppLogger.error('  Retryable: ${apiErrorResponse.retryable}');
-      
+
       if (apiErrorResponse.context != null) {
         AppLogger.error('  Context: ${apiErrorResponse.context}');
       }
-      
+
       if (apiErrorResponse.fieldErrors != null) {
         AppLogger.error('  Field Errors: ${apiErrorResponse.fieldErrors}');
       }
     }
-    
+
     if (err.response?.data != null) {
       AppLogger.error('Response Data: ${err.response?.data}');
     }
@@ -256,27 +287,29 @@ class ErrorInterceptor extends Interceptor {
 class NetworkErrorHandler {
   static void showNetworkError(
     BuildContext context, {
-    String? message, 
+    String? message,
     VoidCallback? onRetry,
     ApiErrorResponse? apiErrorResponse,
   }) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => NetworkErrorWidget(
-          errorMessage: message,
-          apiErrorResponse: apiErrorResponse,
-          onRetry: () {
-            Navigator.of(context).pop();
-            onRetry?.call();
-          },
-        ),
+        builder:
+            (context) => NetworkErrorWidget(
+              errorMessage: message,
+              apiErrorResponse: apiErrorResponse,
+              onRetry: () {
+                Navigator.of(context).pop();
+                onRetry?.call();
+              },
+            ),
       ),
     );
   }
 
   /// Extracts ApiErrorResponse from DioException if available
   static ApiErrorResponse? getApiErrorResponse(DioException exception) {
-    return exception.requestOptions.extra['apiErrorResponse'] as ApiErrorResponse?;
+    return exception.requestOptions.extra['apiErrorResponse']
+        as ApiErrorResponse?;
   }
 
   /// Creates a user-friendly error message from any exception
@@ -287,11 +320,11 @@ class NetworkErrorHandler {
         return apiError.userFriendlySummary;
       }
     }
-    
+
     if (error is AppException) {
       return error.message;
     }
-    
+
     return 'An unexpected error occurred. Please try again.';
   }
 }

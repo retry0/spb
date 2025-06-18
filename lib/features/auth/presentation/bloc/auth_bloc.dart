@@ -25,6 +25,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthCheckRequested>(_onAuthCheckRequested);
     on<AuthLoginRequested>(_onAuthLoginRequested);
     on<AuthLogoutRequested>(_onAuthLogoutRequested);
+    on<AuthTokenValidationRequested>(_onAuthTokenValidationRequested);
     on<AuthUserNameAvailabilityRequested>(_onAuthUserNameAvailabilityRequested);
   }
 
@@ -73,6 +74,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       (failure) => emit(AuthError(failure.message)),
       (_) => emit(const AuthUnauthenticated()),
     );
+  }
+
+  Future _onAuthTokenValidationRequested(
+    AuthTokenValidationRequested event,
+    Emitter emit,
+  ) async {
+    final result = await refreshTokenUseCase();
+    result.fold((failure) => emit(const AuthUnauthenticated()), (isValid) {
+      if (!isValid) {
+        emit(const AuthUnauthenticated());
+      }
+      // If valid, keep current state
+    });
   }
 
   Future _onAuthUserNameAvailabilityRequested(

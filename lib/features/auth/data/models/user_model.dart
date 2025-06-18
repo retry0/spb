@@ -16,8 +16,9 @@ class UserModel extends User {
     required super.updatedAt,
   });
 
-  factory UserModel.fromJson(Map<String, dynamic> json) => _$UserModelFromJson(json);
-  
+  factory UserModel.toJson(Map<String, dynamic> json) =>
+      _$UserModeltoJson(json);
+
   Map<String, dynamic> toJson() => _$UserModelToJson(this);
 
   factory UserModel.fromDatabase(Map<String, dynamic> data) {
@@ -27,8 +28,12 @@ class UserModel extends User {
       email: data['email'] as String,
       name: data['name'] as String,
       avatar: data['avatar'] as String?,
-      createdAt: DateTime.fromMillisecondsSinceEpoch((data['created_at'] as int) * 1000),
-      updatedAt: DateTime.fromMillisecondsSinceEpoch((data['updated_at'] as int) * 1000),
+      createdAt: DateTime.fromMillisecondsSinceEpoch(
+        (data['created_at'] as int) * 1000,
+      ),
+      updatedAt: DateTime.fromMillisecondsSinceEpoch(
+        (data['updated_at'] as int) * 1000,
+      ),
     );
   }
 
