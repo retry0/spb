@@ -3,6 +3,9 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/error/exceptions.dart';
+import '../../../../core/utils/jwt_decoder_util.dart';
+import '../../../../core/di/injection.dart';
+import '../../../../core/utils/jwt_token_manager.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/entities/auth_tokens.dart';
 import '../../domain/repositories/auth_repository.dart';
@@ -28,6 +31,19 @@ class AuthRepositoryImpl implements AuthRepository {
       
       await localDataSource.saveTokens(tokens.accessToken, tokens.refreshToken);
       
+      // Extract and store user data from JWT token
+      final tokenManager = getIt<JwtTokenManager>();
+      final userData = await tokenManager.storeAndExtractToken(tokens.accessToken);
+      
+      if (userData != null) {
+        // Log extracted user data (excluding sensitive fields)
+        final userInfo = JwtDecoderUtil.extractUserInfo(tokens.accessToken);
+        if (userInfo != null) {
+          print('User logged in: ${userInfo['userName'] ?? userInfo['sub']}');
+          print('Available claims: ${JwtDecoderUtil.getAvailableClaims(tokens.accessToken)}');
+        }
+      }
+      
       return Right(tokens);
     } on AuthException catch (e) {
       return Left(AuthFailure(e.message));
@@ -45,10 +61,17 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       await remoteDataSource.logout();
       await localDataSource.clearTokens();
+      
+      // Clear JWT token manager data
+      final tokenManager = getIt<JwtTokenManager>();
+      await tokenManager.clearStoredToken();
+      
       return const Right(null);
     } catch (e) {
       // Even if remote logout fails, clear local tokens
       await localDataSource.clearTokens();
+      final tokenManager = getIt<JwtTokenManager>();
+      await tokenManager.clearStoredToken();
       return const Right(null);
     }
   }
@@ -68,9 +91,15 @@ class AuthRepositoryImpl implements AuthRepository {
       
       await localDataSource.saveTokens(tokens.accessToken, tokens.refreshToken);
       
+      // Update JWT token manager with new token
+      final tokenManager = getIt<JwtTokenManager>();
+      await tokenManager.storeAndExtractToken(tokens.accessToken);
+      
       return Right(tokens);
     } on AuthException catch (e) {
       await localDataSource.clearTokens();
+      final tokenManager = getIt<JwtTokenManager>();
+      await tokenManager.clearStoredToken();
       return Left(AuthFailure(e.message));
     } catch (e) {
       return Left(ServerFailure('Failed to refresh token'));
@@ -80,6 +109,26 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, User>> getCurrentUser() async {
     try {
+      // Try to get user data from JWT token first
+      final tokenManager = getIt<JwtTokenManager>();
+      final userData = await tokenManager.getCurrentUserData();
+      
+      if (userData != null) {
+        // Create User entity from JWT data
+        final user = User(
+          id: userData['sub'] ?? userData['id'] ?? '',
+          userName: userData['userName'] ?? userData['preferred_username'] ?? userData['username'] ?? '',
+          email: userData['email'] ?? '',
+          name: userData['name'] ?? userData['given_name'] ?? '',
+          avatar: userData['picture'],
+          createdAt: DateTime.now().subtract(const Duration(days: 30)), // Default
+          updatedAt: DateTime.now(),
+        );
+        
+        return Right(user);
+      }
+      
+      // Fallback to remote API call
       final user = await remoteDataSource.getCurrentUser();
       return Right(user);
     } on AuthException catch (e) {
@@ -140,6 +189,43 @@ class AuthRepositoryImpl implements AuthRepository {
       return !JwtDecoder.isExpired(accessToken);
     } catch (e) {
       return false;
+    }
+  }
+
+  /// Gets user permissions from JWT token
+  Future<List<String>> getUserPermissions() async {
+    try {
+      final tokenManager = getIt<JwtTokenManager>();
+      final claims = await tokenManager.getSpecificClaims(['permissions', 'roles', 'scope']);
+      
+      final List<String> permissions = [];
+      
+      // Extract permissions from various claim formats
+      if (claims['permissions'] is List) {
+        permissions.addAll((claims['permissions'] as List).cast<String>());
+      }
+      
+      if (claims['roles'] is List) {
+        permissions.addAll((claims['roles'] as List).cast<String>());
+      }
+      
+      if (claims['scope'] is String) {
+        permissions.addAll((claims['scope'] as String).split(' '));
+      }
+      
+      return permissions.toSet().toList(); // Remove duplicates
+    } catch (e) {
+      return [];
+    }
+  }
+
+  /// Gets custom user attributes from JWT token
+  Future<Map<String, dynamic>> getUserAttributes() async {
+    try {
+      final tokenManager = getIt<JwtTokenManager>();
+      return await tokenManager.getCustomClaims() ?? {};
+    } catch (e) {
+      return {};
     }
   }
 }

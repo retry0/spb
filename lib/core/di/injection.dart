@@ -9,6 +9,7 @@ import '../storage/secure_storage.dart';
 import '../storage/local_storage.dart';
 import '../storage/database_helper.dart';
 import '../storage/data_repository.dart';
+import '../utils/jwt_token_manager.dart';
 import '../../features/auth/data/datasources/auth_remote_datasource.dart';
 import '../../features/auth/data/datasources/auth_local_datasource.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
@@ -59,6 +60,11 @@ Future<void> configureDependencies() async {
   
   getIt.registerLazySingleton<DataRepository>(
     () => DataRepository(getIt<DatabaseHelper>()),
+  );
+
+  // JWT Token Manager
+  getIt.registerLazySingleton<JwtTokenManager>(
+    () => JwtTokenManager(getIt<FlutterSecureStorage>()),
   );
   
   getIt.registerLazySingleton<Dio>(() => DioClient.createDio());
