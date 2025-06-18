@@ -11,7 +11,6 @@ import '../storage/local_storage.dart';
 import '../storage/database_helper.dart';
 import '../storage/data_repository.dart';
 import '../utils/jwt_token_manager.dart';
-import '../utils/user_profile_validator.dart';
 import '../utils/session_manager.dart';
 import '../../features/auth/data/datasources/auth_remote_datasource.dart';
 import '../../features/auth/data/datasources/auth_local_datasource.dart';
@@ -77,11 +76,6 @@ Future<void> configureDependencies() async {
   // JWT Token Manager
   getIt.registerLazySingleton<JwtTokenManager>(
     () => JwtTokenManager(getIt<FlutterSecureStorage>()),
-  );
-
-  // User Profile Validator
-  getIt.registerLazySingleton<UserProfileValidator>(
-    () => UserProfileValidator(getIt<JwtTokenManager>()),
   );
 
   // Session Manager
