@@ -133,8 +133,8 @@ class AuthRepositoryImpl implements AuthRepository {
 
         // Create User entity from validated data
         final user = User(
-          id: userData['Id'] ?? '',
-          userName: userData['userName'] ?? '',
+          id: userData['id'] ?? userData['sub'] ?? '',
+          userName: userData['username'] ?? '',
           Nama: userData['Nama'] ?? '',
         );
 
