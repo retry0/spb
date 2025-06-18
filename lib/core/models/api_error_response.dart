@@ -39,46 +39,78 @@ class ApiErrorResponse extends Equatable {
   /// Whether this error can be retried
   final bool retryable;
 
-  class ApiErrorResponse {
-  final int statusCode;
-  final String errorCode;
-  final String message;
-  final String? details;
-  final List<String>? suggestedActions;
-  final String? timestamp;
-  final String? requestId;
-  final bool? retryable;
-  final Map<String, dynamic>? context;
-  final Map<String, dynamic>? fieldErrors;
-
-  ApiErrorResponse({
+  const ApiErrorResponse({
     required this.statusCode,
     required this.errorCode,
     required this.message,
-    this.details,
-    this.suggestedActions,
-    this.timestamp,
-    this.requestId,
-    this.retryable,
+    required this.details,
+    required this.suggestedActions,
+    required this.timestamp,
+    required this.requestId,
     this.context,
     this.fieldErrors,
+    this.documentationUrl,
+    this.retryable = false,
   });
 
-  factory ApiErrorResponse.fromJson(Map<String, dynamic> json) {
-    return ApiErrorResponse(
-      statusCode: json['statusCode'] ?? 0,
-      errorCode: json['errorCode'] ?? '',
-      message: json['message'] ?? '',
-      details: json['details'],
-      suggestedActions: (json['suggestedActions'] as List?)?.cast<String>(),
-      timestamp: json['timestamp'],
-      requestId: json['requestId'],
-      retryable: json['retryable'],
-      context: json['context'] as Map<String, dynamic>?,
-      fieldErrors: json['fieldErrors'] as Map<String, dynamic>?,
-    );
+  factory ApiErrorResponse.fromJson(Map<String, dynamic> json) =>
+      _$ApiErrorResponseFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ApiErrorResponseToJson(this);
+
+  @override
+  List<Object?> get props => [
+    statusCode,
+    errorCode,
+    message,
+    details,
+    suggestedActions,
+    timestamp,
+    requestId,
+    context,
+    fieldErrors,
+    documentationUrl,
+    retryable,
+  ];
+
+  /// Creates a user-friendly error summary
+  String get userFriendlySummary {
+    final buffer = StringBuffer();
+    buffer.writeln('Error: $message');
+
+    if (suggestedActions.isNotEmpty) {
+      buffer.writeln('\nWhat you can do:');
+      for (int i = 0; i < suggestedActions.length; i++) {
+        buffer.writeln('${i + 1}. ${suggestedActions[i]}');
+      }
+    }
+
+    if (retryable) {
+      buffer.writeln('\nThis operation can be retried.');
+    }
+
+    return buffer.toString();
   }
 
-  String get userFriendlySummary => message;
-}
+  /// Creates a technical summary for developers
+  String get technicalSummary {
+    final buffer = StringBuffer();
+    buffer.writeln('HTTP $statusCode - $errorCode');
+    buffer.writeln('Request ID: $requestId');
+    buffer.writeln('Timestamp: $timestamp');
+    buffer.writeln('Details: $details');
+
+    if (context != null && context!.isNotEmpty) {
+      buffer.writeln('Context: $context');
+    }
+
+    if (fieldErrors != null && fieldErrors!.isNotEmpty) {
+      buffer.writeln('Field Errors:');
+      fieldErrors!.forEach((field, errors) {
+        buffer.writeln('  $field: ${errors.join(', ')}');
+      });
+    }
+
+    return buffer.toString();
+  }
 }

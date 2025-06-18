@@ -16,10 +16,10 @@ class CheckUserNameAvailabilityUseCase {
       return Left(ValidationFailure(validationError));
     }
 
-    // Normalize userName
-    final normalizedUserName = UserNameValidator.normalize(userName);
+    // // Normalize userName
+    // final normalizedUserName = UserNameValidator.normalize(userName);
 
-    // Check availability
-    return await repository.checkUserNameAvailability(normalizedUserName);
+    // // Check availability
+    // return await repository.checkUserNameAvailability(normalizedUserName);
   }
 }

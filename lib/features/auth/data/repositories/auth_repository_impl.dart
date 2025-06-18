@@ -11,6 +11,7 @@ import '../../domain/entities/auth_tokens.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_remote_datasource.dart';
 import '../datasources/auth_local_datasource.dart';
+import '../../../../core/utils/logger.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
@@ -39,6 +40,7 @@ class AuthRepositoryImpl implements AuthRepository {
       final userData = await tokenManager.storeAndExtractToken(
         tokens.accessToken,
       );
+      AppLogger.info('userData ${userData}');
 
       if (userData != null) {
         // Log extracted user data (excluding sensitive fields)
@@ -59,7 +61,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message));
     } catch (e) {
-      return Left(ServerFailure('An unexpected error occurred during login'));
+      return Left(ServerFailure(e.toString()));
     }
   }
 
@@ -144,32 +146,32 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
-  @override
-  Future<Either<Failure, bool>> checkUserNameAvailability(
-    String userName,
-  ) async {
-    try {
-      // Check locally first
-      final isLocallyAvailable = await localDataSource.isUserNameAvailable(
-        userName,
-      );
-      if (!isLocallyAvailable) {
-        return const Right(false);
-      }
+  // @override
+  // Future<Either<Failure, bool>> checkUserNameAvailability(
+  //   String userName,
+  // ) async {
+  //   try {
+  //     // Check locally first
+  //     final isLocallyAvailable = await localDataSource.isUserNameAvailable(
+  //       userName,
+  //     );
+  //     if (!isLocallyAvailable) {
+  //       return const Right(false);
+  //     }
 
-      // Check remotely
-      final response = await remoteDataSource.checkUserNameAvailability(
-        userName,
-      );
-      final isAvailable = response['available'] as bool? ?? false;
+  //     // Check remotely
+  //     final response = await remoteDataSource.checkUserNameAvailability(
+  //       userName,
+  //     );
+  //     final isAvailable = response['available'] as bool? ?? false;
 
-      return Right(isAvailable);
-    } on NetworkException catch (e) {
-      return Left(NetworkFailure(e.message));
-    } catch (e) {
-      return Left(ServerFailure('Failed to check username availability'));
-    }
-  }
+  //     return Right(isAvailable);
+  //   } on NetworkException catch (e) {
+  //     return Left(NetworkFailure(e.message));
+  //   } catch (e) {
+  //     return Left(ServerFailure('Failed to check username availability'));
+  //   }
+  // }
 
   @override
   Future<bool> isLoggedIn() async {

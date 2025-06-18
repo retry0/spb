@@ -16,6 +16,7 @@ class AuthInterceptor extends Interceptor {
   ) async {
     try {
       final token = await _secureStorage.read(StorageKeys.accessToken);
+      AppLogger.info('Token encode ${token}');
 
       if (token != null && !JwtDecoder.isExpired(token)) {
         options.headers['Authorization'] = 'Bearer $token';

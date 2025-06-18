@@ -5,7 +5,8 @@ import '../../domain/entities/user.dart';
 import '../../domain/usecases/login_usecase.dart';
 import '../../domain/usecases/logout_usecase.dart';
 import '../../domain/usecases/refresh_token_usecase.dart';
-import '../../domain/usecases/check_username_availability_usecase.dart';
+// import '../../domain/usecases/check_username_availability_usecase.dart';
+import '../../../../core/utils/logger.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
@@ -14,19 +15,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LoginUseCase loginUseCase;
   final LogoutUseCase logoutUseCase;
   final RefreshTokenUseCase refreshTokenUseCase;
-  final CheckUserNameAvailabilityUseCase checkUserNameAvailabilityUseCase;
+  // final CheckUserNameAvailabilityUseCase checkUserNameAvailabilityUseCase;
 
   AuthBloc({
     required this.loginUseCase,
     required this.logoutUseCase,
     required this.refreshTokenUseCase,
-    required this.checkUserNameAvailabilityUseCase,
+    // required this.checkUserNameAvailabilityUseCase,
   }) : super(const AuthInitial()) {
     on<AuthCheckRequested>(_onAuthCheckRequested);
     on<AuthLoginRequested>(_onAuthLoginRequested);
     on<AuthLogoutRequested>(_onAuthLogoutRequested);
     on<AuthTokenValidationRequested>(_onAuthTokenValidationRequested);
-    on<AuthUserNameAvailabilityRequested>(_onAuthUserNameAvailabilityRequested);
+    // on<AuthUserNameAvailabilityRequested>(_onAuthUserNameAvailabilityRequested);
   }
 
   Future _onAuthCheckRequested(AuthCheckRequested event, Emitter emit) async {
@@ -39,6 +40,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Future _onAuthLoginRequested(AuthLoginRequested event, Emitter emit) async {
     emit(const AuthLoading());
     final result = await loginUseCase(event.userName, event.password);
+    // AppLogger.debug(
+    //   'JWT token decoded successfully. Filtered ${tokens} sensitive fields.',
+    // );
 
     result.fold(
       (failure) => emit(AuthError(failure.message)),
@@ -85,23 +89,25 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       if (!isValid) {
         emit(const AuthUnauthenticated());
       }
+      AppLogger.info('AUTH_BLOC ${emit}');
+
       // If valid, keep current state
     });
   }
 
-  Future _onAuthUserNameAvailabilityRequested(
-    AuthUserNameAvailabilityRequested event,
-    Emitter emit,
-  ) async {
-    final result = await checkUserNameAvailabilityUseCase(event.userName);
-    result.fold(
-      (failure) => emit(AuthUserNameCheckError(failure.message)),
-      (isAvailable) => emit(
-        AuthUserNameCheckResult(
-          userName: event.userName,
-          isAvailable: isAvailable,
-        ),
-      ),
-    );
-  }
+  // Future _onAuthUserNameAvailabilityRequested(
+  //   AuthUserNameAvailabilityRequested event,
+  //   Emitter emit,
+  // ) async {
+  //   final result = await checkUserNameAvailabilityUseCase(event.userName);
+  //   result.fold(
+  //     (failure) => emit(AuthUserNameCheckError(failure.message)),
+  //     (isAvailable) => emit(
+  //       AuthUserNameCheckResult(
+  //         userName: event.userName,
+  //         isAvailable: isAvailable,
+  //       ),
+  //     ),
+  //   );
+  // }
 }

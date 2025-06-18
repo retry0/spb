@@ -15,6 +15,6 @@ abstract class AuthRepository {
     String currentPassword,
     String newPassword,
   );
-  Future<Either<Failure, bool>> checkUserNameAvailability(String userName);
+  // Future<Either<Failure, bool>> checkUserNameAvailability(String userName);
   Future<bool> isLoggedIn();
 }
