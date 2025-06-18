@@ -6,8 +6,6 @@ import '../../domain/usecases/login_usecase.dart';
 import '../../domain/usecases/logout_usecase.dart';
 import '../../domain/usecases/refresh_token_usecase.dart';
 import '../../../../core/utils/session_manager.dart';
-import '../../../../core/utils/user_profile_validator.dart';
-import '../../../../core/di/injection.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
@@ -72,22 +70,33 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(const AuthLoading());
     
     try {
-      // Use the UserProfileValidator to check for valid profile
-      final userProfileValidator = getIt<UserProfileValidator>();
-      final validProfile = await userProfileValidator.getValidUserProfile();
+      // Check if session is active
+      final isActive = await sessionManager.isSessionActive();
       
-      if (validProfile != null) {
-        // Valid profile exists, get user data
-        final userResult = await loginUseCase.repository.getCurrentUser();
+      if (isActive) {
+        // Get user data from token
+        final result = await refreshTokenUseCase();
         
-        await userResult.fold(
+        await result.fold(
           (failure) async {
             emit(const AuthUnauthenticated());
           },
-          (user) async {
-            emit(AuthAuthenticated(user: user));
-            // Update session after successful validation
-            await sessionManager.updateLastActivity();
+          (isValid) async {
+            if (isValid) {
+              // Get current user
+              final userResult = await loginUseCase.repository.getCurrentUser();
+              
+              await userResult.fold(
+                (failure) async {
+                  emit(const AuthUnauthenticated());
+                },
+                (user) async {
+                  emit(AuthAuthenticated(user: user));
+                },
+              );
+            } else {
+              emit(const AuthUnauthenticated());
+            }
           },
         );
       } else {
