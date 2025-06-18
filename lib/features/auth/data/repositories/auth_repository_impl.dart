@@ -6,6 +6,7 @@ import '../../../../core/error/exceptions.dart';
 import '../../../../core/utils/jwt_decoder_util.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/utils/jwt_token_manager.dart';
+import '../../../../core/utils/session_manager.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/entities/auth_tokens.dart';
 import '../../domain/repositories/auth_repository.dart';
@@ -51,6 +52,10 @@ class AuthRepositoryImpl implements AuthRepository {
         }
       }
 
+      // Update session after successful login
+      final sessionManager = getIt<SessionManager>();
+      await sessionManager.updateLastActivity();
+
       return Right(tokens);
     } on AuthException catch (e) {
       return Left(AuthFailure(e.message));
@@ -73,12 +78,20 @@ class AuthRepositoryImpl implements AuthRepository {
       final tokenManager = getIt<JwtTokenManager>();
       await tokenManager.clearStoredToken();
 
+      // Clear session data
+      final sessionManager = getIt<SessionManager>();
+      await sessionManager.clearSession();
+
       return const Right(null);
     } catch (e) {
       // Even if remote logout fails, clear local tokens
       await localDataSource.clearToken();
       final tokenManager = getIt<JwtTokenManager>();
       await tokenManager.clearStoredToken();
+      
+      final sessionManager = getIt<SessionManager>();
+      await sessionManager.clearSession();
+      
       return const Right(null);
     }
   }
@@ -127,13 +140,8 @@ class AuthRepositoryImpl implements AuthRepository {
         }
       }
 
-      // Fallback to remote API call only if necessary
-      final user = await remoteDataSource.getCurrentUser();
-      
-      // Save user to local database for future use
-      await localDataSource.saveUser(user);
-      
-      return Right(user);
+      // No need to make a remote API call - we should have the data from the token
+      return Left(AuthFailure('No valid user data found'));
     } on AuthException catch (e) {
       return Left(AuthFailure(e.message));
     } on NetworkException catch (e) {
