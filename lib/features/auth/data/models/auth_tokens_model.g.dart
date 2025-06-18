@@ -8,10 +8,10 @@ part of 'auth_tokens_model.dart';
 
 AuthTokensModel _$AuthTokensModelFromJson(Map<String, dynamic> json) =>
     AuthTokensModel(
-      accessToken: json['accessToken'] as String,
+      token: json['token'] as String,
     );
 
 Map<String, dynamic> _$AuthTokensModelToJson(AuthTokensModel instance) =>
     <String, dynamic>{
-      'accessToken': instance.accessToken,
+      'token': instance.token,
     };

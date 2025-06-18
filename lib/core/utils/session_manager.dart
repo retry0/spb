@@ -12,19 +12,21 @@ class SessionManager {
   final SharedPreferences _prefs;
   final FlutterSecureStorage _secureStorage;
   final JwtTokenManager _tokenManager;
-  
+
   // Session timeout in minutes (default: 30 minutes)
   final int _sessionTimeoutMinutes;
-  
+
   // Timer for session checks
   Timer? _sessionCheckTimer;
-  
+
   // Session state
-  final ValueNotifier<SessionState> sessionState = ValueNotifier(SessionState.unknown);
+  final ValueNotifier<SessionState> sessionState = ValueNotifier(
+    SessionState.unknown,
+  );
 
   SessionManager(
-    this._prefs, 
-    this._secureStorage, 
+    this._prefs,
+    this._secureStorage,
     this._tokenManager, {
     int sessionTimeoutMinutes = 30,
   }) : _sessionTimeoutMinutes = sessionTimeoutMinutes {
@@ -35,8 +37,8 @@ class SessionManager {
   // Initialize session
   Future<void> initializeSession() async {
     try {
-      final token = await _secureStorage.read(StorageKeys.accessToken);
-      
+      final token = await _secureStorage.read(key: StorageKeys.accessToken);
+
       if (token != null && !await _tokenManager.isTokenExpiringSoon()) {
         // Valid token exists
         await updateLastActivity();
@@ -59,7 +61,7 @@ class SessionManager {
     try {
       final now = DateTime.now().millisecondsSinceEpoch;
       await _prefs.setInt(StorageKeys.lastActivity, now);
-      
+
       // If session was expiring, set it back to active
       if (sessionState.value == SessionState.expiring) {
         sessionState.value = SessionState.active;
@@ -73,25 +75,26 @@ class SessionManager {
   Future<bool> isSessionActive() async {
     try {
       // Check if token exists and is valid
-      final token = await _secureStorage.read(StorageKeys.accessToken);
+      final token = await _secureStorage.read(key: StorageKeys.accessToken);
       if (token == null) return false;
-      
+
       // Check if token is valid
       if (await _tokenManager.isTokenExpiringSoon()) {
         sessionState.value = SessionState.expiring;
         return true; // Still active but expiring soon
       }
-      
+
       // Check last activity
       final lastActivity = _prefs.getInt(StorageKeys.lastActivity);
       if (lastActivity == null) return false;
-      
+
       final now = DateTime.now().millisecondsSinceEpoch;
       final elapsedMinutes = (now - lastActivity) / (1000 * 60);
-      
+
       final isActive = elapsedMinutes < _sessionTimeoutMinutes;
-      sessionState.value = isActive ? SessionState.active : SessionState.timeout;
-      
+      sessionState.value =
+          isActive ? SessionState.active : SessionState.timeout;
+
       return isActive;
     } catch (e) {
       AppLogger.error('Failed to check session status: $e');
@@ -103,10 +106,10 @@ class SessionManager {
   // Clear session data
   Future<void> clearSession() async {
     try {
-      await _secureStorage.delete(StorageKeys.accessToken);
-      await _secureStorage.delete(StorageKeys.sessionData);
+      await _secureStorage.delete(key: StorageKeys.accessToken);
+      await _secureStorage.delete(key: StorageKeys.sessionData);
       await _prefs.remove(StorageKeys.lastActivity);
-      
+
       sessionState.value = SessionState.inactive;
     } catch (e) {
       AppLogger.error('Failed to clear session: $e');
@@ -118,7 +121,7 @@ class SessionManager {
     try {
       // Convert data to JSON string
       final jsonData = data.toString();
-      await _secureStorage.write(StorageKeys.sessionData, jsonData);
+      await _secureStorage.write(key: StorageKeys.sessionData, value: jsonData);
     } catch (e) {
       AppLogger.error('Failed to store session data: $e');
     }
@@ -127,9 +130,9 @@ class SessionManager {
   // Get session data
   Future<Map<String, dynamic>?> getSessionData() async {
     try {
-      final jsonData = await _secureStorage.read(StorageKeys.sessionData);
+      final jsonData = await _secureStorage.read(key: StorageKeys.sessionData);
       if (jsonData == null) return null;
-      
+
       // Parse JSON string to Map
       // Note: This is a simplification, actual implementation would use jsonDecode
       final data = <String, dynamic>{};
@@ -164,10 +167,10 @@ class SessionManager {
 
 // Session state enum
 enum SessionState {
-  unknown,   // Initial state
-  active,    // Session is active
-  expiring,  // Session is active but token is expiring soon
-  timeout,   // Session timed out due to inactivity
-  inactive,  // No active session
-  error      // Error occurred during session operations
+  unknown, // Initial state
+  active, // Session is active
+  expiring, // Session is active but token is expiring soon
+  timeout, // Session timed out due to inactivity
+  inactive, // No active session
+  error, // Error occurred during session operations
 }

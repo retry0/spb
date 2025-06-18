@@ -18,11 +18,10 @@ class AuthInterceptor extends Interceptor {
   ) async {
     try {
       final token = await _secureStorage.read(StorageKeys.accessToken);
-      AppLogger.info('Token encode ${token}');
 
       if (token != null && !JwtDecoder.isExpired(token)) {
         options.headers['Authorization'] = 'Bearer $token';
-        
+
         // Update last activity timestamp for session management
         await _sessionManager.updateLastActivity();
       } else if (token != null) {
@@ -44,7 +43,7 @@ class AuthInterceptor extends Interceptor {
         // Clear expired or invalid token
         await _secureStorage.delete(StorageKeys.accessToken);
         AppLogger.warning('Invalid token cleared due to 401 response');
-        
+
         // Clear session data
         await _sessionManager.clearSession();
       } catch (e) {
