@@ -102,11 +102,54 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                             ),
                           ),
-                          Center(
-                            child: Image.asset(
-                              'assets/icon/smart_logo.png',
-                              height: 200,
+                          const SizedBox(height: 32),
+                          Text(
+                            'Welcome Back',
+                            style: Theme.of(
+                              context,
+                            ).textTheme.displaySmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.primary,
                             ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Sign in to your secure account',
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodyLarge?.copyWith(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onBackground.withOpacity(0.7),
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 48),
+                          // Login form
+                          const LoginForm(),
+                          const SizedBox(height: 24),
+                          // Additional options
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Need help?',
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.bodyMedium?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onBackground.withOpacity(0.7),
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  // Navigate to help page
+                                },
+                                child: const Text('Contact Support'),
+                              ),
+                            ],
                           ),
                         ],
                       ),

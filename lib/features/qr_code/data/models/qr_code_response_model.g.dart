@@ -15,10 +15,10 @@ QrCodeResponseModel _$QrCodeResponseModelFromJson(Map<String, dynamic> json) =>
     );
 
 Map<String, dynamic> _$QrCodeResponseModelToJson(
-  QrCodeResponseModel instance,
-) => <String, dynamic>{
-  'content': instance.content,
-  'success': instance.success,
-  'message': instance.message,
-  'data': instance.data,
-};
+        QrCodeResponseModel instance) =>
+    <String, dynamic>{
+      'content': instance.content,
+      'success': instance.success,
+      'message': instance.message,
+      'data': instance.data,
+    };

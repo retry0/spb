@@ -27,7 +27,7 @@ class ProfileInfoSection extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  _InfoRow(label: 'User ID', value: state.user.id),
+                  _InfoRow(label: 'User ID', value: state.user.Id),
                   const Divider(),
                   _InfoRow(label: 'Username', value: state.user.userName),
 

@@ -93,8 +93,8 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
       await _dbHelper.update(
         'users',
         user.toDatabase(),
-        where: 'id = ?',
-        whereArgs: [user.id],
+        where: 'Id = ?',
+        whereArgs: [user.Id],
       );
     } catch (e) {
       AppLogger.error('Failed to update user', e);

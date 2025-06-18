@@ -13,14 +13,14 @@ class QrCodeControls extends StatefulWidget {
 
 class _QrCodeControlsState extends State<QrCodeControls> {
   final _formKey = GlobalKey<FormState>();
-  
+
   // Default values
   String? _driver;
   String? _kdVendor;
   int _size = 300;
   String _errorCorrectionLevel = 'M';
   bool _isDarkMode = false;
-  
+
   @override
   void initState() {
     super.initState();
@@ -28,17 +28,15 @@ class _QrCodeControlsState extends State<QrCodeControls> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthAuthenticated) {
       _driver = authState.user.userName;
-      _kdVendor = authState.user.id;
+      _kdVendor = authState.user.Id;
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -48,12 +46,12 @@ class _QrCodeControlsState extends State<QrCodeControls> {
             children: [
               Text(
                 'QR Code Settings',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
-              
+
               // Driver field
               TextFormField(
                 initialValue: _driver,
@@ -75,7 +73,7 @@ class _QrCodeControlsState extends State<QrCodeControls> {
                 },
               ),
               const SizedBox(height: 16),
-              
+
               // Vendor field
               TextFormField(
                 initialValue: _kdVendor,
@@ -97,7 +95,7 @@ class _QrCodeControlsState extends State<QrCodeControls> {
                 },
               ),
               const SizedBox(height: 24),
-              
+
               // Size slider
               Row(
                 children: [
@@ -121,7 +119,7 @@ class _QrCodeControlsState extends State<QrCodeControls> {
                             setState(() {
                               _size = value.round();
                             });
-                            
+
                             // Update QR code size if already generated
                             final state = context.read<QrCodeBloc>().state;
                             if (state is QrCodeGenerated) {
@@ -136,7 +134,7 @@ class _QrCodeControlsState extends State<QrCodeControls> {
                   ),
                 ],
               ),
-              
+
               // Error correction level
               Row(
                 children: [
@@ -163,12 +161,14 @@ class _QrCodeControlsState extends State<QrCodeControls> {
                             setState(() {
                               _errorCorrectionLevel = selection.first;
                             });
-                            
+
                             // Update QR code error correction if already generated
                             final state = context.read<QrCodeBloc>().state;
                             if (state is QrCodeGenerated) {
                               context.read<QrCodeBloc>().add(
-                                QrCodeErrorCorrectionChanged(_errorCorrectionLevel),
+                                QrCodeErrorCorrectionChanged(
+                                  _errorCorrectionLevel,
+                                ),
                               );
                             }
                           },
@@ -179,7 +179,7 @@ class _QrCodeControlsState extends State<QrCodeControls> {
                 ],
               ),
               const SizedBox(height: 16),
-              
+
               // Theme switch
               Row(
                 children: [
@@ -196,14 +196,16 @@ class _QrCodeControlsState extends State<QrCodeControls> {
                       setState(() {
                         _isDarkMode = value;
                       });
-                      
+
                       // Update QR code theme if already generated
                       final state = context.read<QrCodeBloc>().state;
                       if (state is QrCodeGenerated) {
                         context.read<QrCodeBloc>().add(
                           QrCodeThemeChanged(
-                            foregroundColor: _isDarkMode ? '#FFFFFF' : '#000000',
-                            backgroundColor: _isDarkMode ? '#000000' : '#FFFFFF',
+                            foregroundColor:
+                                _isDarkMode ? '#FFFFFF' : '#000000',
+                            backgroundColor:
+                                _isDarkMode ? '#000000' : '#FFFFFF',
                           ),
                         );
                       }
@@ -212,29 +214,30 @@ class _QrCodeControlsState extends State<QrCodeControls> {
                 ],
               ),
               const SizedBox(height: 24),
-              
+
               // Generate button
               SizedBox(
                 width: double.infinity,
                 child: BlocBuilder<QrCodeBloc, QrCodeState>(
                   builder: (context, state) {
                     final isGenerating = state is QrCodeGenerating;
-                    
+
                     return ElevatedButton(
                       onPressed: isGenerating ? null : _generateQrCode,
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
-                      child: isGenerating
-                          ? const SizedBox(
-                              height: 24,
-                              width: 24,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Text('Generate QR Code'),
+                      child:
+                          isGenerating
+                              ? const SizedBox(
+                                height: 24,
+                                width: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                              : const Text('Generate QR Code'),
                     );
                   },
                 ),
@@ -245,7 +248,7 @@ class _QrCodeControlsState extends State<QrCodeControls> {
       ),
     );
   }
-  
+
   void _generateQrCode() {
     if (_formKey.currentState?.validate() ?? false) {
       context.read<QrCodeBloc>().add(

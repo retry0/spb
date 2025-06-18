@@ -133,9 +133,13 @@ class AuthRepositoryImpl implements AuthRepository {
 
         // Create User entity from validated data
         final user = User(
-          id: userData['id'] ?? userData['sub'] ?? '',
-          userName: userData['username'] ?? '',
-          Nama: userData['Nama'] ?? '',
+          Id: userData['Id'],
+          userName: userData['userName'],
+          Nama: userData['Nama'], //     '',
+          // createdAt: DateTime.now().subtract(
+          //   const Duration(days: 30),
+          // ), // Default
+          // updatedAt: DateTime.now(),
         );
 
         return Right(user);

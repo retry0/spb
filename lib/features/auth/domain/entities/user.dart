@@ -1,20 +1,20 @@
 import 'package:equatable/equatable.dart';
 
 class User extends Equatable {
-  final String id;
+  final String Id;
   final String userName;
   final String Nama;
 
-  const User({required this.id, required this.userName, required this.Nama});
+  const User({required this.Id, required this.userName, required this.Nama});
 
-  User copyWith({String? id, String? userName, String? Nama}) {
+  User copyWith({String? Id, String? userName, String? Nama}) {
     return User(
-      id: id ?? this.id,
+      Id: Id ?? this.Id,
       userName: userName ?? this.userName,
       Nama: Nama ?? this.Nama,
     );
   }
 
   @override
-  List<Object?> get props => [id, userName, Nama];
+  List<Object?> get props => [Id, userName, Nama];
 }
