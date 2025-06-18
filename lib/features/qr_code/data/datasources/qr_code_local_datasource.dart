@@ -7,7 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:image_gallery_saver_plus/image_gallery_saver_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -154,14 +154,14 @@ class QrCodeLocalDataSourceImpl implements QrCodeLocalDataSource {
       // Request storage permission
       final status = await Permission.storage.request();
       if (!status.isGranted) {
-        throw CacheException('Storage permission not granted');
+        throw PermissionException('Storage permission not granted');
       }
       
       // Generate QR code image
       final qrImage = await _generateQrImage(qrCode, size);
       
-      // Save to gallery
-      final result = await ImageGallerySaver.saveImage(
+      // Save to gallery using image_gallery_saver_plus
+      final result = await ImageGallerySaverPlus.saveImage(
         qrImage,
         quality: 100,
         name: 'QR_${qrCode.id}_${DateTime.now().millisecondsSinceEpoch}',
@@ -170,7 +170,7 @@ class QrCodeLocalDataSourceImpl implements QrCodeLocalDataSource {
       if (result['isSuccess']) {
         return result['filePath'] ?? 'Image saved to gallery';
       } else {
-        throw CacheException('Failed to save image to gallery');
+        throw CacheException('Failed to save image to gallery: ${result['errorMessage']}');
       }
     } catch (e) {
       throw CacheException('Failed to export QR code as image: $e');

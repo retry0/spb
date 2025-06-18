@@ -39,12 +39,11 @@ dependencies:
   
   # QR Code
   qr_flutter: ^4.1.0
-  image_gallery_saver: ^2.0.3
+  image_gallery_saver_plus: ^1.0.0
   path_provider: ^2.1.4
   share_plus: ^7.2.2
   
   # File Operations
-  path_provider: ^2.1.4
   file_picker: ^8.1.2
   image_picker: ^1.1.2
   image: ^4.2.0
