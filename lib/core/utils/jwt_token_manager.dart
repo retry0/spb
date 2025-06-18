@@ -6,9 +6,9 @@ import 'jwt_decoder_util.dart';
 
 /// Manages JWT tokens with secure storage and data extraction
 class JwtTokenManager {
-  final FlutterSecureStorage _secureStorage;
+  final FlutterSecureStorage secureStorage;
 
-  const JwtTokenManager(this._secureStorage);
+  const JwtTokenManager(this.secureStorage);
 
   /// Stores a JWT token securely and extracts user data
   Future<Map<String, dynamic>?> storeAndExtractToken(String token) async {
@@ -20,7 +20,7 @@ class JwtTokenManager {
       }
 
       // Store the token securely
-      await _secureStorage.write(key: StorageKeys.accessToken, value: token);
+      await secureStorage.write(key: StorageKeys.accessToken, value: token);
       
       // Extract and return filtered data
       final filteredData = JwtDecoderUtil.decodeAndFilterToken(token);
@@ -31,7 +31,7 @@ class JwtTokenManager {
         // Optionally store extracted user data separately for quick access
         final userInfo = JwtDecoderUtil.extractUserInfo(token);
         if (userInfo != null) {
-          await _secureStorage.write(
+          await secureStorage.write(
             key: 'user_info', 
             value: jsonEncode(userInfo),
           );
@@ -49,7 +49,7 @@ class JwtTokenManager {
   Future<Map<String, dynamic>?> getCurrentUserData() async {
     try {
       // First try to get from cached user info for better performance
-      final userInfoJson = await _secureStorage.read(key: 'user_info');
+      final userInfoJson = await secureStorage.read(key: 'user_info');
       if (userInfoJson != null) {
         try {
           return jsonDecode(userInfoJson) as Map<String, dynamic>;
@@ -60,7 +60,7 @@ class JwtTokenManager {
       }
       
       // Get from token if cache not available
-      final token = await _secureStorage.read(key: StorageKeys.accessToken);
+      final token = await secureStorage.read(key: StorageKeys.accessToken);
       if (token == null) {
         AppLogger.debug('No stored JWT token found');
         return null;
@@ -77,7 +77,7 @@ class JwtTokenManager {
       final userInfo = JwtDecoderUtil.extractUserInfo(token);
       if (userInfo != null) {
         // Update cached user info
-        await _secureStorage.write(
+        await secureStorage.write(
           key: 'user_info', 
           value: jsonEncode(userInfo),
         );
@@ -93,7 +93,7 @@ class JwtTokenManager {
   /// Gets token metadata without exposing sensitive data
   Future<Map<String, dynamic>?> getTokenMetadata() async {
     try {
-      final token = await _secureStorage.read(key: StorageKeys.accessToken);
+      final token = await secureStorage.read(key: StorageKeys.accessToken);
       if (token == null) return null;
 
       return JwtDecoderUtil.getTokenMetadata(token);
@@ -106,7 +106,7 @@ class JwtTokenManager {
   /// Extracts custom claims from stored token
   Future<Map<String, dynamic>?> getCustomClaims() async {
     try {
-      final token = await _secureStorage.read(key: StorageKeys.accessToken);
+      final token = await secureStorage.read(key: StorageKeys.accessToken);
       if (token == null) return null;
 
       return JwtDecoderUtil.extractCustomClaims(token);
@@ -119,7 +119,7 @@ class JwtTokenManager {
   /// Checks if stored token has specific claims
   Future<bool> hasRequiredClaims(List<String> requiredClaims) async {
     try {
-      final token = await _secureStorage.read(key: StorageKeys.accessToken);
+      final token = await secureStorage.read(key: StorageKeys.accessToken);
       if (token == null) return false;
 
       return JwtDecoderUtil.hasClaimsInToken(token, requiredClaims);
@@ -132,7 +132,7 @@ class JwtTokenManager {
   /// Gets specific claims from stored token
   Future<Map<String, dynamic>> getSpecificClaims(List<String> claimNames) async {
     try {
-      final token = await _secureStorage.read(key: StorageKeys.accessToken);
+      final token = await secureStorage.read(key: StorageKeys.accessToken);
       if (token == null) return {};
 
       return JwtDecoderUtil.extractSpecificClaims(token, claimNames);
@@ -145,16 +145,16 @@ class JwtTokenManager {
   /// Clears stored token and user data
   Future<void> clearStoredToken() async {
     try {
-      await _secureStorage.delete(key: StorageKeys.accessToken);
-      await _secureStorage.delete(key: 'user_info');
-      await _secureStorage.delete(key: StorageKeys.userCredentials);
-      await _secureStorage.delete(key: StorageKeys.sessionData);
+      await secureStorage.delete(key: StorageKeys.accessToken);
+      await secureStorage.delete(key: 'user_info');
+      await secureStorage.delete(key: StorageKeys.userCredentials);
+      await secureStorage.delete(key: StorageKeys.sessionData);
       
       // Clear any other token-related data
-      final keys = await _secureStorage.readAll();
+      final keys = await secureStorage.readAll();
       for (final key in keys.keys) {
         if (key.startsWith('token_') || key.startsWith('auth_')) {
-          await _secureStorage.delete(key: key);
+          await secureStorage.delete(key: key);
         }
       }
       
@@ -164,7 +164,7 @@ class JwtTokenManager {
       
       // Try alternative approach if the first method fails
       try {
-        await _secureStorage.deleteAll();
+        await secureStorage.deleteAll();
         AppLogger.info('Deleted all secure storage as fallback');
       } catch (e2) {
         AppLogger.error('Failed to delete all secure storage: $e2');
@@ -175,13 +175,13 @@ class JwtTokenManager {
   /// Refreshes user data from current token
   Future<Map<String, dynamic>?> refreshUserData() async {
     try {
-      final token = await _secureStorage.read(key: StorageKeys.accessToken);
+      final token = await secureStorage.read(key: StorageKeys.accessToken);
       if (token == null) return null;
 
       final userInfo = JwtDecoderUtil.extractUserInfo(token);
       if (userInfo != null) {
         // Update stored user info
-        await _secureStorage.write(
+        await secureStorage.write(
           key: 'user_info', 
           value: jsonEncode(userInfo),
         );
@@ -197,7 +197,7 @@ class JwtTokenManager {
   /// Gets cached user info (faster than decoding token each time)
   Future<Map<String, dynamic>?> getCachedUserInfo() async {
     try {
-      final userInfoJson = await _secureStorage.read(key: 'user_info');
+      final userInfoJson = await secureStorage.read(key: 'user_info');
       if (userInfoJson == null) return null;
 
       return jsonDecode(userInfoJson) as Map<String, dynamic>;
@@ -211,7 +211,7 @@ class JwtTokenManager {
   /// Checks if token is about to expire (within 5 minutes)
   Future<bool> isTokenExpiringSoon() async {
     try {
-      final token = await _secureStorage.read(key: StorageKeys.accessToken);
+      final token = await secureStorage.read(key: StorageKeys.accessToken);
       if (token == null) return true; // No token means we need to login
       
       final metadata = JwtDecoderUtil.getTokenMetadata(token);
