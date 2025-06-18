@@ -73,6 +73,7 @@ class _NetworkErrorWidgetState extends State<NetworkErrorWidget> {
 
               // Action buttons
               _buildActionButtons(),
+
               const SizedBox(height: 24),
 
               // Diagnostics results
@@ -134,6 +135,7 @@ class _NetworkErrorWidgetState extends State<NetworkErrorWidget> {
 
   Widget _buildApiErrorDetails() {
     final apiError = widget.apiErrorResponse!;
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -153,22 +155,25 @@ class _NetworkErrorWidgetState extends State<NetworkErrorWidget> {
               ],
             ),
             const SizedBox(height: 12),
-            if (apiError.details.isNotEmpty) ...[
+
+            if (apiError.details != null && apiError.details!.isNotEmpty) ...[
               Text(
                 'Details:',
                 style: const TextStyle(fontWeight: FontWeight.w500),
               ),
               const SizedBox(height: 4),
-              Text(apiError.details),
+              Text(apiError.details!),
               const SizedBox(height: 12),
             ],
-            if (apiError.suggestedActions.isNotEmpty) ...[
+
+            if (apiError.suggestedActions != null &&
+                apiError.suggestedActions!.isNotEmpty) ...[
               Text(
                 'Suggested Actions:',
                 style: const TextStyle(fontWeight: FontWeight.w500),
               ),
               const SizedBox(height: 8),
-              ...apiError.suggestedActions.map(
+              ...apiError.suggestedActions!.map(
                 (action) => Padding(
                   padding: const EdgeInsets.only(bottom: 4),
                   child: Row(
@@ -218,7 +223,8 @@ class _NetworkErrorWidgetState extends State<NetworkErrorWidget> {
               ),
             ],
 
-            if (apiError.requestId.isNotEmpty) ...[
+            if (apiError.requestId != null &&
+                apiError.requestId!.isNotEmpty) ...[
               const SizedBox(height: 12),
               Container(
                 padding: const EdgeInsets.all(8),
@@ -296,6 +302,7 @@ class _NetworkErrorWidgetState extends State<NetworkErrorWidget> {
 
   Widget _buildActionButtons() {
     final canRetry = widget.apiErrorResponse?.retryable ?? true;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [

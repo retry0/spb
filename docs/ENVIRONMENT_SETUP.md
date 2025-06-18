@@ -24,7 +24,7 @@ The application supports three environment types:
 
 | Variable | Required | Description | Default |
 |----------|----------|-------------|---------|
-| `DEV_API_BASE_URL` | No | Development API base URL | `http://10.88.115.131:8097/v1` |
+| `DEV_API_BASE_URL` | No | Development API base URL | `http://10.0.2.2:8097/v1` |
 | `DEV_ENABLE_LOGGING` | No | Enable debug logging | `true` |
 | `DEV_TIMEOUT_SECONDS` | No | Request timeout in seconds | `30` |
 
@@ -60,7 +60,7 @@ The application supports three environment types:
    Edit `.env` with your development settings:
    ```bash
    FLUTTER_ENV=development
-   DEV_API_BASE_URL=http://10.88.115.131:8097/v1
+   DEV_API_BASE_URL=http://10.0.2.2:8097/v1
    DEV_ENABLE_LOGGING=true
    DEV_TIMEOUT_SECONDS=30
    ```

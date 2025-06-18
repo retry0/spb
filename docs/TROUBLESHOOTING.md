@@ -99,7 +99,7 @@ This guide provides solutions for common issues encountered when developing, dep
 3. **Test API directly:**
    ```bash
    # Using curl
-   curl -X POST "http://10.88.115.131:8097/v1/Account/LoginUser" \
+   curl -X POST "http://10.0.2.2:8097/v1/Account/LoginUser" \
      -H "Content-Type: application/json" \
      -d '{"userName":"test_user","password":"password123"}'
    ```
@@ -1724,7 +1724,7 @@ This guide provides solutions for common issues encountered when developing, dep
    
    # Example .env content
    FLUTTER_ENV=development
-   DEV_API_BASE_URL=http://10.88.115.131:8097/v1
+   DEV_API_BASE_URL=http://10.0.2.2:8097/v1
    DEV_ENABLE_LOGGING=true
    DEV_TIMEOUT_SECONDS=30
    ```

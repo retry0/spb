@@ -40,31 +40,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Future _onAuthLoginRequested(AuthLoginRequested event, Emitter emit) async {
     emit(const AuthLoading());
     final result = await loginUseCase(event.userName, event.password);
-    // AppLogger.debug(
-    //   'JWT token decoded successfully. Filtered ${tokens} sensitive fields.',
-    // );
 
     result.fold(
       (failure) => emit(AuthError(failure.message)),
       (tokens) => emit(
         AuthAuthenticated(
-          user: User(
-            id: '1',
-            userName: event.userName,
-            email: '${event.userName}@example.com',
-            name: event.userName
-                .replaceAll('_', ' ')
-                .split(' ')
-                .map(
-                  (word) =>
-                      word.isNotEmpty
-                          ? word[0].toUpperCase() + word.substring(1)
-                          : word,
-                )
-                .join(' '),
-            createdAt: DateTime.now().subtract(const Duration(days: 30)),
-            updatedAt: DateTime.now(),
-          ),
+          user: User(id: '1', userName: event.userName, Nama: 'MAYA'),
         ),
       ),
     );
@@ -89,7 +70,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       if (!isValid) {
         emit(const AuthUnauthenticated());
       }
-      AppLogger.info('AUTH_BLOC ${emit}');
 
       // If valid, keep current state
     });

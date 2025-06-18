@@ -62,7 +62,7 @@ class AndroidEmulatorConfig {
   /// Get emulator-specific development configuration
   static Map<String, String> getEmulatorDevConfig() {
     return {
-      'DEV_API_BASE_URL': 'http://10.88.115.131:8097/v1',
+      'DEV_API_BASE_URL': 'http://10.0.2.2:8097/v1',
       'DEV_ENABLE_LOGGING': 'true',
       'DEV_TIMEOUT_SECONDS': '45', // Slightly longer for emulator
     };

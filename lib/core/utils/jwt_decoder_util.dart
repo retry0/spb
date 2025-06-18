@@ -17,14 +17,14 @@ class JwtDecoderUtil {
   };
 
   /// Decodes a JWT token and returns all data except sensitive authentication fields
-  /// 
+  ///
   /// Returns a Map containing all JWT claims except:
   /// - access_token/accessToken
-  /// - refresh_token/refreshToken  
+  /// - refresh_token/refreshToken
   /// - expires_at/expiresAt
   /// - exp (expiration time)
   /// - iat (issued at time)
-  /// 
+  ///
   /// Returns null if the token is invalid or cannot be decoded
   static Map<String, dynamic>? decodeAndFilterToken(String token) {
     try {
@@ -42,17 +42,21 @@ class JwtDecoderUtil {
 
       // Decode the JWT token
       final Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
-      
+
       // Filter out sensitive fields
-      final Map<String, dynamic> filteredData = Map<String, dynamic>.from(decodedToken);
-      
+      final Map<String, dynamic> filteredData = Map<String, dynamic>.from(
+        decodedToken,
+      );
+
       // Remove excluded fields
       for (final field in _excludedFields) {
         filteredData.remove(field);
       }
 
-      AppLogger.debug('JWT token decoded successfully. Filtered ${_excludedFields.length} sensitive fields.');
-      
+      AppLogger.debug(
+        'JWT token decoded successfully. Filtered ${_excludedFields.length} sensitive fields.',
+      );
+
       return filteredData;
     } catch (e) {
       AppLogger.error('Failed to decode JWT token: $e');
@@ -93,7 +97,7 @@ class JwtDecoderUtil {
     };
 
     final Map<String, dynamic> userInfo = {};
-    
+
     for (final field in userFields) {
       if (filteredData.containsKey(field)) {
         userInfo[field] = filteredData[field];
@@ -142,8 +146,10 @@ class JwtDecoderUtil {
       'address',
     };
 
-    final Map<String, dynamic> customClaims = Map<String, dynamic>.from(filteredData);
-    
+    final Map<String, dynamic> customClaims = Map<String, dynamic>.from(
+      filteredData,
+    );
+
     // Remove standard and common claims
     for (final claim in [...standardClaims, ...commonUserClaims]) {
       customClaims.remove(claim);
@@ -168,7 +174,7 @@ class JwtDecoderUtil {
     try {
       final decodedToken = JwtDecoder.decode(token);
       final iat = decodedToken['iat'];
-      
+
       if (iat != null) {
         return DateTime.fromMillisecondsSinceEpoch(iat * 1000);
       }
@@ -195,15 +201,16 @@ class JwtDecoderUtil {
       final expiration = getTokenExpiration(token);
       final issuedAt = getTokenIssuedAt(token);
       final isValid = isTokenValid(token);
-      
+
       return {
         'isValid': isValid,
         'isExpired': !isValid,
         'expirationDate': expiration?.toIso8601String(),
         'issuedAtDate': issuedAt?.toIso8601String(),
-        'timeUntilExpiration': expiration != null 
-            ? expiration.difference(DateTime.now()).inSeconds
-            : null,
+        'timeUntilExpiration':
+            expiration != null
+                ? expiration.difference(DateTime.now()).inSeconds
+                : null,
       };
     } catch (e) {
       AppLogger.error('Failed to get token metadata: $e');
@@ -214,7 +221,7 @@ class JwtDecoderUtil {
   /// Validates JWT token format (basic structure check)
   static bool _isValidJwtFormat(String token) {
     if (token.isEmpty) return false;
-    
+
     final parts = token.split('.');
     return parts.length == 3; // Header.Payload.Signature
   }
@@ -232,14 +239,14 @@ class JwtDecoderUtil {
 
   /// Extracts specific claims by name
   static Map<String, dynamic> extractSpecificClaims(
-    String token, 
+    String token,
     List<String> claimNames,
   ) {
     final filteredData = decodeAndFilterToken(token);
     if (filteredData == null) return {};
 
     final Map<String, dynamic> specificClaims = {};
-    
+
     for (final claimName in claimNames) {
       if (filteredData.containsKey(claimName)) {
         specificClaims[claimName] = filteredData[claimName];

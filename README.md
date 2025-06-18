@@ -253,7 +253,7 @@ Edit `.env` with your configuration:
 ```bash
 # Environment Configuration
 FLUTTER_ENV=development
-DEV_API_BASE_URL=http://10.88.115.131:8097/v1
+DEV_API_BASE_URL=http://10.0.2.2:8097/v1
 DEV_ENABLE_LOGGING=true
 DEV_TIMEOUT_SECONDS=30
 ```
@@ -308,7 +308,7 @@ The application supports multiple environments with automatic validation:
 | Variable | Environment | Required | Description | Default |
 |----------|-------------|----------|-------------|---------|
 | `FLUTTER_ENV` | All | No | Environment type | `development` |
-| `DEV_API_BASE_URL` | Development | No | Development API URL | `http://10.88.115.131:8097/v1` |
+| `DEV_API_BASE_URL` | Development | No | Development API URL | `http://10.0.2.2:8097/v1` |
 | `DEV_ENABLE_LOGGING` | Development | No | Enable debug logging | `true` |
 | `DEV_TIMEOUT_SECONDS` | Development | No | Request timeout | `30` |
 | `STAGING_API_BASE_URL` | Staging | Yes | Staging API URL | None |

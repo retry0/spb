@@ -16,48 +16,49 @@ import 'features/theme/presentation/bloc/theme_bloc.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize logging
   AppLogger.init();
-  
+
   try {
     // Initialize environment configuration
     await EnvironmentConfig.initialize();
     AppLogger.info('Environment: ${EnvironmentConfig.environmentName}');
     AppLogger.info('Raw Base URL: ${EnvironmentConfig.rawBaseUrl}');
     AppLogger.info('Effective Base URL: ${EnvironmentConfig.baseUrl}');
-    
+
     // Log Android emulator information
     if (EnvironmentConfig.isDevelopment) {
       final emulatorInfo = AndroidEmulatorConfig.getDebugInfo();
       AppLogger.info('Platform Info: $emulatorInfo');
     }
-    
+
     // Validate environment configuration
     final validation = EnvironmentValidator.validateEnvironment();
     if (!validation.isValid) {
       AppLogger.error('Environment validation failed:');
       AppLogger.error(validation.getReport());
-      
+
       // In development, show validation errors but continue
       if (EnvironmentConfig.isDevelopment) {
-        AppLogger.warning('Continuing with invalid configuration in development mode');
+        AppLogger.warning(
+          'Continuing with invalid configuration in development mode',
+        );
       } else {
         // In production/staging, fail fast
         throw Exception('Invalid environment configuration');
       }
     }
-    
+
     if (validation.warnings.isNotEmpty) {
       AppLogger.warning('Environment warnings:');
       for (final warning in validation.warnings) {
         AppLogger.warning('  • $warning');
       }
     }
-    
   } catch (e) {
     AppLogger.error('Failed to initialize environment configuration: $e');
-    
+
     // Show user-friendly error in debug mode
     if (EnvironmentConfig.isDevelopment) {
       runApp(ErrorApp(error: e.toString()));
@@ -66,22 +67,22 @@ void main() async {
       rethrow;
     }
   }
-  
+
   // Initialize SQLite database
   await DatabaseHelper.instance.database;
-  
+
   // Configure dependency injection
   await configureDependencies();
-  
+
   // Set up BLoC observer
   Bloc.observer = AppBlocObserver();
-  
+
   // Set preferred orientations
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-  
+
   runApp(const MyApp());
 }
 
@@ -93,16 +94,18 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (context) => getIt<AuthBloc>()..add(const AuthCheckRequested()),
+          create:
+              (context) => getIt<AuthBloc>()..add(const AuthCheckRequested()),
         ),
         BlocProvider(
-          create: (context) => getIt<ThemeBloc>()..add(const ThemeInitialized()),
+          create:
+              (context) => getIt<ThemeBloc>()..add(const ThemeInitialized()),
         ),
       ],
       child: BlocBuilder<ThemeBloc, ThemeState>(
         builder: (context, themeState) {
           return MaterialApp.router(
-            title: 'SPB Secure App',
+            title: 'SPB',
             debugShowCheckedModeBanner: false,
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
@@ -112,7 +115,9 @@ class MyApp extends StatelessWidget {
               return MediaQuery(
                 data: MediaQuery.of(context).copyWith(
                   textScaler: TextScaler.linear(
-                    MediaQuery.of(context).textScaler.scale(1.0).clamp(0.8, 1.4),
+                    MediaQuery.of(
+                      context,
+                    ).textScaler.scale(1.0).clamp(0.8, 1.4),
                   ),
                 ),
                 child: child!,
@@ -128,7 +133,7 @@ class MyApp extends StatelessWidget {
 /// Error app shown when environment configuration fails
 class ErrorApp extends StatelessWidget {
   final String error;
-  
+
   const ErrorApp({super.key, required this.error});
 
   @override
@@ -143,11 +148,7 @@ class ErrorApp extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.error_outline,
-                  size: 64,
-                  color: Colors.red[700],
-                ),
+                Icon(Icons.error_outline, size: 64, color: Colors.red[700]),
                 const SizedBox(height: 24),
                 Text(
                   'Configuration Error',

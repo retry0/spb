@@ -6,7 +6,7 @@ The SPB Secure API provides RESTful endpoints for user authentication, data mana
 
 ## Base URL
 
-- **Development**: `http://10.88.115.131:8097/v1`
+- **Development**: `http://10.0.2.2:8097/v1`
 - **Staging**: `https://api-staging.spb-secure.com/v1`
 - **Production**: `https://api.spb-secure.com/v1`
 

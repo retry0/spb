@@ -8,7 +8,7 @@ This guide covers deployment strategies, environment configuration, and platform
 
 ### Development
 - **Purpose**: Local development and testing
-- **API**: `http://10.88.115.131:8097/v1`
+- **API**: `http://10.0.2.2:8097/v1`
 - **Features**: Debug logging, hot reload, development tools
 - **Security**: Relaxed security for development convenience
 
@@ -63,7 +63,7 @@ Create environment-specific configuration files:
 ```bash
 # Development
 echo "FLUTTER_ENV=development" > .env.development
-echo "DEV_API_BASE_URL=http://10.88.115.131:8097/v1" >> .env.development
+echo "DEV_API_BASE_URL=http://10.0.2.2:8097/v1" >> .env.development
 
 # Staging
 echo "FLUTTER_ENV=staging" > .env.staging
@@ -573,7 +573,7 @@ deploy_firebase:
 #### Development
 ```bash
 FLUTTER_ENV=development
-DEV_API_BASE_URL=http://10.88.115.131:8097/v1
+DEV_API_BASE_URL=http://10.0.2.2:8097/v1
 DEV_ENABLE_LOGGING=true
 DEV_TIMEOUT_SECONDS=30
 ```

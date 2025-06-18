@@ -10,7 +10,6 @@ abstract class AuthRemoteDataSource {
   Future<void> logout();
   Future<UserModel> getCurrentUser();
   Future<void> changePassword(Map<String, dynamic> data);
-  // Future<Map<String, dynamic>> checkUserNameAvailability(String userName);
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -26,12 +25,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     final Map<String, dynamic> decodedToken = JwtDecoder.decode(
       response.data['data']['token'],
     );
+    //AppLogger.info('Data remote: ${response.data}');
+    AppLogger.info('Token: ${response.data['data']['token']}');
+    AppLogger.info('TokenData: ${decodedToken}');
 
-    AppLogger.info(
-      'ERRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR ${response.data['data']}',
-    );
-
-    //AppLogger.info('Token ${response.data['data']['token']}');
+    //AppLogger.info('Data Encode: ${decodedToken}');
 
     return AuthTokensModel.fromJson(response.data['data']['token']);
   }
@@ -51,15 +49,4 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<void> changePassword(Map<String, dynamic> data) async {
     await _dio.post(ApiEndpoints.changePassword, data: data);
   }
-
-  // @override
-  // Future<Map<String, dynamic>> checkUserNameAvailability(
-  //   String userName,
-  // ) async {
-  //   final endpoint = ApiEndpoints.withQuery(ApiEndpoints.userNameCheck, {
-  //     'userName': userName,
-  //   });
-  //   final response = await _dio.get(endpoint);
-  //   return response.data;
-  // }
 }
