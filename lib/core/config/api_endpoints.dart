@@ -9,6 +9,7 @@ class ApiEndpoints {
   static String get logout => '$baseUrl/auth/logout';
   static String get refresh => '$baseUrl/auth/refresh';
   static String get register => '$baseUrl/auth/register';
+  static String get changePassword => '$baseUrl/Account/api/ChangePassword';
 
   // User endpoints
   static String get profile => '$baseUrl/user/profile';
@@ -23,11 +24,9 @@ class ApiEndpoints {
   static String get metrics => '$baseUrl/dashboard/metrics';
   static String get activities => '$baseUrl/dashboard/activities';
 
-  // UserName availability
-  static String get userNameCheck => '$baseUrl/auth/userName/check';
-
   // Password management
-  static String get changePassword => '$baseUrl/auth/password/change';
+  static String get requestPasswordReset => '$baseUrl/auth/password/reset-request';
+  static String get resetPassword => '$baseUrl/auth/password/reset';
 
   /// Get endpoint with query parameters
   static String withQuery(String endpoint, Map<String, String> params) {
@@ -56,8 +55,9 @@ class ApiEndpoints {
       'dashboard': dashboard,
       'metrics': metrics,
       'activities': activities,
-      'userNameCheck': userNameCheck,
       'changePassword': changePassword,
+      'requestPasswordReset': requestPasswordReset,
+      'resetPassword': resetPassword,
     };
   }
 }

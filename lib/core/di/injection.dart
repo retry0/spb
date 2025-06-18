@@ -24,6 +24,11 @@ import '../../features/home/data/datasources/home_remote_datasource.dart';
 import '../../features/home/data/repositories/home_repository_impl.dart';
 import '../../features/home/domain/repositories/home_repository.dart';
 import '../../features/home/presentation/bloc/home_bloc.dart';
+import '../../features/profile/data/datasources/profile_remote_datasource.dart';
+import '../../features/profile/data/repositories/profile_repository_impl.dart';
+import '../../features/profile/domain/repositories/profile_repository.dart';
+import '../../features/profile/domain/usecases/change_password_usecase.dart';
+import '../../features/profile/presentation/bloc/profile_bloc.dart';
 
 final getIt = GetIt.instance;
 
@@ -95,6 +100,10 @@ Future<void> configureDependencies() async {
     () => HomeRemoteDataSourceImpl(getIt<Dio>()),
   );
   
+  getIt.registerLazySingleton<ProfileRemoteDataSource>(
+    () => ProfileRemoteDataSourceImpl(getIt<Dio>()),
+  );
+  
   // Repositories
   getIt.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(
@@ -109,10 +118,18 @@ Future<void> configureDependencies() async {
     ),
   );
   
+  getIt.registerLazySingleton<ProfileRepository>(
+    () => ProfileRepositoryImpl(
+      authRepository: getIt<AuthRepository>(),
+      remoteDataSource: getIt<ProfileRemoteDataSource>(),
+    ),
+  );
+  
   // Use cases
   getIt.registerLazySingleton(() => LoginUseCase(getIt<AuthRepository>()));
   getIt.registerLazySingleton(() => LogoutUseCase(getIt<AuthRepository>()));
   getIt.registerLazySingleton(() => RefreshTokenUseCase(getIt<AuthRepository>()));
+  getIt.registerLazySingleton(() => ChangePasswordUseCase(getIt<ProfileRepository>()));
   
   // BLoCs
   getIt.registerFactory(
@@ -126,4 +143,10 @@ Future<void> configureDependencies() async {
   
   getIt.registerFactory(() => ThemeBloc(getIt<LocalStorage>()));
   getIt.registerFactory(() => HomeBloc(getIt<HomeRepository>()));
+  getIt.registerFactory(
+    () => ProfileBloc(
+      profileRepository: getIt<ProfileRepository>(),
+      changePasswordUseCase: getIt<ChangePasswordUseCase>(),
+    ),
+  );
 }
