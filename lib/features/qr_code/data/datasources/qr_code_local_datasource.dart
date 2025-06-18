@@ -262,7 +262,7 @@ class QrCodeLocalDataSourceImpl implements QrCodeLocalDataSource {
   }
   
   // Helper method to convert error correction level string to enum
-  QrErrorCorrectLevel _getErrorCorrectionLevel(String level) {
+  int _getErrorCorrectionLevel(String level) {
     switch (level) {
       case 'L':
         return QrErrorCorrectLevel.L;
