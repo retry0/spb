@@ -69,38 +69,23 @@ class JwtDecoderUtil {
   static Map<String, dynamic>? extractUserInfo(String token) {
     final filteredData = decodeAndFilterToken(token);
     if (filteredData == null) return null;
+    print('JWT Decoder ${filteredData}');
 
     // Common user-related JWT claims
     const userFields = {
-      'sub', // Subject (user ID)
-      'email',
-      'email_verified',
-      'name',
-      'given_name',
-      'family_name',
-      'nickname',
-      'picture',
-      'locale',
-      'roles',
-      'permissions',
-      'groups',
-      'userName',
-      'username', // Legacy support
-      'preferred_username',
-      'profile',
-      'website',
-      'gender',
-      'birthdate',
-      'phone_number',
-      'phone_number_verified',
-      'address',
+      'Id', // Subject (user ID)
+      'UserName',
+      'Nama',
     };
 
     final Map<String, dynamic> userInfo = {};
 
     for (final field in userFields) {
+      print('Userfield ${field}');
+
       if (filteredData.containsKey(field)) {
         userInfo[field] = filteredData[field];
+        print('userInfo ${userInfo[field]}');
       }
     }
 

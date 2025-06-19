@@ -23,9 +23,9 @@ class DatabaseHelper {
     try {
       final documentsDirectory = await getApplicationDocumentsDirectory();
       final path = join(documentsDirectory.path, 'spb_secure.db');
-      
+
       AppLogger.info('Initializing database at: $path');
-      
+
       return await openDatabase(
         path,
         version: 3, // Increased version for QR code table
@@ -47,7 +47,7 @@ class DatabaseHelper {
   Future<void> _onCreate(Database db, int version) async {
     try {
       AppLogger.info('Creating database tables...');
-      
+
       // Settings table for local storage
       await db.execute('''
         CREATE TABLE settings (
@@ -63,13 +63,14 @@ class DatabaseHelper {
       // Users table with username support
       await db.execute('''
         CREATE TABLE users (
-          id TEXT PRIMARY KEY,
-          username TEXT UNIQUE NOT NULL,
-          email TEXT UNIQUE NOT NULL,
-          name TEXT NOT NULL,
-          avatar TEXT,
-          created_at INTEGER NOT NULL,
+          Id TEXT PRIMARY KEY,
+          userName TEXT UNIQUE NOT NULL,
+          nama TEXT  NULL,
           updated_at INTEGER NOT NULL,
+          last_sync_status TEXT DEFAULT 'success',
+          sync_error TEXT,
+          is_dirty BOOLEAN NOT NULL DEFAULT 0,
+          local_updated_at INTEGER,
           synced_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
         )
       ''');
@@ -79,10 +80,8 @@ class DatabaseHelper {
         CREATE TABLE data_entries (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           remote_id TEXT UNIQUE,
-          name TEXT NOT NULL,
-          email TEXT NOT NULL,
+          nama TEXT NOT NULL,
           status TEXT NOT NULL DEFAULT 'active',
-          created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
           updated_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
           synced_at INTEGER,
           is_dirty INTEGER NOT NULL DEFAULT 0
@@ -114,10 +113,12 @@ class DatabaseHelper {
           data TEXT NOT NULL,
           created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
           retry_count INTEGER NOT NULL DEFAULT 0,
-          last_error TEXT
+          last_error TEXT,
+          priority INTEGER NOT NULL DEFAULT 5,
+          status TEXT NOT NULL DEFAULT 'pending'
         )
       ''');
-      
+
       // QR codes table
       await db.execute('''
         CREATE TABLE qr_codes (
@@ -137,15 +138,37 @@ class DatabaseHelper {
       // Create indexes for better performance
       await db.execute('CREATE INDEX idx_settings_key ON settings (key)');
       await db.execute('CREATE INDEX idx_users_username ON users (username)');
-      await db.execute('CREATE INDEX idx_users_email ON users (email)');
-      await db.execute('CREATE INDEX idx_data_entries_status ON data_entries (status)');
-      await db.execute('CREATE INDEX idx_data_entries_synced ON data_entries (synced_at)');
-      await db.execute('CREATE INDEX idx_activity_logs_type ON activity_logs (type)');
-      await db.execute('CREATE INDEX idx_activity_logs_username ON activity_logs (username)');
-      await db.execute('CREATE INDEX idx_activity_logs_created ON activity_logs (created_at)');
-      await db.execute('CREATE INDEX idx_sync_queue_operation ON sync_queue (operation)');
+      await db.execute('CREATE INDEX idx_users_nama ON users (nama)');
+      await db.execute('CREATE INDEX idx_users_is_dirty ON users (is_dirty)');
+      await db.execute('CREATE INDEX idx_users_synced_at ON users (synced_at)');
+      await db.execute(
+        'CREATE INDEX idx_data_entries_status ON data_entries (status)',
+      );
+      await db.execute(
+        'CREATE INDEX idx_data_entries_synced ON data_entries (synced_at)',
+      );
+      await db.execute(
+        'CREATE INDEX idx_activity_logs_type ON activity_logs (type)',
+      );
+      await db.execute(
+        'CREATE INDEX idx_activity_logs_username ON activity_logs (username)',
+      );
+      await db.execute(
+        'CREATE INDEX idx_activity_logs_created ON activity_logs (created_at)',
+      );
+      await db.execute(
+        'CREATE INDEX idx_sync_queue_operation ON sync_queue (operation)',
+      );
+      await db.execute(
+        'CREATE INDEX idx_sync_queue_status ON sync_queue (status)',
+      );
+      await db.execute(
+        'CREATE INDEX idx_sync_queue_priority ON sync_queue (priority)',
+      );
       await db.execute('CREATE INDEX idx_qr_codes_driver ON qr_codes (driver)');
-      await db.execute('CREATE INDEX idx_qr_codes_created_at ON qr_codes (created_at)');
+      await db.execute(
+        'CREATE INDEX idx_qr_codes_created_at ON qr_codes (created_at)',
+      );
 
       AppLogger.info('Database tables created successfully');
     } catch (e) {
@@ -155,33 +178,44 @@ class DatabaseHelper {
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    AppLogger.info('Upgrading database from version $oldVersion to $newVersion');
-    
+    AppLogger.info(
+      'Upgrading database from version $oldVersion to $newVersion',
+    );
+
     if (oldVersion < 2) {
       // Migration to add username support
       await _migrateToUsernameAuth(db);
     }
-    
+
     if (oldVersion < 3) {
       // Migration to add QR codes table
       await _migrateToAddQrCodesTable(db);
+    }
+
+    if (oldVersion < 4) {
+      // Migration to add user profile sync fields
+      await _migrateToAddUserSyncFields(db);
     }
   }
 
   Future<void> _migrateToUsernameAuth(Database db) async {
     try {
       AppLogger.info('Migrating to username-based authentication...');
-      
+
       // Add username column to users table
       await db.execute('ALTER TABLE users ADD COLUMN username TEXT');
-      
+
       // Add username column to activity_logs
       await db.execute('ALTER TABLE activity_logs ADD COLUMN username TEXT');
-      
+
       // Create new indexes
-      await db.execute('CREATE INDEX IF NOT EXISTS idx_users_username ON users (username)');
-      await db.execute('CREATE INDEX IF NOT EXISTS idx_activity_logs_username ON activity_logs (username)');
-      
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_users_username ON users (username)',
+      );
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_activity_logs_username ON activity_logs (username)',
+      );
+
       // Generate usernames for existing users (email prefix)
       final existingUsers = await db.query('users');
       for (final user in existingUsers) {
@@ -196,26 +230,28 @@ class DatabaseHelper {
           );
         }
       }
-      
+
       // Make username unique and not null
-      await db.execute('CREATE UNIQUE INDEX idx_users_username_unique ON users (username)');
-      
+      await db.execute(
+        'CREATE UNIQUE INDEX idx_users_username_unique ON users (username)',
+      );
+
       AppLogger.info('Username authentication migration completed');
     } catch (e) {
       AppLogger.error('Failed to migrate to username authentication', e);
       rethrow;
     }
   }
-  
+
   Future<void> _migrateToAddQrCodesTable(Database db) async {
     try {
       AppLogger.info('Migrating to add QR codes table...');
-      
+
       // Check if qr_codes table already exists
       final tables = await db.rawQuery(
-        "SELECT name FROM sqlite_master WHERE type='table' AND name='qr_codes'"
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='qr_codes'",
       );
-      
+
       if (tables.isEmpty) {
         // Create QR codes table
         await db.execute('''
@@ -232,11 +268,15 @@ class DatabaseHelper {
             updated_at INTEGER NOT NULL
           )
         ''');
-        
+
         // Create indexes
-        await db.execute('CREATE INDEX idx_qr_codes_driver ON qr_codes (driver)');
-        await db.execute('CREATE INDEX idx_qr_codes_created_at ON qr_codes (created_at)');
-        
+        await db.execute(
+          'CREATE INDEX idx_qr_codes_driver ON qr_codes (driver)',
+        );
+        await db.execute(
+          'CREATE INDEX idx_qr_codes_created_at ON qr_codes (created_at)',
+        );
+
         AppLogger.info('QR codes table created successfully');
       } else {
         AppLogger.info('QR codes table already exists, skipping migration');
@@ -247,11 +287,67 @@ class DatabaseHelper {
     }
   }
 
+  Future<void> _migrateToAddUserSyncFields(Database db) async {
+    try {
+      AppLogger.info('Migrating to add user profile sync fields...');
+
+      // Check if the columns already exist
+      final userTableInfo = await db.rawQuery('PRAGMA table_info(users)');
+      final columnNames =
+          userTableInfo.map((col) => col['name'] as String).toList();
+
+      // Add sync status column if it doesn't exist
+      if (!columnNames.contains('last_sync_status')) {
+        await db.execute(
+          'ALTER TABLE users ADD COLUMN last_sync_status TEXT DEFAULT "success"',
+        );
+      }
+
+      // Add sync error column if it doesn't exist
+      if (!columnNames.contains('sync_error')) {
+        await db.execute('ALTER TABLE users ADD COLUMN sync_error TEXT');
+      }
+
+      // Add is_dirty column if it doesn't exist
+      if (!columnNames.contains('is_dirty')) {
+        await db.execute(
+          'ALTER TABLE users ADD COLUMN is_dirty BOOLEAN NOT NULL DEFAULT 0',
+        );
+      }
+
+      // Add local_updated_at column if it doesn't exist
+      if (!columnNames.contains('local_updated_at')) {
+        await db.execute(
+          'ALTER TABLE users ADD COLUMN local_updated_at INTEGER',
+        );
+      }
+
+      // Create index for is_dirty if it doesn't exist
+      final indexes = await db.rawQuery(
+        "SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='users'",
+      );
+      final indexNames = indexes.map((idx) => idx['name'] as String).toList();
+
+      if (!indexNames.contains('idx_users_is_dirty')) {
+        await db.execute('CREATE INDEX idx_users_is_dirty ON users (is_dirty)');
+      }
+
+      AppLogger.info('User profile sync fields migration completed');
+    } catch (e) {
+      AppLogger.error('Failed to migrate user profile sync fields', e);
+      rethrow;
+    }
+  }
+
   // Generic CRUD operations
   Future<int> insert(String table, Map<String, dynamic> data) async {
     final db = await database;
     try {
-      return await db.insert(table, data, conflictAlgorithm: ConflictAlgorithm.replace);
+      return await db.insert(
+        table,
+        data,
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
     } catch (e) {
       AppLogger.error('Failed to insert into $table', e);
       rethrow;

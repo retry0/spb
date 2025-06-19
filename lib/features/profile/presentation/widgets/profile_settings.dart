@@ -113,7 +113,10 @@ class ProfileSettings extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: Icon(Icons.logout, color: Theme.of(context).colorScheme.error),
+              leading: Icon(
+                Icons.logout,
+                color: Theme.of(context).colorScheme.error,
+              ),
               title: Text(
                 'Logout',
                 style: TextStyle(color: Theme.of(context).colorScheme.error),
@@ -140,73 +143,75 @@ class ProfileSettings extends StatelessWidget {
   void _showThemeDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Choose Theme'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            RadioListTile<ThemeMode>(
-              title: const Text('Light'),
-              value: ThemeMode.light,
-              groupValue: context.read<ThemeBloc>().state.themeMode,
-              onChanged: (value) {
-                if (value != null) {
-                  context.read<ThemeBloc>().add(ThemeChanged(value));
-                  Navigator.pop(context);
-                }
-              },
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Choose Theme'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                RadioListTile<ThemeMode>(
+                  title: const Text('Light'),
+                  value: ThemeMode.light,
+                  groupValue: context.read<ThemeBloc>().state.themeMode,
+                  onChanged: (value) {
+                    if (value != null) {
+                      context.read<ThemeBloc>().add(ThemeChanged(value));
+                      Navigator.pop(context);
+                    }
+                  },
+                ),
+                RadioListTile<ThemeMode>(
+                  title: const Text('Dark'),
+                  value: ThemeMode.dark,
+                  groupValue: context.read<ThemeBloc>().state.themeMode,
+                  onChanged: (value) {
+                    if (value != null) {
+                      context.read<ThemeBloc>().add(ThemeChanged(value));
+                      Navigator.pop(context);
+                    }
+                  },
+                ),
+                RadioListTile<ThemeMode>(
+                  title: const Text('System'),
+                  value: ThemeMode.system,
+                  groupValue: context.read<ThemeBloc>().state.themeMode,
+                  onChanged: (value) {
+                    if (value != null) {
+                      context.read<ThemeBloc>().add(ThemeChanged(value));
+                      Navigator.pop(context);
+                    }
+                  },
+                ),
+              ],
             ),
-            RadioListTile<ThemeMode>(
-              title: const Text('Dark'),
-              value: ThemeMode.dark,
-              groupValue: context.read<ThemeBloc>().state.themeMode,
-              onChanged: (value) {
-                if (value != null) {
-                  context.read<ThemeBloc>().add(ThemeChanged(value));
-                  Navigator.pop(context);
-                }
-              },
-            ),
-            RadioListTile<ThemeMode>(
-              title: const Text('System'),
-              value: ThemeMode.system,
-              groupValue: context.read<ThemeBloc>().state.themeMode,
-              onChanged: (value) {
-                if (value != null) {
-                  context.read<ThemeBloc>().add(ThemeChanged(value));
-                  Navigator.pop(context);
-                }
-              },
-            ),
-          ],
-        ),
-      ),
+          ),
     );
   }
 
   void _showLogoutDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to logout?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Logout'),
+            content: const Text('Are you sure you want to logout?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  context.read<AuthBloc>().add(const AuthLogoutRequested());
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.error,
+                ),
+                child: const Text('Logout'),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              context.read<AuthBloc>().add(const AuthLogoutRequested());
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
-            child: const Text('Logout'),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -215,10 +220,7 @@ class _SettingsSection extends StatelessWidget {
   final String title;
   final List<Widget> children;
 
-  const _SettingsSection({
-    required this.title,
-    required this.children,
-  });
+  const _SettingsSection({required this.title, required this.children});
 
   @override
   Widget build(BuildContext context) {
@@ -230,9 +232,9 @@ class _SettingsSection extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             child: Text(
               title,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
           ...children,

@@ -4,14 +4,18 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:dio/dio.dart';
 import 'package:uuid/uuid.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 import '../network/dio_client.dart';
 import '../storage/secure_storage.dart';
 import '../storage/local_storage.dart';
 import '../storage/database_helper.dart';
 import '../storage/data_repository.dart';
+import '../storage/user_profile_repository.dart';
 import '../utils/jwt_token_manager.dart';
 import '../utils/session_manager.dart';
+import '../services/connectivity_service.dart';
+import '../services/sync_service.dart';
 import '../../features/auth/data/datasources/auth_remote_datasource.dart';
 import '../../features/auth/data/datasources/auth_local_datasource.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
@@ -90,6 +94,31 @@ Future<void> configureDependencies() async {
 
   getIt.registerLazySingleton<Dio>(() => DioClient.createDio());
 
+  // Connectivity
+  getIt.registerLazySingleton<Connectivity>(() => Connectivity());
+
+  getIt.registerLazySingleton<ConnectivityService>(
+    () => ConnectivityService(getIt<Connectivity>()),
+  );
+
+  // User Profile Repository
+  getIt.registerLazySingleton<UserProfileRepository>(
+    () => UserProfileRepository(
+      dbHelper: getIt<DatabaseHelper>(),
+      tokenManager: getIt<JwtTokenManager>(),
+      dio: getIt<Dio>(),
+      connectivity: getIt<Connectivity>(),
+    ),
+  );
+
+  // Sync Service
+  getIt.registerLazySingleton<SyncService>(
+    () => SyncService(
+      userProfileRepository: getIt<UserProfileRepository>(),
+      connectivityService: getIt<ConnectivityService>(),
+    ),
+  );
+
   // Utilities
   getIt.registerLazySingleton<Uuid>(() => const Uuid());
 
@@ -140,6 +169,7 @@ Future<void> configureDependencies() async {
     () => ProfileRepositoryImpl(
       authRepository: getIt<AuthRepository>(),
       remoteDataSource: getIt<ProfileRemoteDataSource>(),
+      userProfileRepository: getIt<UserProfileRepository>(),
     ),
   );
 
@@ -194,6 +224,8 @@ Future<void> configureDependencies() async {
     () => ProfileBloc(
       profileRepository: getIt<ProfileRepository>(),
       changePasswordUseCase: getIt<ChangePasswordUseCase>(),
+      userProfileRepository: getIt<UserProfileRepository>(),
+      syncService: getIt<SyncService>(),
     ),
   );
 

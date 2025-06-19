@@ -21,18 +21,78 @@ class ProfileInfoSection extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Account Information',
+                    'My Profile',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  _InfoRow(label: 'User ID', value: state.user.Id),
                   const Divider(),
                   _InfoRow(label: 'Username', value: state.user.userName),
-
                   const Divider(),
-                  _InfoRow(label: 'Full Name', value: state.user.Nama),
+                  _InfoRow(label: 'Nama', value: state.user.Nama),
+
+                  // Show update error if any
+                  if (state.updateError != null) ...[
+                    const Divider(),
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.red.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.error_outline,
+                            color: Colors.red,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Update error: ${state.updateError}',
+                              style: const TextStyle(
+                                color: Colors.red,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          );
+        } else if (state is ProfileError) {
+          return Card(
+            color: Colors.red[50],
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  Icon(Icons.error_outline, size: 48, color: Colors.red[700]),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Failed to load profile',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    state.message,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      context.read<ProfileBloc>().add(
+                        const ProfileLoadRequested(),
+                      );
+                    },
+                    child: const Text('Retry'),
+                  ),
                 ],
               ),
             ),

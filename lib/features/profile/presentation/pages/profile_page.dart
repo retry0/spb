@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/di/injection.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../bloc/profile_bloc.dart';
-import '../widgets/profile_header.dart';
 import '../widgets/profile_info_section.dart';
 import '../widgets/password_change_form.dart';
 import '../widgets/logout_button.dart';
@@ -16,7 +15,8 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => getIt<ProfileBloc>()..add(const ProfileLoadRequested()),
+      create:
+          (context) => getIt<ProfileBloc>()..add(const ProfileLoadRequested()),
       child: Scaffold(
         body: SafeArea(
           child: CustomScrollView(
@@ -35,7 +35,9 @@ class ProfilePage extends StatelessWidget {
                     alignment: Alignment.topLeft,
                     child: Text(
                       'My Profile',
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      style: Theme.of(
+                        context,
+                      ).textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: Theme.of(context).colorScheme.primary,
                       ),
@@ -46,14 +48,16 @@ class ProfilePage extends StatelessWidget {
                   IconButton(
                     icon: const Icon(Icons.refresh),
                     onPressed: () {
-                      context.read<ProfileBloc>().add(const ProfileLoadRequested());
+                      context.read<ProfileBloc>().add(
+                        const ProfileLoadRequested(),
+                      );
                     },
                   ),
                   const LogoutButton(),
                   const SizedBox(width: 8),
                 ],
               ),
-              
+
               // Content
               SliverToBoxAdapter(
                 child: BlocListener<ProfileBloc, ProfileState>(
@@ -89,12 +93,13 @@ class ProfilePage extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const ProfileHeader(),
                         const SizedBox(height: 24),
                         const ProfileInfoSection(),
                         const SizedBox(height: 24),
                         const PasswordChangeForm(),
-                        const SizedBox(height: 100), // Bottom padding for navigation
+                        const SizedBox(
+                          height: 100,
+                        ), // Bottom padding for navigation
                       ],
                     ),
                   ),
