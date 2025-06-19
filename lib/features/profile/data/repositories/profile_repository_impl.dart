@@ -34,13 +34,14 @@ class ProfileRepositoryImpl implements ProfileRepository {
           // Convert to User entity
           final user = User(
             id: userData['id'] ?? userData['sub'] ?? '',
-            userName: userData['userName'] ?? 
-                     userData['username'] ?? 
+            userName: userData['username'] ?? 
+                     userData['userName'] ?? 
                      userData['preferred_username'] ?? '',
             email: userData['email'] ?? '',
             name: userData['name'] ?? 
                  userData['given_name'] ?? 
-                 userData['userName'] ?? '',
+                 userData['userName'] ?? 
+                 userData['username'] ?? '',
             avatar: userData['avatar'] ?? userData['picture'],
             createdAt: userData['created_at'] != null 
                 ? DateTime.fromMillisecondsSinceEpoch(
@@ -119,7 +120,8 @@ class ProfileRepositoryImpl implements ProfileRepository {
             email: updatedData['email'] ?? '',
             name: updatedData['name'] ?? 
                  updatedData['given_name'] ?? 
-                 updatedData['userName'] ?? '',
+                 updatedData['userName'] ?? 
+                 updatedData['username'] ?? '',
             avatar: updatedData['avatar'] ?? updatedData['picture'],
             createdAt: updatedData['created_at'] != null 
                 ? DateTime.fromMillisecondsSinceEpoch(
