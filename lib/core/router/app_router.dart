@@ -9,6 +9,7 @@ import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/data/presentation/pages/data_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/qr_code/presentation/pages/qr_code_generator_page.dart';
+import '../../features/location/presentation/pages/location_permission_page.dart';
 import '../../ui/screens/splash_screen.dart';
 
 class AppRouter {
@@ -21,7 +22,8 @@ class AppRouter {
       // If user is not logged in and trying to access protected routes
       if (!isLoggedIn &&
           state.matchedLocation != '/login' &&
-          state.matchedLocation != '/splash') {
+          state.matchedLocation != '/splash' &&
+          state.matchedLocation != '/location_permission') {
         return '/login';
       }
 
@@ -44,6 +46,11 @@ class AppRouter {
         path: '/login',
         name: 'login',
         builder: (context, state) => const LoginPage(),
+      ),
+      GoRoute(
+        path: '/location_permission',
+        name: 'locationPermission',
+        builder: (context, state) => const LocationPermissionPage(),
       ),
       ShellRoute(
         builder: (context, state, child) => MainPage(child: child),

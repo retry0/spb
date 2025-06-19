@@ -128,13 +128,13 @@ class MyApp extends StatelessWidget {
       child: BlocBuilder<ThemeBloc, ThemeState>(
         builder: (context, themeState) {
           return SessionTimeoutManager(
-            child: MaterialApp(
+            child: MaterialApp.router(
               title: 'SPB Secure App',
               debugShowCheckedModeBanner: false,
               theme: core_theme.AppTheme.lightTheme,
               darkTheme: core_theme.AppTheme.darkTheme,
               themeMode: themeState.themeMode,
-              home: const LocationPermissionPage(),
+              routerConfig: AppRouter.router,
               builder: (context, child) {
                 return MediaQuery(
                   data: MediaQuery.of(context).copyWith(

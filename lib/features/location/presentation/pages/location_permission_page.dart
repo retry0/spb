@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:io';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/permissions/location_permission_handler.dart';
@@ -24,7 +25,7 @@ class LocationPermissionPage extends StatelessWidget {
           listener: (context, state) {
             if (state is LocationPermissionGranted) {
               // Navigate to home page when permission is granted
-              Navigator.of(context).pushReplacementNamed('/home');
+              context.go('/home');
             } else if (state is LocationPermissionDenied) {
               _showExitConfirmationDialog(context);
             }
