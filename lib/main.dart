@@ -13,9 +13,11 @@ import 'core/config/environment_validator.dart';
 import 'core/config/android_emulator_config.dart';
 import 'core/services/connectivity_service.dart';
 import 'core/services/sync_service.dart';
+import 'core/permissions/permission_manager.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/widgets/session_timeout_dialog.dart';
 import 'features/theme/presentation/bloc/theme_bloc.dart';
+import 'features/location/presentation/pages/location_permission_page.dart';
 import 'ui/screens/splash_screen.dart';
 import 'ui/theme/app_theme.dart';
 
@@ -78,6 +80,9 @@ void main() async {
 
   // Configure dependency injection
   await configureDependencies();
+  
+  // Initialize permission manager
+  await getIt<PermissionManager>().initialize();
 
   // Set up BLoC observer
   Bloc.observer = AppBlocObserver();
@@ -118,17 +123,18 @@ class MyApp extends StatelessWidget {
         // Provide global services
         RepositoryProvider.value(value: getIt<ConnectivityService>()),
         RepositoryProvider.value(value: getIt<SyncService>()),
+        RepositoryProvider.value(value: getIt<PermissionManager>()),
       ],
       child: BlocBuilder<ThemeBloc, ThemeState>(
         builder: (context, themeState) {
           return SessionTimeoutManager(
-            child: MaterialApp.router(
+            child: MaterialApp(
               title: 'SPB Secure App',
               debugShowCheckedModeBanner: false,
               theme: core_theme.AppTheme.lightTheme,
               darkTheme: core_theme.AppTheme.darkTheme,
               themeMode: themeState.themeMode,
-              routerConfig: AppRouter.router,
+              home: const LocationPermissionPage(),
               builder: (context, child) {
                 return MediaQuery(
                   data: MediaQuery.of(context).copyWith(
