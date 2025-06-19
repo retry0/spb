@@ -65,7 +65,7 @@ class DatabaseHelper {
         CREATE TABLE users (
           id TEXT PRIMARY KEY,
           username TEXT UNIQUE NOT NULL,
-          email TEXT UNIQUE NOT NULL,
+          email TEXT UNIQUE,
           name TEXT NOT NULL,
           avatar TEXT,
           created_at INTEGER NOT NULL,
