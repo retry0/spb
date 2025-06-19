@@ -105,7 +105,7 @@ class _LoginFormState extends State<LoginForm>
                   labelText: 'Password',
                   prefixIcon: const Icon(Icons.lock_outlined),
                   helperText: 'Silakan masukkan kata sandi Anda',
-                  hintText: 'e.g. yourpassword',
+                  hintText: 'e.g. ABCD1234',
 
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),

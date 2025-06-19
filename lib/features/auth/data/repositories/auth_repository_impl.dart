@@ -43,7 +43,8 @@ class AuthRepositoryImpl implements AuthRepository {
         // Log extracted user data (excluding sensitive fields)
         final userInfo = JwtDecoderUtil.extractUserInfo(tokens.token);
         if (userInfo != null) {
-          print('User logged in: ${userInfo['userName'] ?? userInfo['sub']}');
+          print('User info: ${userData}');
+
           print(
             'Available claims: ${JwtDecoderUtil.getAvailableClaims(tokens.token)}',
           );
