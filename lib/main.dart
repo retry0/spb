@@ -11,6 +11,8 @@ import 'core/storage/database_helper.dart';
 import 'core/config/environment_config.dart';
 import 'core/config/environment_validator.dart';
 import 'core/config/android_emulator_config.dart';
+import 'core/services/connectivity_service.dart';
+import 'core/services/sync_service.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/widgets/session_timeout_dialog.dart';
 import 'features/theme/presentation/bloc/theme_bloc.dart';
@@ -109,6 +111,13 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider(
           create: (context) => getIt<ThemeBloc>()..add(const ThemeInitialized()),
+        ),
+        // Provide global services
+        RepositoryProvider.value(
+          value: getIt<ConnectivityService>(),
+        ),
+        RepositoryProvider.value(
+          value: getIt<SyncService>(),
         ),
       ],
       child: BlocBuilder<ThemeBloc, ThemeState>(

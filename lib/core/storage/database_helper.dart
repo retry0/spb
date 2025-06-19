@@ -70,7 +70,11 @@ class DatabaseHelper {
           avatar TEXT,
           created_at INTEGER NOT NULL,
           updated_at INTEGER NOT NULL,
-          synced_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
+          synced_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
+          last_sync_status TEXT DEFAULT 'success',
+          sync_error TEXT,
+          is_dirty BOOLEAN NOT NULL DEFAULT 0,
+          local_updated_at INTEGER
         )
       ''');
 
@@ -114,7 +118,9 @@ class DatabaseHelper {
           data TEXT NOT NULL,
           created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
           retry_count INTEGER NOT NULL DEFAULT 0,
-          last_error TEXT
+          last_error TEXT,
+          priority INTEGER NOT NULL DEFAULT 5,
+          status TEXT NOT NULL DEFAULT 'pending'
         )
       ''');
       
@@ -138,12 +144,16 @@ class DatabaseHelper {
       await db.execute('CREATE INDEX idx_settings_key ON settings (key)');
       await db.execute('CREATE INDEX idx_users_username ON users (username)');
       await db.execute('CREATE INDEX idx_users_email ON users (email)');
+      await db.execute('CREATE INDEX idx_users_is_dirty ON users (is_dirty)');
+      await db.execute('CREATE INDEX idx_users_synced_at ON users (synced_at)');
       await db.execute('CREATE INDEX idx_data_entries_status ON data_entries (status)');
       await db.execute('CREATE INDEX idx_data_entries_synced ON data_entries (synced_at)');
       await db.execute('CREATE INDEX idx_activity_logs_type ON activity_logs (type)');
       await db.execute('CREATE INDEX idx_activity_logs_username ON activity_logs (username)');
       await db.execute('CREATE INDEX idx_activity_logs_created ON activity_logs (created_at)');
       await db.execute('CREATE INDEX idx_sync_queue_operation ON sync_queue (operation)');
+      await db.execute('CREATE INDEX idx_sync_queue_status ON sync_queue (status)');
+      await db.execute('CREATE INDEX idx_sync_queue_priority ON sync_queue (priority)');
       await db.execute('CREATE INDEX idx_qr_codes_driver ON qr_codes (driver)');
       await db.execute('CREATE INDEX idx_qr_codes_created_at ON qr_codes (created_at)');
 
@@ -165,6 +175,11 @@ class DatabaseHelper {
     if (oldVersion < 3) {
       // Migration to add QR codes table
       await _migrateToAddQrCodesTable(db);
+    }
+    
+    if (oldVersion < 4) {
+      // Migration to add user profile sync fields
+      await _migrateToAddUserSyncFields(db);
     }
   }
 
@@ -243,6 +258,49 @@ class DatabaseHelper {
       }
     } catch (e) {
       AppLogger.error('Failed to migrate to add QR codes table', e);
+      rethrow;
+    }
+  }
+  
+  Future<void> _migrateToAddUserSyncFields(Database db) async {
+    try {
+      AppLogger.info('Migrating to add user profile sync fields...');
+      
+      // Check if the columns already exist
+      final userTableInfo = await db.rawQuery('PRAGMA table_info(users)');
+      final columnNames = userTableInfo.map((col) => col['name'] as String).toList();
+      
+      // Add sync status column if it doesn't exist
+      if (!columnNames.contains('last_sync_status')) {
+        await db.execute('ALTER TABLE users ADD COLUMN last_sync_status TEXT DEFAULT "success"');
+      }
+      
+      // Add sync error column if it doesn't exist
+      if (!columnNames.contains('sync_error')) {
+        await db.execute('ALTER TABLE users ADD COLUMN sync_error TEXT');
+      }
+      
+      // Add is_dirty column if it doesn't exist
+      if (!columnNames.contains('is_dirty')) {
+        await db.execute('ALTER TABLE users ADD COLUMN is_dirty BOOLEAN NOT NULL DEFAULT 0');
+      }
+      
+      // Add local_updated_at column if it doesn't exist
+      if (!columnNames.contains('local_updated_at')) {
+        await db.execute('ALTER TABLE users ADD COLUMN local_updated_at INTEGER');
+      }
+      
+      // Create index for is_dirty if it doesn't exist
+      final indexes = await db.rawQuery("SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='users'");
+      final indexNames = indexes.map((idx) => idx['name'] as String).toList();
+      
+      if (!indexNames.contains('idx_users_is_dirty')) {
+        await db.execute('CREATE INDEX idx_users_is_dirty ON users (is_dirty)');
+      }
+      
+      AppLogger.info('User profile sync fields migration completed');
+    } catch (e) {
+      AppLogger.error('Failed to migrate user profile sync fields', e);
       rethrow;
     }
   }

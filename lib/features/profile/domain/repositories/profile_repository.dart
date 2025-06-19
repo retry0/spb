@@ -12,4 +12,8 @@ abstract class ProfileRepository {
     required String newPassword,
     required String requestor,
   });
+  
+  Future<Either<Failure, User>> updateUserProfile(User user);
+  
+  Future<Either<Failure, bool>> syncUserProfile();
 }

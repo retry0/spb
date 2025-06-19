@@ -4,7 +4,7 @@ abstract class ProfileEvent extends Equatable {
   const ProfileEvent();
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 class ProfileLoadRequested extends ProfileEvent {
@@ -34,4 +34,34 @@ class PasswordChangeRequested extends ProfileEvent {
     confirmPassword,
     requestor,
   ];
+}
+
+class ProfileUpdateRequested extends ProfileEvent {
+  final User user;
+
+  const ProfileUpdateRequested({
+    required this.user,
+  });
+
+  @override
+  List<Object> get props => [user];
+}
+
+class ProfileSyncRequested extends ProfileEvent {
+  const ProfileSyncRequested();
+}
+
+class ProfileSyncStatusChanged extends ProfileEvent {
+  final SyncStatus status;
+  final String? error;
+  final DateTime? lastSyncTime;
+
+  const ProfileSyncStatusChanged({
+    required this.status,
+    this.error,
+    this.lastSyncTime,
+  });
+
+  @override
+  List<Object?> get props => [status, error, lastSyncTime];
 }

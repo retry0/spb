@@ -227,4 +227,14 @@ class JwtTokenManager {
       return true; // Assume token is expiring to be safe
     }
   }
+  
+  /// Get the access token
+  Future<String?> getAccessToken() async {
+    try {
+      return await _secureStorage.read(key: StorageKeys.accessToken);
+    } catch (e) {
+      AppLogger.error('Failed to get access token: $e');
+      return null;
+    }
+  }
 }
