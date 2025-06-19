@@ -21,15 +21,15 @@ class ProfileInfoSection extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'My Profile',
+                    'Account Information',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+                  const SizedBox(height: 16),
+                  _InfoRow(label: 'User Name', value: state.user.UserName),
                   const Divider(),
-                  _InfoRow(label: 'Username', value: state.user.userName),
-                  const Divider(),
-                  _InfoRow(label: 'Nama', value: state.user.Nama),
+                  _InfoRow(label: 'Full Name', value: state.user.Nama),
 
                   // Show update error if any
                   if (state.updateError != null) ...[

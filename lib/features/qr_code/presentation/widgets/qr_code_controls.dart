@@ -27,7 +27,7 @@ class _QrCodeControlsState extends State<QrCodeControls> {
     // Get user info from auth state
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthAuthenticated) {
-      _driver = authState.user.userName;
+      _driver = authState.user.UserName;
       _kdVendor = authState.user.Id;
     }
   }

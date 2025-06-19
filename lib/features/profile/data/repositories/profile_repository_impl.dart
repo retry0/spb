@@ -34,7 +34,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
           // Convert to User entity
           final user = User(
             Id: userData['Id'] ?? userData['sub'] ?? '',
-            userName: userData['userName'] ?? '',
+            UserName: userData['usernUserNameame'] ?? '',
             Nama: userData['Nama'] ?? '',
           );
 
@@ -83,7 +83,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
       // Convert User entity to Map
       final userData = {
         'Id': user.Id,
-        'userName': user.userName,
+        'UserName': user.UserName,
         'Nama': user.Nama,
       };
 
@@ -94,7 +94,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
         // Convert back to User entity
         final updatedUser = User(
           Id: updatedData['Id'] ?? updatedData['sub'] ?? '',
-          userName: updatedData['userName'] ?? '',
+          UserName: updatedData['UserName'] ?? '',
           Nama: updatedData['Nama'] ?? '',
         );
 

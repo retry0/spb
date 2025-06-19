@@ -63,15 +63,16 @@ class DatabaseHelper {
       // Users table with username support
       await db.execute('''
         CREATE TABLE users (
-          Id TEXT PRIMARY KEY,
-          userName TEXT UNIQUE NOT NULL,
-          nama TEXT  NULL,
+          id TEXT PRIMARY KEY,
+          UserName TEXT UNIQUE NOT NULL,
+          Nama TEXT NOT NULL,
+          created_at INTEGER NOT NULL,
           updated_at INTEGER NOT NULL,
+          synced_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
           last_sync_status TEXT DEFAULT 'success',
           sync_error TEXT,
           is_dirty BOOLEAN NOT NULL DEFAULT 0,
-          local_updated_at INTEGER,
-          synced_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
+          local_updated_at INTEGER
         )
       ''');
 
@@ -80,8 +81,10 @@ class DatabaseHelper {
         CREATE TABLE data_entries (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           remote_id TEXT UNIQUE,
-          nama TEXT NOT NULL,
+          UserName TEXT NOT NULL,
+          Nama TEXT NOT NULL,
           status TEXT NOT NULL DEFAULT 'active',
+          created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
           updated_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
           synced_at INTEGER,
           is_dirty INTEGER NOT NULL DEFAULT 0
@@ -138,7 +141,6 @@ class DatabaseHelper {
       // Create indexes for better performance
       await db.execute('CREATE INDEX idx_settings_key ON settings (key)');
       await db.execute('CREATE INDEX idx_users_username ON users (username)');
-      await db.execute('CREATE INDEX idx_users_nama ON users (nama)');
       await db.execute('CREATE INDEX idx_users_is_dirty ON users (is_dirty)');
       await db.execute('CREATE INDEX idx_users_synced_at ON users (synced_at)');
       await db.execute(
@@ -343,6 +345,14 @@ class DatabaseHelper {
   Future<int> insert(String table, Map<String, dynamic> data) async {
     final db = await database;
     try {
+      // Add timestamps if not provided
+      if (!data.containsKey('created_at')) {
+        data['created_at'] = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      }
+      if (!data.containsKey('updated_at')) {
+        data['updated_at'] = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      }
+
       return await db.insert(
         table,
         data,
@@ -388,7 +398,11 @@ class DatabaseHelper {
   }) async {
     final db = await database;
     try {
-      data['updated_at'] = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      // Add updated_at timestamp if not provided
+      if (!data.containsKey('updated_at')) {
+        data['updated_at'] = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      }
+
       return await db.update(table, data, where: where, whereArgs: whereArgs);
     } catch (e) {
       AppLogger.error('Failed to update $table', e);

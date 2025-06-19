@@ -43,8 +43,7 @@ class AuthRepositoryImpl implements AuthRepository {
         // Log extracted user data (excluding sensitive fields)
         final userInfo = JwtDecoderUtil.extractUserInfo(tokens.token);
         if (userInfo != null) {
-          print('User info: ${userData}');
-
+          print('User logged in: ${userInfo['userName'] ?? userInfo['sub']}');
           print(
             'Available claims: ${JwtDecoderUtil.getAvailableClaims(tokens.token)}',
           );
@@ -132,8 +131,8 @@ class AuthRepositoryImpl implements AuthRepository {
         // Create User entity from JWT data
         final user = User(
           Id: userData['sub'] ?? userData['id'] ?? '',
-          userName: userData['userName'] ?? userData['username'] ?? '',
-          Nama: userData['Nama'] ?? userData['name'] ?? '',
+          UserName: userData['UserName'] ?? '',
+          Nama: userData['Nama'] ?? '',
         );
 
         return Right(user);

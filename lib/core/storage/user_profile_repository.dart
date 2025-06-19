@@ -41,24 +41,19 @@ class UserProfileRepository {
 
       // Get user data from token
       final userInfo = JwtDecoderUtil.extractUserInfo(token);
-
       if (userInfo == null) {
         return Left(AuthFailure('Failed to extract user info from token'));
       }
 
       // Get user ID from token
-      final userId = userInfo['Id'];
-      print('Get user ID from token: ${userInfo}');
-
+      final userId = userInfo['sub'] ?? userInfo['Id'];
+      print('object: $token');
       if (userId == null) {
-        print('User ID not found in token: ${userId}');
-
         return Left(AuthFailure('User ID not found in token'));
       }
 
       // Check if we need to sync with remote
       final shouldSync = await _shouldSyncWithRemote(userId, forceRefresh);
-      print('savetoDatabase ${userId}');
 
       if (shouldSync) {
         // Try to sync with remote server if we have connectivity
@@ -71,7 +66,6 @@ class UserProfileRepository {
           try {
             // Fetch from remote API
             final remoteProfile = await _fetchRemoteProfile(token);
-            print('_saveUserToDatabase ${remoteProfile}');
 
             // Save to local database
             await _saveUserToDatabase(remoteProfile);
@@ -94,6 +88,7 @@ class UserProfileRepository {
 
       // If no local data, save token data to database
       await _saveUserToDatabase(userInfo);
+
       return Right(userInfo);
     } catch (e) {
       AppLogger.error('Failed to get user profile: $e');
@@ -113,7 +108,7 @@ class UserProfileRepository {
           !connectivityResult.contains(ConnectivityResult.none);
 
       // Get user ID
-      final userId = userData['Id'];
+      final userId = userData['id'] ?? userData['sub'];
       if (userId == null) {
         return Left(ValidationFailure('User ID is required'));
       }
@@ -248,7 +243,6 @@ class UserProfileRepository {
         try {
           final operation = item['operation'] as String;
           final tableName = item['table_name'] as String;
-          final recordId = item['record_id'] as String;
           final data =
               jsonDecode(item['data'] as String) as Map<String, dynamic>;
           final itemId = item['id'] as int;
@@ -302,7 +296,7 @@ class UserProfileRepository {
       final results = await _dbHelper.query(
         'users',
         columns: ['synced_at'],
-        where: 'Id = ?',
+        where: 'id = ?',
         whereArgs: [userId],
         limit: 1,
       );
@@ -344,13 +338,12 @@ class UserProfileRepository {
 
       if (response.statusCode == 200) {
         final data = response.data;
-        print('dataResponse ${data}');
+
         // If the response is wrapped in a data field, extract it
         final userData =
             data is Map<String, dynamic> && data.containsKey('data')
                 ? data['data'] as Map<String, dynamic>
                 : data as Map<String, dynamic>;
-        print('dataResponseuserData ${userData}');
 
         return userData;
       } else {
@@ -358,9 +351,9 @@ class UserProfileRepository {
           'Failed to fetch profile: ${response.statusCode}',
         );
       }
+    } on DioException catch (e) {
+      throw ServerException('Failed to fetch profile: ${e.message}');
     } catch (e) {
-      AppLogger.error('Failed to fetch remote profile: $e');
-
       // If we can't reach the server, fall back to token data
       final userInfo = JwtDecoderUtil.extractUserInfo(token);
       if (userInfo != null) {
@@ -397,10 +390,10 @@ class UserProfileRepository {
         data: apiData,
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
-      print('responseDatalocal ${response.data}');
 
       if (response.statusCode == 200) {
         final responseData = response.data;
+
         // If the response is wrapped in a data field, extract it
         final updatedData =
             responseData is Map<String, dynamic> &&
@@ -430,12 +423,13 @@ class UserProfileRepository {
   }
 
   /// Get user from local database
-  Future<Map<String, dynamic>?> _getUserFromDatabase(String Id) async {
+  Future<Map<String, dynamic>?> _getUserFromDatabase(String userId) async {
     try {
       final results = await _dbHelper.query(
         'users',
-        where: 'Id = ?',
-        whereArgs: [Id],
+        columns: ['id', 'username', 'Nama'],
+        where: 'id = ?',
+        whereArgs: [userId],
         limit: 1,
       );
 
@@ -453,47 +447,38 @@ class UserProfileRepository {
   /// Save user to local database
   Future<void> _saveUserToDatabase(Map<String, dynamic> userData) async {
     try {
-      print('datalocal ${userData}');
-      print('datalocal1 ${userData['UserName']}');
-
       // Ensure required fields
-      final userId = userData['Id'];
+      final userId = userData['Id'] ?? userData['sub'];
+      print('userData: $userData');
+      print('userId: $userId');
+
       if (userId == null) {
         throw ValidationException('User ID is required');
       }
 
-      final username = userData['UserName'];
-      print('userNAMEPROFILE ${username}');
+      final username = userData['userName'] ?? '';
+
       if (username == null) {
         throw ValidationException('Username is required');
       }
 
-      final name = userData['Nama'];
-      if (name == null) {
-        throw ValidationException('Nama is required');
-      }
       // Prepare data for database
       final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-
       final dbData = {
-        'Id': userId,
-        'userName': username,
-        'nama': name,
+        'id': userId,
+        'UserName': username,
+        'Nama': userData['Nama'],
         'synced_at': userData['synced_at'] ?? now,
         'last_sync_status': userData['last_sync_status'] ?? 'success',
         'sync_error': userData['sync_error'],
         'is_dirty': userData['is_dirty'] ?? 0,
         'local_updated_at': userData['local_updated_at'],
       };
-      print('dbData ${dbData}');
 
       // Check if user exists
-      final existingUser = await _getUserFromDatabase(userData['Id']);
-      print('exists ${existingUser}');
+      final existingUser = await _getUserFromDatabase(userId);
 
       if (existingUser == null) {
-        print('existingUser ${existingUser}');
-
         // Insert new user
         await _dbHelper.insert('users', dbData);
       } else {
@@ -501,10 +486,9 @@ class UserProfileRepository {
         await _dbHelper.update(
           'users',
           dbData,
-          where: 'Id = ?',
+          where: 'id = ?',
           whereArgs: [userId],
         );
-        print('_dbHelper ${dbData}');
       }
     } catch (e) {
       AppLogger.error('Failed to save user to database: $e');

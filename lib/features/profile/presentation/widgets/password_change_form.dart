@@ -16,23 +16,23 @@ class _PasswordChangeFormState extends State<PasswordChangeForm> {
   final _oldPasswordController = TextEditingController();
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  
+
   bool _obscureOldPassword = true;
   bool _obscureNewPassword = true;
   bool _obscureConfirmPassword = true;
-  
+
   String? _userName;
-  
+
   @override
   void initState() {
     super.initState();
     // Get username from auth state
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthAuthenticated) {
-      _userName = authState.user.userName;
+      _userName = authState.user.UserName;
     }
   }
-  
+
   @override
   void dispose() {
     _oldPasswordController.dispose();
@@ -40,7 +40,7 @@ class _PasswordChangeFormState extends State<PasswordChangeForm> {
     _confirmPasswordController.dispose();
     super.dispose();
   }
-  
+
   void _submitForm() {
     if (_formKey.currentState?.validate() ?? false) {
       if (_userName == null) {
@@ -52,7 +52,7 @@ class _PasswordChangeFormState extends State<PasswordChangeForm> {
         );
         return;
       }
-      
+
       context.read<ProfileBloc>().add(
         PasswordChangeRequested(
           userName: _userName!,
@@ -62,14 +62,14 @@ class _PasswordChangeFormState extends State<PasswordChangeForm> {
           requestor: _userName!, // Using username as requestor
         ),
       );
-      
+
       // Clear form after submission
       _oldPasswordController.clear();
       _newPasswordController.clear();
       _confirmPasswordController.clear();
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ProfileBloc, ProfileState>(
@@ -102,7 +102,7 @@ class _PasswordChangeFormState extends State<PasswordChangeForm> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      
+
                       // Old Password field
                       TextFormField(
                         controller: _oldPasswordController,
@@ -113,9 +113,9 @@ class _PasswordChangeFormState extends State<PasswordChangeForm> {
                           border: const OutlineInputBorder(),
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _obscureOldPassword 
-                                ? Icons.visibility 
-                                : Icons.visibility_off,
+                              _obscureOldPassword
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
                             ),
                             onPressed: () {
                               setState(() {
@@ -132,7 +132,7 @@ class _PasswordChangeFormState extends State<PasswordChangeForm> {
                         },
                       ),
                       const SizedBox(height: 16),
-                      
+
                       // New Password field
                       TextFormField(
                         controller: _newPasswordController,
@@ -143,9 +143,9 @@ class _PasswordChangeFormState extends State<PasswordChangeForm> {
                           border: const OutlineInputBorder(),
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _obscureNewPassword 
-                                ? Icons.visibility 
-                                : Icons.visibility_off,
+                              _obscureNewPassword
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
                             ),
                             onPressed: () {
                               setState(() {
@@ -153,7 +153,8 @@ class _PasswordChangeFormState extends State<PasswordChangeForm> {
                               });
                             },
                           ),
-                          helperText: 'Password must be at least 8 characters long',
+                          helperText:
+                              'Password must be at least 8 characters long',
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -166,7 +167,7 @@ class _PasswordChangeFormState extends State<PasswordChangeForm> {
                         },
                       ),
                       const SizedBox(height: 16),
-                      
+
                       // Confirm Password field
                       TextFormField(
                         controller: _confirmPasswordController,
@@ -177,13 +178,14 @@ class _PasswordChangeFormState extends State<PasswordChangeForm> {
                           border: const OutlineInputBorder(),
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _obscureConfirmPassword 
-                                ? Icons.visibility 
-                                : Icons.visibility_off,
+                              _obscureConfirmPassword
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
                             ),
                             onPressed: () {
                               setState(() {
-                                _obscureConfirmPassword = !_obscureConfirmPassword;
+                                _obscureConfirmPassword =
+                                    !_obscureConfirmPassword;
                               });
                             },
                           ),
@@ -199,22 +201,28 @@ class _PasswordChangeFormState extends State<PasswordChangeForm> {
                         },
                       ),
                       const SizedBox(height: 24),
-                      
+
                       // Submit button
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: state is PasswordChangeLoading ? null : _submitForm,
+                          onPressed:
+                              state is PasswordChangeLoading
+                                  ? null
+                                  : _submitForm,
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 12),
                           ),
-                          child: state is PasswordChangeLoading
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
-                                )
-                              : const Text('Change Password'),
+                          child:
+                              state is PasswordChangeLoading
+                                  ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                  : const Text('Change Password'),
                         ),
                       ),
                     ],

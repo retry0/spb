@@ -99,7 +99,7 @@ class _ProfileEditFormState extends State<ProfileEditForm> {
 
                 // Username field (disabled, just for display)
                 TextFormField(
-                  initialValue: widget.user.userName,
+                  initialValue: widget.user.UserName,
                   enabled: false,
                   decoration: const InputDecoration(
                     labelText: 'Username',
@@ -153,7 +153,7 @@ class _ProfileEditFormState extends State<ProfileEditForm> {
       // Create updated user object
       final updatedUser = User(
         Id: widget.user.Id,
-        userName: widget.user.userName,
+        UserName: widget.user.UserName,
         Nama: _nameController.text,
       );
 

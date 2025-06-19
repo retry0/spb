@@ -8,7 +8,7 @@ part 'user_model.g.dart';
 class UserModel extends User {
   const UserModel({
     required super.Id,
-    required super.userName,
+    required super.UserName,
     required super.Nama,
   });
 
@@ -20,12 +20,12 @@ class UserModel extends User {
   factory UserModel.fromDatabase(Map<String, dynamic> data) {
     return UserModel(
       Id: data['Id'] as String,
-      userName: data['username'] as String,
+      UserName: data['UserName'] as String,
       Nama: data['Nama'] as String,
     );
   }
 
   Map<String, dynamic> toDatabase() {
-    return {'id': Id, 'username': userName, 'Nama': Nama};
+    return {'id': Id, 'userName': UserName, 'Nama': Nama};
   }
 }

@@ -3,14 +3,24 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/services/sync_service.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../bloc/profile_bloc.dart';
 import '../widgets/profile_info_section.dart';
 import '../widgets/password_change_form.dart';
 import '../widgets/logout_button.dart';
+import '../widgets/sync_status_indicator.dart';
+import '../widgets/profile_edit_form.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  bool _isEditing = false;
 
   @override
   Widget build(BuildContext context) {
@@ -49,9 +59,10 @@ class ProfilePage extends StatelessWidget {
                     icon: const Icon(Icons.refresh),
                     onPressed: () {
                       context.read<ProfileBloc>().add(
-                        const ProfileLoadRequested(),
+                        const ProfileSyncRequested(),
                       );
                     },
+                    tooltip: 'Sync Profile',
                   ),
                   const LogoutButton(),
                   const SizedBox(width: 8),
@@ -86,6 +97,33 @@ class ProfilePage extends StatelessWidget {
                           margin: const EdgeInsets.all(16),
                         ),
                       );
+                    } else if (state is ProfileUpdateSuccess) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(state.message),
+                          backgroundColor: Colors.green,
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          margin: const EdgeInsets.all(16),
+                        ),
+                      );
+                      setState(() {
+                        _isEditing = false;
+                      });
+                    } else if (state is ProfileUpdateError) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(state.message),
+                          backgroundColor: Colors.red,
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          margin: const EdgeInsets.all(16),
+                        ),
+                      );
                     }
                   },
                   child: Padding(
@@ -93,10 +131,25 @@ class ProfilePage extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Sync Status Indicator
+                        const SyncStatusIndicator(),
+                        // Profile Info or Edit Form
+                        BlocBuilder<ProfileBloc, ProfileState>(
+                          builder: (context, state) {
+                            if (state is ProfileLoaded) {
+                              return _isEditing
+                                  ? ProfileEditForm(user: state.user)
+                                  : const ProfileInfoSection();
+                            }
+                            return const SizedBox.shrink();
+                          },
+                        ),
+
                         const SizedBox(height: 24),
-                        const ProfileInfoSection(),
-                        const SizedBox(height: 24),
-                        const PasswordChangeForm(),
+
+                        // Password Change Form (only show when not editing)
+                        if (!_isEditing) const PasswordChangeForm(),
+
                         const SizedBox(
                           height: 100,
                         ), // Bottom padding for navigation
