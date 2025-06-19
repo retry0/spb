@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'environment_config.dart';
-import 'android_emulator_config.dart';
 
 /// Validates environment configuration and provides helpful error messages
 class EnvironmentValidator {
@@ -28,12 +27,6 @@ class EnvironmentValidator {
           _validateProduction(env, errors, warnings);
           break;
       }
-
-      // Add Android emulator specific warnings
-      if (Platform.isAndroid) {
-        warnings.addAll(AndroidEmulatorConfig.validateEmulatorConfig());
-      }
-
     } catch (e) {
       errors.add('Invalid environment: $envString');
     }
@@ -76,19 +69,6 @@ class EnvironmentValidator {
     if (env['DEV_ENABLE_LOGGING'] == null) {
       warnings.add('DEV_ENABLE_LOGGING not set, defaulting to true');
     }
-
-    // Android emulator specific checks
-    if (Platform.isAndroid && AndroidEmulatorConfig.isAndroidEmulator) {
-      final url = baseUrl ?? 'http://localhost:8000/api';
-      final uri = Uri.parse(url);
-      
-      if (uri.host == 'localhost' || uri.host == '127.0.0.1') {
-        warnings.add(
-          'Android emulator detected. URL will be automatically converted from '
-          '${uri.host} to 10.0.2.2 for emulator connectivity.'
-        );
-      }
-    }
   }
 
   static void _validateStaging(
@@ -128,7 +108,7 @@ class EnvironmentValidator {
       warnings.add('Logging is enabled in production environment');
     }
 
-    // Check for development URLs in production (allow 10.0.2.2 for Android emulator testing)
+    // Check for development URLs in production
     if (baseUrl != null) {
       final uri = Uri.parse(baseUrl);
       if (uri.host == 'localhost' || uri.host == '127.0.0.1') {
@@ -178,13 +158,9 @@ class EnvironmentValidator {
 FLUTTER_ENV=development
 
 # Development Environment
-# Note: For Android emulator, localhost will be automatically converted to 10.0.2.2
 DEV_API_BASE_URL=http://localhost:8000/api
 DEV_ENABLE_LOGGING=true
 DEV_TIMEOUT_SECONDS=30
-
-# Alternative for Android emulator (if you want to be explicit)
-# DEV_API_BASE_URL=http://10.0.2.2:8000/api
 
 # Staging Environment
 STAGING_API_BASE_URL=https://api-staging.yourapp.com/api

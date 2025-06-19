@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/config/environment_config.dart';
-import '../../../../core/config/android_emulator_config.dart';
 import '../../../../core/widgets/network_error_widget.dart';
 import '../bloc/auth_bloc.dart';
 
@@ -147,16 +146,6 @@ class _SplashPageState extends State<SplashPage> {
                           ),
                           textAlign: TextAlign.center,
                         ),
-                        if (AndroidEmulatorConfig.isAndroidEmulator) ...[
-                          const SizedBox(height: 4),
-                          const Text(
-                            '📱 Android Emulator Detected',
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
                       ],
                     ),
                   ),
