@@ -45,5 +45,17 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<!-- Location permission descriptions -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app needs access to your location to provide GPS functionality while you are using the app.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>This app needs access to your location to provide GPS functionality at all times.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>This app needs access to your location to provide GPS functionality at all times.</string>
+	<!-- Photo library permissions -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app needs access to your photo library to save QR codes and other images.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>This app needs access to your photo library to save QR codes and other images.</string>
 </dict>
 </plist>

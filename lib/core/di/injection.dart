@@ -17,6 +17,8 @@ import '../utils/jwt_token_manager.dart';
 import '../utils/session_manager.dart';
 import '../services/connectivity_service.dart';
 import '../services/sync_service.dart';
+import '../permissions/location_permission_handler.dart';
+import '../permissions/permission_manager.dart';
 import '../../features/auth/data/datasources/auth_remote_datasource.dart';
 import '../../features/auth/data/datasources/auth_local_datasource.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
@@ -45,6 +47,7 @@ import '../../features/qr_code/domain/usecases/get_saved_qr_codes_usecase.dart';
 import '../../features/qr_code/domain/usecases/export_qr_code_usecase.dart';
 import '../../features/qr_code/domain/usecases/share_qr_code_usecase.dart';
 import '../../features/qr_code/presentation/bloc/qr_code_bloc.dart';
+import '../../features/location/presentation/bloc/location_bloc.dart';
 
 final getIt = GetIt.instance;
 
@@ -111,6 +114,7 @@ Future<void> configureDependencies() async {
       connectivity: getIt<Connectivity>(),
     ),
   );
+  
   // Sync Service
   getIt.registerLazySingleton<SyncService>(
     () => SyncService(
@@ -118,6 +122,16 @@ Future<void> configureDependencies() async {
       connectivityService: getIt<ConnectivityService>(),
     ),
   );
+  
+  // Permission handlers
+  getIt.registerLazySingleton<LocationPermissionHandler>(
+    () => LocationPermissionHandler(),
+  );
+  
+  getIt.registerLazySingleton<PermissionManager>(
+    () => PermissionManager(),
+  );
+  
   // Utilities
   getIt.registerLazySingleton<Uuid>(() => const Uuid());
 
@@ -235,6 +249,12 @@ Future<void> configureDependencies() async {
       getSavedQrCodesUseCase: getIt<GetSavedQrCodesUseCase>(),
       exportQrCodeUseCase: getIt<ExportQrCodeUseCase>(),
       shareQrCodeUseCase: getIt<ShareQrCodeUseCase>(),
+    ),
+  );
+  
+  getIt.registerFactory(
+    () => LocationBloc(
+      permissionHandler: getIt<LocationPermissionHandler>(),
     ),
   );
 }
