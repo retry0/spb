@@ -46,8 +46,7 @@ class UserProfileRepository {
       }
 
       // Get user ID from token
-      final userId = userInfo['sub'] ?? userInfo['Id'];
-      print('object: $token');
+      final userId = userInfo['Id'] ?? userInfo['sub'];
       if (userId == null) {
         return Left(AuthFailure('User ID not found in token'));
       }
@@ -108,7 +107,7 @@ class UserProfileRepository {
           !connectivityResult.contains(ConnectivityResult.none);
 
       // Get user ID
-      final userId = userData['id'] ?? userData['sub'];
+      final userId = userData['Id'] ?? userData['sub'];
       if (userId == null) {
         return Left(ValidationFailure('User ID is required'));
       }
@@ -422,7 +421,6 @@ class UserProfileRepository {
     try {
       final results = await _dbHelper.query(
         'users',
-        columns: ['id', 'username', 'Nama'],
         where: 'id = ?',
         whereArgs: [userId],
         limit: 1,
@@ -444,15 +442,11 @@ class UserProfileRepository {
     try {
       // Ensure required fields
       final userId = userData['Id'] ?? userData['sub'];
-      print('userData: $userData');
-      print('userId: $userId');
-
       if (userId == null) {
         throw ValidationException('User ID is required');
       }
 
-      final username = userData['userName'] ?? '';
-
+      final username = userData['UserName'];
       if (username == null) {
         throw ValidationException('Username is required');
       }

@@ -69,7 +69,6 @@ class JwtDecoderUtil {
   static Map<String, dynamic>? extractUserInfo(String token) {
     final filteredData = decodeAndFilterToken(token);
     if (filteredData == null) return null;
-    print('JWT Decoder ${filteredData}');
 
     // Common user-related JWT claims
     const userFields = {
@@ -81,11 +80,8 @@ class JwtDecoderUtil {
     final Map<String, dynamic> userInfo = {};
 
     for (final field in userFields) {
-      print('Userfield ${field}');
-
       if (filteredData.containsKey(field)) {
         userInfo[field] = filteredData[field];
-        print('userInfo ${userInfo[field]}');
       }
     }
 
