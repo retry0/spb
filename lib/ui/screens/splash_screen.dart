@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'dart:math';
 
 import '../../core/config/environment_config.dart';
-import '../../core/config/android_emulator_config.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/network_error_widget.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
@@ -307,16 +306,6 @@ class _SplashScreenState extends State<SplashScreen>
                                 ),
                                 textAlign: TextAlign.center,
                               ),
-                              if (AndroidEmulatorConfig.isAndroidEmulator) ...[
-                                const SizedBox(height: 4),
-                                const Text(
-                                  '📱 Android Emulator Detected',
-                                  style: TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
                             ],
                           ),
                         ),

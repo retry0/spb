@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'environment_config.dart';
-import 'android_emulator_config.dart';
 import '../utils/logger.dart';
 
 /// Network troubleshooting utilities for diagnosing connection issues
@@ -135,7 +134,6 @@ class NetworkTroubleshooter {
     final checks = EmulatorChecks();
 
     try {
-      checks.isEmulator = AndroidEmulatorConfig.isAndroidEmulator;
       checks.originalUrl = EnvironmentConfig.rawBaseUrl;
       checks.convertedUrl = EnvironmentConfig.baseUrl;
 
@@ -330,15 +328,6 @@ class NetworkTroubleshooter {
         '• Verify the server is bound to 0.0.0.0, not just localhost',
       );
       recommendations.add('• Check if the port number is correct');
-
-      if (Platform.isAndroid && AndroidEmulatorConfig.isAndroidEmulator) {
-        recommendations.add(
-          '• For Android emulator, use 10.0.2.2 instead of localhost',
-        );
-        recommendations.add(
-          '• Test backend accessibility: curl http://10.0.2.2:YOUR_PORT/api',
-        );
-      }
     }
 
     if (Platform.isAndroid && diagnostics.emulatorChecks != null) {

@@ -11,10 +11,10 @@ class EnvironmentValidator {
 
     // Get current environment
     final envString = env['FLUTTER_ENV'] ?? env['ENV'] ?? 'development';
-    
+
     try {
       final environment = _parseEnvironment(envString);
-      
+
       // Validate based on environment
       switch (environment) {
         case Environment.development:
@@ -116,7 +116,7 @@ class EnvironmentValidator {
       } else if (uri.host == '10.0.2.2' && Platform.isAndroid) {
         warnings.add(
           'Using Android emulator URL (10.0.2.2) in production build. '
-          'This should only be used for testing.'
+          'This should only be used for testing.',
         );
       }
     }
@@ -190,7 +190,7 @@ class ValidationResult {
   /// Get formatted validation report
   String getReport() {
     final buffer = StringBuffer();
-    
+
     if (isValid) {
       buffer.writeln('✅ Environment validation passed');
     } else {

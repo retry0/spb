@@ -24,7 +24,7 @@ class _SplashPageState extends State<SplashPage> {
     try {
       // Add a small delay for splash screen visibility
       await Future.delayed(const Duration(seconds: 2));
-      
+
       // Check authentication status
       if (mounted) {
         context.read<AuthBloc>().add(const AuthCheckRequested());
@@ -40,13 +40,14 @@ class _SplashPageState extends State<SplashPage> {
   void _showInitializationError(String error) {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (context) => NetworkErrorWidget(
-          errorMessage: 'Failed to initialize app: $error',
-          onRetry: () {
-            Navigator.of(context).pop();
-            _initializeApp();
-          },
-        ),
+        builder:
+            (context) => NetworkErrorWidget(
+              errorMessage: 'Failed to initialize app: $error',
+              onRetry: () {
+                Navigator.of(context).pop();
+                _initializeApp();
+              },
+            ),
       ),
     );
   }
@@ -63,13 +64,14 @@ class _SplashPageState extends State<SplashPage> {
           // Show network error widget for auth errors
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
-              builder: (context) => NetworkErrorWidget(
-                errorMessage: state.message,
-                onRetry: () {
-                  Navigator.of(context).pop();
-                  context.read<AuthBloc>().add(const AuthCheckRequested());
-                },
-              ),
+              builder:
+                  (context) => NetworkErrorWidget(
+                    errorMessage: state.message,
+                    onRetry: () {
+                      Navigator.of(context).pop();
+                      context.read<AuthBloc>().add(const AuthCheckRequested());
+                    },
+                  ),
             ),
           );
         }
@@ -90,11 +92,7 @@ class _SplashPageState extends State<SplashPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
-                  Icons.security,
-                  size: 100,
-                  color: Colors.white,
-                ),
+                const Icon(Icons.security, size: 100, color: Colors.white),
                 const SizedBox(height: 24),
                 const Text(
                   'SPB Secure',
@@ -107,17 +105,14 @@ class _SplashPageState extends State<SplashPage> {
                 const SizedBox(height: 16),
                 const Text(
                   'Secure Flutter Application',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.white70,
-                  ),
+                  style: TextStyle(fontSize: 16, color: Colors.white70),
                 ),
                 const SizedBox(height: 48),
                 const CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                 ),
                 const SizedBox(height: 24),
-                
+
                 // Show configuration info in development mode
                 if (EnvironmentConfig.isDevelopment) ...[
                   Container(

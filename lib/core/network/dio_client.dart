@@ -11,8 +11,8 @@ import 'interceptors/csrf_interceptor.dart';
 class DioClient {
   static Dio createDio() {
     // Ensure environment is initialized
-    if (!EnvironmentConfig.isDevelopment && 
-        !EnvironmentConfig.isStaging && 
+    if (!EnvironmentConfig.isDevelopment &&
+        !EnvironmentConfig.isStaging &&
         !EnvironmentConfig.isProduction) {
       throw Exception('Environment configuration not initialized');
     }
@@ -47,7 +47,7 @@ class DioClient {
       CsrfInterceptor(), // Add CSRF protection
       ErrorInterceptor(),
       // Only add logging in development or when explicitly enabled
-      if (EnvironmentConfig.isLoggingEnabled || kDebugMode) 
+      if (EnvironmentConfig.isLoggingEnabled || kDebugMode)
         LoggingInterceptor(),
     ]);
 
