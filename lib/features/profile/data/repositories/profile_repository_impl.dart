@@ -33,7 +33,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
           // Convert to User entity
           final user = User(
             Id: userData['Id'] ?? userData['sub'] ?? '',
-            UserName: userData['usernUserNameame'] ?? '',
+            UserName: userData['UserName'] ?? '',
             Nama: userData['Nama'] ?? '',
           );
 
