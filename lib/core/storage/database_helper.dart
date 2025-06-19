@@ -309,6 +309,14 @@ class DatabaseHelper {
   Future<int> insert(String table, Map<String, dynamic> data) async {
     final db = await database;
     try {
+      // Add timestamps if not provided
+      if (!data.containsKey('created_at')) {
+        data['created_at'] = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      }
+      if (!data.containsKey('updated_at')) {
+        data['updated_at'] = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      }
+      
       return await db.insert(table, data, conflictAlgorithm: ConflictAlgorithm.replace);
     } catch (e) {
       AppLogger.error('Failed to insert into $table', e);
@@ -350,7 +358,11 @@ class DatabaseHelper {
   }) async {
     final db = await database;
     try {
-      data['updated_at'] = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      // Add updated_at timestamp if not provided
+      if (!data.containsKey('updated_at')) {
+        data['updated_at'] = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      }
+      
       return await db.update(table, data, where: where, whereArgs: whereArgs);
     } catch (e) {
       AppLogger.error('Failed to update $table', e);
