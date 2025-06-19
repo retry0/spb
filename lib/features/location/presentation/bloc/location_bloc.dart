@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/permissions/location_permission_handler.dart';
 import '../../../../core/utils/logger.dart';
@@ -38,10 +39,13 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
     emit(const LocationPermissionLoading());
     
     try {
-      final isGranted = await _permissionHandler.requestPermission(event.context);
+      final BuildContext context = event.context as BuildContext;
+      final isGranted = await _permissionHandler.requestPermission(context);
       
       if (isGranted) {
         emit(const LocationPermissionGranted());
+        // Navigate to home page when permission is granted
+        context.go('/home');
       } else {
         emit(const LocationPermissionDenied('Location permission is required'));
       }
