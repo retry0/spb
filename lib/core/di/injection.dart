@@ -17,8 +17,6 @@ import '../utils/jwt_token_manager.dart';
 import '../utils/session_manager.dart';
 import '../services/connectivity_service.dart';
 import '../services/sync_service.dart';
-import '../permissions/location_permission_handler.dart';
-import '../permissions/permission_manager.dart';
 import '../../features/auth/data/datasources/auth_remote_datasource.dart';
 import '../../features/auth/data/datasources/auth_local_datasource.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
@@ -121,13 +119,6 @@ Future<void> configureDependencies() async {
       connectivityService: getIt<ConnectivityService>(),
     ),
   );
-
-  // Permission handlers
-  getIt.registerLazySingleton<LocationPermissionHandler>(
-    () => LocationPermissionHandler(),
-  );
-
-  getIt.registerLazySingleton<PermissionManager>(() => PermissionManager());
 
   // Utilities
   getIt.registerLazySingleton<Uuid>(() => const Uuid());
