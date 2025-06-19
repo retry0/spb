@@ -37,15 +37,20 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     on<ProfileSyncStatusChanged>(_onProfileSyncStatusChanged);
     
     // Listen to sync status changes
-    _syncStatusSubscription = _syncService.syncStatusNotifier.addListener(
-      () {
-        add(ProfileSyncStatusChanged(
-          status: _syncService.syncStatusNotifier.value,
-          error: _syncService.syncErrorNotifier.value,
-          lastSyncTime: _syncService.lastSyncTimeNotifier.value,
-        ));
-      }
-    );
+    _listenToSyncChanges();
+  }
+  
+  void _listenToSyncChanges() {
+    // Listen to sync status changes
+    _syncService.syncStatusNotifier.addListener(_onSyncStatusChanged);
+  }
+  
+  void _onSyncStatusChanged() {
+    add(ProfileSyncStatusChanged(
+      status: _syncService.syncStatusNotifier.value,
+      error: _syncService.syncErrorNotifier.value,
+      lastSyncTime: _syncService.lastSyncTimeNotifier.value,
+    ));
   }
 
   Future<void> _onProfileLoadRequested(
@@ -209,6 +214,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   @override
   Future<void> close() {
     _syncStatusSubscription?.cancel();
+    _syncService.syncStatusNotifier.removeListener(_onSyncStatusChanged);
     return super.close();
   }
 }
