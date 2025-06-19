@@ -17,9 +17,7 @@ import 'core/permissions/permission_manager.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/widgets/session_timeout_dialog.dart';
 import 'features/theme/presentation/bloc/theme_bloc.dart';
-import 'features/location/presentation/bloc/location_bloc.dart';
 import 'features/location/presentation/pages/location_permission_page.dart';
-import 'features/home/presentation/pages/home_page.dart';
 import 'ui/screens/splash_screen.dart';
 import 'ui/theme/app_theme.dart';
 
@@ -122,9 +120,6 @@ class MyApp extends StatelessWidget {
           create:
               (context) => getIt<ThemeBloc>()..add(const ThemeInitialized()),
         ),
-        BlocProvider(
-          create: (context) => getIt<LocationBloc>(),
-        ),
         // Provide global services
         RepositoryProvider.value(value: getIt<ConnectivityService>()),
         RepositoryProvider.value(value: getIt<SyncService>()),
@@ -139,12 +134,7 @@ class MyApp extends StatelessWidget {
               theme: core_theme.AppTheme.lightTheme,
               darkTheme: core_theme.AppTheme.darkTheme,
               themeMode: themeState.themeMode,
-              initialRoute: '/location_permission',
-              routes: {
-                '/': (context) => const SplashScreen(),
-                '/location_permission': (context) => const LocationPermissionPage(),
-                '/home': (context) => const HomePage(),
-              },
+              home: const LocationPermissionPage(),
               builder: (context, child) {
                 return MediaQuery(
                   data: MediaQuery.of(context).copyWith(
