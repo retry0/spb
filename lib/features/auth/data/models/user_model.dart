@@ -25,7 +25,7 @@ class UserModel extends User {
     return UserModel(
       id: data['id'] as String,
       userName: data['username'] as String,
-      email: data['email'] as String,
+      email: data['email'] as String? ?? '',
       name: data['name'] as String,
       avatar: data['avatar'] as String?,
       createdAt: DateTime.fromMillisecondsSinceEpoch(

@@ -348,11 +348,15 @@ class UserProfileRepository {
             
         return userData;
       } else {
-        throw ServerException('Failed to fetch profile: ${response.statusCode}');
+        throw ServerException(
+          'Failed to fetch profile: ${response.statusCode}',
+        );
       }
+    } on DioException catch (e) {
+      throw ServerException(
+        'Failed to fetch profile: ${e.message}',
+      );
     } catch (e) {
-      AppLogger.error('Failed to fetch remote profile: $e');
-      
       // If we can't reach the server, fall back to token data
       final userInfo = JwtDecoderUtil.extractUserInfo(token);
       if (userInfo != null) {
@@ -424,6 +428,7 @@ class UserProfileRepository {
     try {
       final results = await _dbHelper.query(
         'users',
+        columns: ['id', 'username', 'name'],
         where: 'id = ?',
         whereArgs: [userId],
         limit: 1,
@@ -449,8 +454,8 @@ class UserProfileRepository {
         throw ValidationException('User ID is required');
       }
 
-      final username = userData['userName'] ?? 
-                      userData['username'] ?? 
+      final username = userData['username'] ?? 
+                      userData['userName'] ?? 
                       userData['preferred_username'] ??
                       (userData['email'] != null ? (userData['email'] as String).split('@')[0] : null);
       
@@ -458,22 +463,13 @@ class UserProfileRepository {
         throw ValidationException('Username is required');
       }
 
-      final email = userData['email'];
-      if (email == null) {
-        throw ValidationException('Email is required');
-      }
-
-      final name = userData['name'] ?? 
-                  userData['given_name'] ?? 
-                  username;
-
       // Prepare data for database
       final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
       final dbData = {
         'id': userId,
         'username': username,
-        'email': email,
-        'name': name,
+        'email': userData['email'],
+        'name': userData['name'] ?? userData['given_name'] ?? username,
         'avatar': userData['avatar'] ?? userData['picture'],
         'created_at': userData['created_at'] ?? now,
         'updated_at': userData['updated_at'] ?? now,

@@ -114,8 +114,8 @@ class ProfileRepositoryImpl implements ProfileRepository {
           // Convert back to User entity
           final updatedUser = User(
             id: updatedData['id'] ?? updatedData['sub'] ?? '',
-            userName: updatedData['userName'] ?? 
-                     updatedData['username'] ?? 
+            userName: updatedData['username'] ?? 
+                     updatedData['userName'] ?? 
                      updatedData['preferred_username'] ?? '',
             email: updatedData['email'] ?? '',
             name: updatedData['name'] ?? 
