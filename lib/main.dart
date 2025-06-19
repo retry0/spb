@@ -17,7 +17,6 @@ import 'core/permissions/permission_manager.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/widgets/session_timeout_dialog.dart';
 import 'features/theme/presentation/bloc/theme_bloc.dart';
-import 'features/location/presentation/pages/location_permission_page.dart';
 import 'ui/screens/splash_screen.dart';
 import 'ui/theme/app_theme.dart';
 
@@ -80,7 +79,7 @@ void main() async {
 
   // Configure dependency injection
   await configureDependencies();
-  
+
   // Initialize permission manager
   await getIt<PermissionManager>().initialize();
 

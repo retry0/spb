@@ -22,23 +22,27 @@ class ProfileRepositoryImpl implements ProfileRepository {
   @override
   Future<Either<Failure, User>> getUserProfile() async {
     try {
-      // Get user profile from user profile repository
-      final result = await userProfileRepository.getUserProfile();
-      return result.fold(
+      // First try to get user from auth repository
+      final authResult = await authRepository.getCurrentUser();
+      
+      return authResult.fold(
         (failure) async {
-          // Fallback to auth repository if user profile repository fails
-          return await authRepository.getCurrentUser();
-        },
-        (userData) async {
-          // Convert to User entity
-          final user = User(
-            Id: userData['Id'] ?? userData['sub'] ?? '',
-            UserName: userData['UserName'] ?? '',
-            Nama: userData['Nama'] ?? '',
+          // If auth repository fails, try user profile repository
+          final result = await userProfileRepository.getUserProfile();
+          return result.fold(
+            (failure) => Left(failure),
+            (userData) {
+              // Convert to User entity
+              final user = User(
+                Id: userData['Id'] ?? userData['sub'] ?? '',
+                UserName: userData['UserName'] ?? '',
+                Nama: userData['Nama'] ?? '',
+              );
+              return Right(user);
+            },
           );
-
-          return Right(user);
         },
+        (user) => Right(user),
       );
     } catch (e) {
       return Left(ServerFailure('Failed to get user profile: $e'));

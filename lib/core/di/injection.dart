@@ -47,7 +47,6 @@ import '../../features/qr_code/domain/usecases/get_saved_qr_codes_usecase.dart';
 import '../../features/qr_code/domain/usecases/export_qr_code_usecase.dart';
 import '../../features/qr_code/domain/usecases/share_qr_code_usecase.dart';
 import '../../features/qr_code/presentation/bloc/qr_code_bloc.dart';
-import '../../features/location/presentation/bloc/location_bloc.dart';
 
 final getIt = GetIt.instance;
 
@@ -114,7 +113,7 @@ Future<void> configureDependencies() async {
       connectivity: getIt<Connectivity>(),
     ),
   );
-  
+
   // Sync Service
   getIt.registerLazySingleton<SyncService>(
     () => SyncService(
@@ -122,16 +121,14 @@ Future<void> configureDependencies() async {
       connectivityService: getIt<ConnectivityService>(),
     ),
   );
-  
+
   // Permission handlers
   getIt.registerLazySingleton<LocationPermissionHandler>(
     () => LocationPermissionHandler(),
   );
-  
-  getIt.registerLazySingleton<PermissionManager>(
-    () => PermissionManager(),
-  );
-  
+
+  getIt.registerLazySingleton<PermissionManager>(() => PermissionManager());
+
   // Utilities
   getIt.registerLazySingleton<Uuid>(() => const Uuid());
 
@@ -249,12 +246,6 @@ Future<void> configureDependencies() async {
       getSavedQrCodesUseCase: getIt<GetSavedQrCodesUseCase>(),
       exportQrCodeUseCase: getIt<ExportQrCodeUseCase>(),
       shareQrCodeUseCase: getIt<ShareQrCodeUseCase>(),
-    ),
-  );
-  
-  getIt.registerFactory(
-    () => LocationBloc(
-      permissionHandler: getIt<LocationPermissionHandler>(),
     ),
   );
 }
