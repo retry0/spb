@@ -55,6 +55,22 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                 ),
                 actions: [
+                  // BlocBuilder<ProfileBloc, ProfileState>(
+                  //   builder: (context, state) {
+                  //     if (state is ProfileLoaded) {
+                  //       return IconButton(
+                  //         icon: Icon(_isEditing ? Icons.close : Icons.edit),
+                  //         onPressed: () {
+                  //           setState(() {
+                  //             _isEditing = !_isEditing;
+                  //           });
+                  //         },
+                  //         tooltip: _isEditing ? 'Cancel' : 'Edit Profile',
+                  //       );
+                  //     }
+                  //     return const SizedBox.shrink();
+                  //   },
+                  // ),
                   IconButton(
                     icon: const Icon(Icons.refresh),
                     onPressed: () {
