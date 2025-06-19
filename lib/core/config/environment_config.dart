@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'android_emulator_config.dart';
 
 /// Environment types supported by the application
 enum Environment { development, staging, production }
@@ -192,19 +191,13 @@ class EnvironmentConfig {
     return _currentEnvironment!;
   }
 
-  /// Get base API URL (automatically converted for Android emulator)
+  /// Get base API URL
   static String get baseUrl {
     _ensureInitialized();
-
-    // Convert localhost URLs for Android emulator
-    if (Platform.isAndroid && AndroidEmulatorConfig.isAndroidEmulator) {
-      return AndroidEmulatorConfig.convertUrlForEmulator(_baseUrl!);
-    }
-
     return _baseUrl!;
   }
 
-  /// Get raw base URL without emulator conversion
+  /// Get raw base URL
   static String get rawBaseUrl {
     _ensureInitialized();
     return _baseUrl!;
@@ -267,13 +260,10 @@ class EnvironmentConfig {
     _ensureInitialized();
     return {
       'environment': environmentName,
-      'rawBaseUrl': rawBaseUrl,
-      'effectiveBaseUrl': baseUrl,
+      'baseUrl': baseUrl,
       'loggingEnabled': isLoggingEnabled,
       'timeout': '${timeout.inSeconds}s',
       'isProduction': isProduction,
-      'isAndroidEmulator':
-          Platform.isAndroid ? AndroidEmulatorConfig.isAndroidEmulator : false,
       'platform': Platform.operatingSystem,
     };
   }

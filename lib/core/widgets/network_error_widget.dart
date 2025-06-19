@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import '../config/network_troubleshooter.dart';
 import '../config/environment_config.dart';
-import '../config/android_emulator_config.dart';
+import '../config/network_troubleshooter.dart';
 import '../network/models/api_error_response.dart';
 import '../utils/logger.dart';
 
@@ -269,10 +268,6 @@ class _NetworkErrorWidgetState extends State<NetworkErrorWidget> {
             const SizedBox(height: 8),
             _buildInfoRow('Environment', EnvironmentConfig.environmentName),
             _buildInfoRow('Base URL', EnvironmentConfig.baseUrl),
-            if (AndroidEmulatorConfig.isAndroidEmulator) ...[
-              _buildInfoRow('Platform', 'Android Emulator'),
-              _buildInfoRow('Original URL', EnvironmentConfig.rawBaseUrl),
-            ],
           ],
         ),
       ),
@@ -443,19 +438,9 @@ class _NetworkErrorWidgetState extends State<NetworkErrorWidget> {
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            if (AndroidEmulatorConfig.isAndroidEmulator) ...[
-              _buildTip(
-                'For Android emulator, ensure your backend server is running on your host machine',
-              ),
-              _buildTip(
-                'Use http://10.0.2.2:YOUR_PORT/api instead of localhost',
-              ),
-              _buildTip('Bind your server to 0.0.0.0, not just localhost'),
-            ] else ...[
-              _buildTip('Check your WiFi or mobile data connection'),
-              _buildTip('Ensure your backend server is running and accessible'),
-              _buildTip('Verify the API endpoint URL is correct'),
-            ],
+            _buildTip('Check your WiFi or mobile data connection'),
+            _buildTip('Ensure your backend server is running and accessible'),
+            _buildTip('Verify the API endpoint URL is correct'),
           ],
         ),
       ),
