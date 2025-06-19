@@ -22,7 +22,10 @@ class LocationPermissionPage extends StatelessWidget {
         ),
         body: BlocListener<LocationBloc, LocationState>(
           listener: (context, state) {
-            if (state is LocationPermissionDenied) {
+            if (state is LocationPermissionGranted) {
+              // Navigate to home page when permission is granted
+              Navigator.of(context).pushReplacementNamed('/home');
+            } else if (state is LocationPermissionDenied) {
               _showExitConfirmationDialog(context);
             }
           },
@@ -168,8 +171,14 @@ class LocationPermissionPage extends StatelessWidget {
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text('Cancel'),
-              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Try Again'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                // Request permission again
+                context.read<LocationBloc>().add(
+                  LocationPermissionRequested(context: context),
+                );
+              },
             ),
             TextButton(
               child: const Text('Exit App'),

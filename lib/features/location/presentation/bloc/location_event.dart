@@ -8,7 +8,7 @@ abstract class LocationEvent extends Equatable {
 }
 
 class LocationPermissionRequested extends LocationEvent {
-  final BuildContext context;
+  final dynamic context;
   
   const LocationPermissionRequested({required this.context});
   
