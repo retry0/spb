@@ -250,19 +250,16 @@ class UserProfileRepository {
           if (tableName == 'users' && operation == 'update') {
             // Push changes to remote
             await _pushLocalChangesToRemote(data);
-
             // Mark as synced
             await _dbHelper.delete(
               'sync_queue',
               where: 'id = ?',
               whereArgs: [itemId],
             );
-
             successCount++;
           }
         } catch (e) {
           AppLogger.error('Failed to process sync item: $e');
-
           // Update retry count and error
           await _dbHelper.update(
             'sync_queue',
@@ -359,7 +356,6 @@ class UserProfileRepository {
       if (userInfo != null) {
         return userInfo;
       }
-
       throw ServerException('Failed to fetch profile: $e');
     }
   }
@@ -376,7 +372,6 @@ class UserProfileRepository {
 
       // Prepare data for API
       final apiData = Map<String, dynamic>.from(userData);
-
       // Remove local-only fields
       apiData.remove('is_dirty');
       apiData.remove('local_updated_at');
@@ -477,7 +472,6 @@ class UserProfileRepository {
 
       // Check if user exists
       final existingUser = await _getUserFromDatabase(userId);
-
       if (existingUser == null) {
         // Insert new user
         await _dbHelper.insert('users', dbData);

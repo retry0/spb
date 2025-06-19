@@ -63,7 +63,6 @@ class _ProfileEditFormState extends State<ProfileEditForm> {
                   ),
                 ),
                 const SizedBox(height: 24),
-
                 // Avatar URL
                 TextFormField(
                   initialValue: _avatarUrl,
@@ -79,7 +78,6 @@ class _ProfileEditFormState extends State<ProfileEditForm> {
                   },
                 ),
                 const SizedBox(height: 16),
-
                 // Name field
                 TextFormField(
                   controller: _nameController,
@@ -108,7 +106,6 @@ class _ProfileEditFormState extends State<ProfileEditForm> {
                   ),
                 ),
                 const SizedBox(height: 24),
-
                 // Action buttons
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,

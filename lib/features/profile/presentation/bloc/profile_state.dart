@@ -29,7 +29,6 @@ class ProfileLoaded extends ProfileState {
     this.lastSyncTime,
     this.updateError,
   });
-
   ProfileLoaded copyWith({
     User? user,
     SyncStatus? syncStatus,

@@ -97,6 +97,38 @@ class ProfileInfoSection extends StatelessWidget {
               ),
             ),
           );
+        } else if (state is ProfileError) {
+          return Card(
+            color: Colors.red[50],
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  Icon(Icons.error_outline, size: 48, color: Colors.red[700]),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Failed to load profile',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    state.message,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      context.read<ProfileBloc>().add(
+                        const ProfileLoadRequested(),
+                      );
+                    },
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            ),
+          );
         } else {
           return const SizedBox.shrink();
         }

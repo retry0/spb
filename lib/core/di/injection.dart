@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -110,7 +111,6 @@ Future<void> configureDependencies() async {
       connectivity: getIt<Connectivity>(),
     ),
   );
-
   // Sync Service
   getIt.registerLazySingleton<SyncService>(
     () => SyncService(
@@ -118,7 +118,6 @@ Future<void> configureDependencies() async {
       connectivityService: getIt<ConnectivityService>(),
     ),
   );
-
   // Utilities
   getIt.registerLazySingleton<Uuid>(() => const Uuid());
 

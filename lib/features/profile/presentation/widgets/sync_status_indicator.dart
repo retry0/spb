@@ -24,12 +24,10 @@ class SyncStatusIndicator extends StatelessWidget {
     final syncStatus = state.syncStatus;
     final lastSyncTime = state.lastSyncTime;
     final syncError = state.syncError;
-
     Color backgroundColor;
     IconData icon;
     String message;
     bool showRetry = false;
-
     switch (syncStatus) {
       case SyncStatus.syncing:
         backgroundColor = Colors.blue.withOpacity(0.1);
@@ -61,7 +59,6 @@ class SyncStatusIndicator extends StatelessWidget {
           return const SizedBox.shrink(); // Don't show anything if never synced
         }
     }
-
     return Card(
       color: backgroundColor,
       child: InkWell(

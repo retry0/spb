@@ -24,7 +24,6 @@ class ProfileRepositoryImpl implements ProfileRepository {
     try {
       // Get user profile from user profile repository
       final result = await userProfileRepository.getUserProfile();
-
       return result.fold(
         (failure) async {
           // Fallback to auth repository if user profile repository fails

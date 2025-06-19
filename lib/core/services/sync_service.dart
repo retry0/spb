@@ -52,7 +52,6 @@ class SyncService {
   void _startBackgroundSync() {
     // Cancel existing timer if any
     _backgroundSyncTimer?.cancel();
-
     // Start new timer (every 15 minutes)
     _backgroundSyncTimer = Timer.periodic(
       const Duration(minutes: 15),
@@ -76,7 +75,6 @@ class SyncService {
       if (token == null) {
         return; // Not logged in
       }
-
       // Sync user profile
       await syncUserProfile(silent: true);
     } catch (e) {
@@ -124,7 +122,6 @@ class SyncService {
         (userData) async {
           // Update last sync time
           lastSyncTimeNotifier.value = DateTime.now();
-
           if (!silent) {
             syncStatusNotifier.value = SyncStatus.success;
             syncErrorNotifier.value = null;
@@ -134,7 +131,6 @@ class SyncService {
       );
     } catch (e) {
       AppLogger.error('Sync user profile failed: $e');
-
       if (!silent) {
         syncStatusNotifier.value = SyncStatus.failed;
         syncErrorNotifier.value = e.toString();
@@ -179,11 +175,7 @@ class SyncService {
     return await syncUserProfile();
   }
 
-  // Dispose resources
   void dispose() {
-    _backgroundSyncTimer?.cancel();
-    _connectivitySubscription?.cancel();
-    syncStatusNotifier.dispose();
     syncErrorNotifier.dispose();
     lastSyncTimeNotifier.dispose();
   }

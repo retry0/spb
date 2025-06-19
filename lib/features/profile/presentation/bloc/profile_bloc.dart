@@ -16,7 +16,6 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final ChangePasswordUseCase _changePasswordUseCase;
   final UserProfileRepository _userProfileRepository;
   final SyncService _syncService;
-
   // Subscriptions
   StreamSubscription? _syncStatusSubscription;
 

@@ -193,7 +193,6 @@ class DatabaseHelper {
       // Migration to add QR codes table
       await _migrateToAddQrCodesTable(db);
     }
-
     if (oldVersion < 4) {
       // Migration to add user profile sync fields
       await _migrateToAddUserSyncFields(db);
@@ -402,7 +401,6 @@ class DatabaseHelper {
       if (!data.containsKey('updated_at')) {
         data['updated_at'] = DateTime.now().millisecondsSinceEpoch ~/ 1000;
       }
-
       return await db.update(table, data, where: where, whereArgs: whereArgs);
     } catch (e) {
       AppLogger.error('Failed to update $table', e);
