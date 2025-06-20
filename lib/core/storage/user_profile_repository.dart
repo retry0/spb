@@ -378,9 +378,9 @@ class UserProfileRepository {
       apiData.remove('last_sync_status');
       apiData.remove('sync_error');
 
-      // Send update to API
+      // Send update to API - use the correct endpoint
       final response = await _dio.put(
-        ApiEndpoints.updateProfile,
+        '${ApiEndpoints.baseUrl}/user/profile', // Use the correct endpoint path
         data: apiData,
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );

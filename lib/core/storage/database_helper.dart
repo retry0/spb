@@ -115,6 +115,7 @@ class DatabaseHelper {
           record_id TEXT NOT NULL,
           data TEXT NOT NULL,
           created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
+          updated_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
           retry_count INTEGER NOT NULL DEFAULT 0,
           last_error TEXT,
           priority INTEGER NOT NULL DEFAULT 5,

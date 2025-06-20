@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/utils/jwt_token_manager.dart';
+import '../../../../core/storage/user_profile_repository.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../bloc/home_bloc.dart';
 import '../widgets/dashboard_metrics.dart';
@@ -29,35 +30,35 @@ class _HomePageState extends State<HomePage> {
     try {
       // Get JWT token manager
       final tokenManager = getIt<JwtTokenManager>();
-      
+
       // Get user data from token
       final userData = await tokenManager.getCurrentUserData();
-      
+
       if (userData != null) {
         setState(() {
           // Extract user name from token data
           _userName = userData['Nama'] ?? userData['UserName'] ?? 'User';
         });
-        
+
         // Sync user data with local storage if needed
-        await _syncUserData(userData);
+        //await _syncUserData(userData);
       }
     } catch (e) {
       debugPrint('Error loading user data: $e');
     }
   }
 
-  Future<void> _syncUserData(Map<String, dynamic> userData) async {
-    try {
-      // Get user profile repository to sync data
-      final userProfileRepository = getIt<UserProfileRepository>();
-      
-      // Sync user profile with local storage
-      await userProfileRepository.updateUserProfile(userData);
-    } catch (e) {
-      debugPrint('Error syncing user data: $e');
-    }
-  }
+  // Future<void> _syncUserData(Map<String, dynamic> userData) async {
+  //   try {
+  //     // Get user profile repository to sync data
+  //     final userProfileRepository = getIt<UserProfileRepository>();
+
+  //     // Sync user profile with local storage
+  //     await userProfileRepository.updateUserProfile(userData);
+  //   } catch (e) {
+  //     debugPrint('Error syncing user data: $e');
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
