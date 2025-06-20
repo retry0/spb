@@ -23,6 +23,29 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
       duration: const Duration(milliseconds: 300),
     );
     _pageController = PageController();
+    
+    // Set initial index based on current route
+    _updateSelectedIndex();
+  }
+  
+  void _updateSelectedIndex() {
+    final String location = GoRouterState.of(context).uri.path;
+    if (location.startsWith('/home')) {
+      setState(() => _selectedIndex = 0);
+    } else if (location.startsWith('/data')) {
+      setState(() => _selectedIndex = 1);
+    } else if (location.startsWith('/spb')) {
+      setState(() => _selectedIndex = 2);
+    } else if (location.startsWith('/profile')) {
+      setState(() => _selectedIndex = 3);
+    }
+  }
+
+  @override
+  void didUpdateWidget(MainPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Update selected index when route changes
+    _updateSelectedIndex();
   }
 
   @override
@@ -49,6 +72,9 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
         context.go('/data');
         break;
       case 2:
+        context.go('/spb');
+        break;
+      case 3:
         context.go('/profile');
         break;
     }
@@ -121,7 +147,14 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
               ),
               BottomNavigationBarItem(
                 icon: Icon(
-                  _selectedIndex == 2 ? Icons.person : Icons.person_outlined,
+                  _selectedIndex == 2 ? Icons.receipt : Icons.receipt_outlined,
+                  size: 24,
+                ),
+                label: 'SPB',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(
+                  _selectedIndex == 3 ? Icons.person : Icons.person_outlined,
                   size: 24,
                 ),
                 label: 'Profile',
@@ -130,13 +163,6 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
           ),
         ),
       ),
-      floatingActionButton: _selectedIndex == 1 ? FloatingActionButton(
-        onPressed: () {
-          // Add new data entry
-        },
-        elevation: 4,
-        child: const Icon(Icons.add),
-      ) : null,
     );
   }
 }

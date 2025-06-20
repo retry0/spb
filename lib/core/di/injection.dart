@@ -45,6 +45,13 @@ import '../../features/qr_code/domain/usecases/get_saved_qr_codes_usecase.dart';
 import '../../features/qr_code/domain/usecases/export_qr_code_usecase.dart';
 import '../../features/qr_code/domain/usecases/share_qr_code_usecase.dart';
 import '../../features/qr_code/presentation/bloc/qr_code_bloc.dart';
+import '../../features/spb/data/datasources/spb_remote_datasource.dart';
+import '../../features/spb/data/datasources/spb_local_datasource.dart';
+import '../../features/spb/data/repositories/spb_repository_impl.dart';
+import '../../features/spb/domain/repositories/spb_repository.dart';
+import '../../features/spb/domain/usecases/get_spb_for_driver_usecase.dart';
+import '../../features/spb/domain/usecases/sync_spb_data_usecase.dart';
+import '../../features/spb/presentation/bloc/spb_bloc.dart';
 
 final getIt = GetIt.instance;
 
@@ -154,6 +161,15 @@ Future<void> configureDependencies() async {
     ),
   );
 
+  // SPB data sources
+  getIt.registerLazySingleton<SpbRemoteDataSource>(
+    () => SpbRemoteDataSourceImpl(dio: getIt<Dio>()),
+  );
+
+  getIt.registerLazySingleton<SpbLocalDataSource>(
+    () => SpbLocalDataSourceImpl(dbHelper: getIt<DatabaseHelper>()),
+  );
+
   // Repositories
   getIt.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(
@@ -179,6 +195,15 @@ Future<void> configureDependencies() async {
       remoteDataSource: getIt<QrCodeRemoteDataSource>(),
       localDataSource: getIt<QrCodeLocalDataSource>(),
       uuid: getIt<Uuid>(),
+    ),
+  );
+
+  // SPB repository
+  getIt.registerLazySingleton<SpbRepository>(
+    () => SpbRepositoryImpl(
+      remoteDataSource: getIt<SpbRemoteDataSource>(),
+      localDataSource: getIt<SpbLocalDataSource>(),
+      connectivity: getIt<Connectivity>(),
     ),
   );
 
@@ -209,6 +234,14 @@ Future<void> configureDependencies() async {
     () => ShareQrCodeUseCase(getIt<QrCodeRepository>()),
   );
 
+  // SPB use cases
+  getIt.registerLazySingleton(
+    () => GetSpbForDriverUseCase(getIt<SpbRepository>()),
+  );
+  getIt.registerLazySingleton(
+    () => SyncSpbDataUseCase(getIt<SpbRepository>()),
+  );
+
   // BLoCs
   getIt.registerFactory(
     () => AuthBloc(
@@ -237,6 +270,15 @@ Future<void> configureDependencies() async {
       getSavedQrCodesUseCase: getIt<GetSavedQrCodesUseCase>(),
       exportQrCodeUseCase: getIt<ExportQrCodeUseCase>(),
       shareQrCodeUseCase: getIt<ShareQrCodeUseCase>(),
+    ),
+  );
+
+  // SPB BLoC
+  getIt.registerFactory(
+    () => SpbBloc(
+      getSpbForDriverUseCase: getIt<GetSpbForDriverUseCase>(),
+      syncSpbDataUseCase: getIt<SyncSpbDataUseCase>(),
+      connectivity: getIt<Connectivity>(),
     ),
   );
 }

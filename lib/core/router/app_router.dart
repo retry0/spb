@@ -9,6 +9,7 @@ import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/data/presentation/pages/data_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/qr_code/presentation/pages/qr_code_generator_page.dart';
+import '../../features/spb/presentation/pages/spb_page.dart';
 import '../../ui/screens/splash_screen.dart';
 
 class AppRouter {
@@ -68,6 +69,11 @@ class AppRouter {
             path: '/qr-generator',
             name: 'qrGenerator',
             builder: (context, state) => const QrCodeGeneratorPage(),
+          ),
+          GoRoute(
+            path: '/spb',
+            name: 'spb',
+            builder: (context, state) => const SpbPage(),
           ),
         ],
       ),

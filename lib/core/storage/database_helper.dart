@@ -28,7 +28,7 @@ class DatabaseHelper {
 
       return await openDatabase(
         path,
-        version: 3, // Increased version for QR code table
+        version: 4, // Increased version for SPB table
         onCreate: _onCreate,
         onUpgrade: _onUpgrade,
         onConfigure: _onConfigure,
@@ -139,6 +139,22 @@ class DatabaseHelper {
         )
       ''');
 
+      // SPB data table
+      await db.execute('''
+        CREATE TABLE spb_data (
+          no_spb TEXT PRIMARY KEY,
+          tgl_antar_buah TEXT NOT NULL,
+          mill_tujuan TEXT NOT NULL,
+          status TEXT NOT NULL,
+          keterangan TEXT,
+          driver TEXT NOT NULL,
+          kd_vendor TEXT NOT NULL,
+          created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
+          updated_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
+          is_synced INTEGER NOT NULL DEFAULT 1
+        )
+      ''');
+
       // Create indexes for better performance
       await db.execute('CREATE INDEX idx_settings_key ON settings (key)');
       await db.execute('CREATE INDEX idx_users_username ON users (username)');
@@ -172,6 +188,10 @@ class DatabaseHelper {
       await db.execute(
         'CREATE INDEX idx_qr_codes_created_at ON qr_codes (created_at)',
       );
+      await db.execute('CREATE INDEX idx_spb_data_driver ON spb_data (driver)');
+      await db.execute('CREATE INDEX idx_spb_data_kd_vendor ON spb_data (kd_vendor)');
+      await db.execute('CREATE INDEX idx_spb_data_status ON spb_data (status)');
+      await db.execute('CREATE INDEX idx_spb_data_is_synced ON spb_data (is_synced)');
 
       AppLogger.info('Database tables created successfully');
     } catch (e) {
@@ -194,9 +214,13 @@ class DatabaseHelper {
       // Migration to add QR codes table
       await _migrateToAddQrCodesTable(db);
     }
+    
     if (oldVersion < 4) {
       // Migration to add user profile sync fields
       await _migrateToAddUserSyncFields(db);
+      
+      // Migration to add SPB data table
+      await _migrateToAddSpbDataTable(db);
     }
   }
 
@@ -341,6 +365,48 @@ class DatabaseHelper {
     }
   }
 
+  Future<void> _migrateToAddSpbDataTable(Database db) async {
+    try {
+      AppLogger.info('Migrating to add SPB data table...');
+
+      // Check if spb_data table already exists
+      final tables = await db.rawQuery(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='spb_data'",
+      );
+
+      if (tables.isEmpty) {
+        // Create SPB data table
+        await db.execute('''
+          CREATE TABLE spb_data (
+            no_spb TEXT PRIMARY KEY,
+            tgl_antar_buah TEXT NOT NULL,
+            mill_tujuan TEXT NOT NULL,
+            status TEXT NOT NULL,
+            keterangan TEXT,
+            driver TEXT NOT NULL,
+            kd_vendor TEXT NOT NULL,
+            created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
+            updated_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
+            is_synced INTEGER NOT NULL DEFAULT 1
+          )
+        ''');
+
+        // Create indexes
+        await db.execute('CREATE INDEX idx_spb_data_driver ON spb_data (driver)');
+        await db.execute('CREATE INDEX idx_spb_data_kd_vendor ON spb_data (kd_vendor)');
+        await db.execute('CREATE INDEX idx_spb_data_status ON spb_data (status)');
+        await db.execute('CREATE INDEX idx_spb_data_is_synced ON spb_data (is_synced)');
+
+        AppLogger.info('SPB data table created successfully');
+      } else {
+        AppLogger.info('SPB data table already exists, skipping migration');
+      }
+    } catch (e) {
+      AppLogger.error('Failed to migrate to add SPB data table', e);
+      rethrow;
+    }
+  }
+
   // Generic CRUD operations
   Future<int> insert(String table, Map<String, dynamic> data) async {
     final db = await database;
@@ -448,6 +514,7 @@ class DatabaseHelper {
       await txn.delete('activity_logs');
       await txn.delete('sync_queue');
       await txn.delete('qr_codes');
+      await txn.delete('spb_data');
     });
     AppLogger.info('All database data cleared');
   }
